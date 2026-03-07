@@ -102,7 +102,7 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
 });
 
-app.listen(PORT, () => {
+app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
   console.log(`📚 Health check: http://localhost:${PORT}/health`);
   console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);

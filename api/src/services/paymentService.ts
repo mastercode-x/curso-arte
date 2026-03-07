@@ -86,7 +86,7 @@ export const createCheckoutPreference = async (
         moneda: currency,
         proveedor: 'mercadopago',
         referenciaExterna: result.id!,
-        estado: 'pendiente'
+        estado: 'PENDIENTE'
       }
     });
 
@@ -166,7 +166,7 @@ const processPaymentNotification = async (paymentId: string) => {
     await prisma.pago.updateMany({
       where: { 
         estudianteId: estudiante.id,
-        estado: 'pendiente'
+        estado: 'PENDIENTE'
       },
       data: {
         referenciaExterna: paymentId,
@@ -188,15 +188,15 @@ const processPaymentNotification = async (paymentId: string) => {
 // Mapear estado de Mercado Pago a estado interno
 const mapMPStatusToInternalStatus = (mpStatus: string | undefined): string => {
   const statusMap: Record<string, string> = {
-    'approved': 'completado',
-    'pending': 'pendiente',
-    'in_process': 'pendiente',
-    'rejected': 'fallido',
-    'cancelled': 'fallido',
-    'refunded': 'reembolsado',
-    'charged_back': 'reembolsado'
+    'approved': 'COMPLETADO',
+    'pending': 'PENDIENTE',
+    'in_process': 'PENDIENTE',
+    'rejected': 'FALLIDO',
+    'cancelled': 'FALLIDO',
+    'refunded': 'REEMBOLSADO',
+    'charged_back': 'REEMBOLSADO'
   };
-  return statusMap[mpStatus || ''] || 'pendiente';
+  return statusMap[mpStatus || ''] || 'PENDIENTE';
 };
 
 // Manejar pago exitoso
@@ -281,7 +281,7 @@ export const processRefund = async (pagoId: string): Promise<boolean> => {
       where: { id: pagoId }
     });
 
-    if (!pago || pago.estado !== 'completado') {
+    if (!pago || pago.estado !== 'COMPLETADO') {
       throw new Error('Pago no encontrado o no completado');
     }
 
@@ -310,7 +310,7 @@ export const processRefund = async (pagoId: string): Promise<boolean> => {
     // Actualizar estado en la base de datos
     await prisma.pago.update({
       where: { id: pagoId },
-      data: { estado: 'reembolsado' }
+      data: { estado: 'REEMBOLSADO' }
     });
 
     // Actualizar estado del estudiante

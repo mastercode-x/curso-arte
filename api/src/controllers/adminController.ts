@@ -163,10 +163,10 @@ export const updateConfig = asyncHandler(async (req: Request, res: Response) => 
   });
 });
 
-// Configurar claves de Stripe
-export const setStripeKeys = asyncHandler(async (req: Request, res: Response) => {
+// Configurar claves de Mercado Pago
+export const setMPKeys = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user?.userId;
-  const { stripeSecretKey, stripePublicKey, stripeWebhookSecret } = req.body;
+  const { mpAccessToken, mpPublicKey, mpWebhookSecret } = req.body;
 
   const profesor = await prisma.profesor.findFirst({
     where: { userId }
@@ -180,27 +180,27 @@ export const setStripeKeys = asyncHandler(async (req: Request, res: Response) =>
   const config = await prisma.configuracionProfesor.upsert({
     where: { profesorId: profesor.id },
     update: {
-      stripeSecretKey,
-      stripePublicKey,
-      stripeWebhookSecret
+      mpAccessToken,
+      mpPublicKey,
+      mpWebhookSecret
     },
     create: {
       profesorId: profesor.id,
       nombreCurso: 'Poética de la Mirada',
-      precioCurso: 100,
-      moneda: 'USD',
-      stripeSecretKey,
-      stripePublicKey,
-      stripeWebhookSecret
+      precioCurso: 50000,
+      moneda: 'ARS',
+      mpAccessToken,
+      mpPublicKey,
+      mpWebhookSecret
     }
   });
 
-  logger.info(`Claves de Stripe actualizadas por profesor: ${profesor.id}`);
+  logger.info(`Claves de Mercado Pago actualizadas por profesor: ${profesor.id}`);
 
   res.json({
-    message: 'Claves de Stripe actualizadas exitosamente',
+    message: 'Claves de Mercado Pago actualizadas exitosamente',
     config: {
-      stripePublicKey: config.stripePublicKey
+      mpPublicKey: config.mpPublicKey
     }
   });
 });

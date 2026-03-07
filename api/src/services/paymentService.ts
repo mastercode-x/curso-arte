@@ -1,7 +1,7 @@
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import { PrismaClient } from '@prisma/client';
 import { logger } from '../utils/logger';
-import { sendRegistrationLinkEmail } from './emailService';
+import { sendWelcomeEmailWithCredentials } from './emailService';
 import crypto from 'crypto';
 
 const prisma = new PrismaClient();
@@ -240,45 +240,6 @@ const handlePaymentSuccess = async (estudiante: any, paymentData: any) => {
   }
 };
 
-// Enviar email de bienvenida con credenciales
-const sendWelcomeEmailWithCredentials = async (
-  nombre: string,
-  email: string,
-  password: string,
-  loginUrl: string
-) => {
-  const { sendEmail } = await import('./emailService');
-  
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #C7A36D;">¡Bienvenido a Poética de la Mirada!</h1>
-      <p>Hola <strong>${nombre}</strong>,</p>
-      <p>¡Tu pago ha sido confirmado y ahora tienes acceso completo al curso!</p>
-      
-      <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <h3 style="margin-top: 0; color: #333;">Tus credenciales de acceso:</h3>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Contraseña temporal:</strong> <code style="background: #fff; padding: 4px 8px; border-radius: 4px;">${password}</code></p>
-      </div>
-      
-      <a href="${loginUrl}" style="display: inline-block; background: #C7A36D; color: #0B0B0D; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 16px 0;">
-        Iniciar Sesión
-      </a>
-      
-      <p style="color: #666; font-size: 14px;">
-        <strong>Importante:</strong> Por seguridad, te recomendamos cambiar tu contraseña después del primer inicio de sesión.
-      </p>
-      
-      <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-      <p style="color: #666; font-size: 12px;">
-        Poética de la Mirada - Curso de Arte Online
-      </p>
-    </div>
-  `;
-
-  await sendEmail(email, '¡Bienvenido a Poética de la Mirada! - Tus credenciales de acceso', html);
-};
-
 // Verificar estado de pago por preference ID
 export const getPaymentStatus = async (preferenceId: string) => {
   try {
@@ -308,12 +269,12 @@ export const getPaymentByMPId = async (paymentId: string) => {
   }
 };
 
-// Procesar reembolso
+// Procesar reembolso usando API REST de Mercado Pago
 export const processRefund = async (pagoId: string): Promise<boolean> => {
   try {
-    const mpConfig = initMercadoPago();
-    if (!mpConfig) {
-      throw new Error('Mercado Pago no inicializado');
+    const accessToken = process.env.MP_ACCESS_TOKEN;
+    if (!accessToken) {
+      throw new Error('MP_ACCESS_TOKEN no configurado');
     }
 
     const pago = await prisma.pago.findUnique({
@@ -325,14 +286,26 @@ export const processRefund = async (pagoId: string): Promise<boolean> => {
     }
 
     // Mercado Pago requiere el payment ID para reembolsar
-    const mpPaymentId = pago.referenciaTransaccion || pago.referenciaExterna;
+    // Buscamos el payment ID en la referencia externa
+    const mpPaymentId = pago.referenciaExterna;
     if (!mpPaymentId) {
       throw new Error('No se encontró referencia de pago en Mercado Pago');
     }
 
-    // Realizar reembolso via API de Mercado Pago
-    const payment = new Payment(mpConfig);
-    await payment.refund({ id: mpPaymentId });
+    // Realizar reembolso via API REST de Mercado Pago
+    const response = await fetch(`https://api.mercadopago.com/v1/payments/${mpPaymentId}/refunds`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({})
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Error de MP: ${JSON.stringify(errorData)}`);
+    }
 
     // Actualizar estado en la base de datos
     await prisma.pago.update({

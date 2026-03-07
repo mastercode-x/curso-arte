@@ -4,7 +4,7 @@ import {
   getDashboardSummary,
   getConfig,
   updateConfig,
-  setStripeKeys,
+  setMPKeys,
   getDetailedStats,
   createInitialProfessor
 } from '../controllers/adminController';
@@ -34,15 +34,14 @@ router.put(
   updateConfig
 );
 router.post(
-  '/stripe-keys',
+  '/mp-keys',
   authenticate,
   requireProfessor,
   [
-    body('stripeSecretKey').notEmpty(),
-    body('stripePublicKey').notEmpty(),
-    body('stripeWebhookSecret').notEmpty()
+    body('mpAccessToken').notEmpty(),
+    body('mpPublicKey').notEmpty()
   ],
-  setStripeKeys
+  setMPKeys
 );
 
 export default router;

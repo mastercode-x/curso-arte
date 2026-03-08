@@ -228,7 +228,7 @@ JWT_SECRET="tu-clave-secreta-super-segura"
 # Servidor
 PORT=3001
 NODE_ENV=production
-FRONTEND_URL=https://curso-nine-psi.vercel.app
+FRONTEND_URL=https://curso2-nine.vercel.app/
 BACKEND_URL=https://tu-backend.railway.app
 
 # Mercado Pago

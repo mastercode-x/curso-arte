@@ -1,12 +1,14 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
 import LandingPage from './pages/LandingPage';
 import ModulePage from './pages/ModulePage';
 import LoginPage from './pages/LoginPage';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentFailed from './pages/PaymentFailed';
 
 import { ThemeProvider } from './components/shared/ThemeContext';
 import ProfessorDashboard from './pages/ProfessorDashboard';
@@ -306,6 +308,8 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/pago-exitoso" element={<PaymentSuccess />} />
+          <Route path="/pago-fallido" element={<PaymentFailed />} />
           
           {/* Protected routes (With Theme Support) */}
           <Route 

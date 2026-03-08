@@ -37,12 +37,26 @@ export const useAuth = () => {
     auth.logout();
   }, [auth]);
 
+  const updateProfile = useCallback(async (data: { nombre?: string; avatarUrl?: string }) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await auth.updateProfile(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al actualizar perfil');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [auth]);
+
   return {
     ...auth,
     isLoading,
     error,
     login,
     register,
-    logout
+    logout,
+    updateProfile
   };
 };

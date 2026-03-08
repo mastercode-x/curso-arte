@@ -13,6 +13,7 @@ interface AuthContextType {
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  updateProfile: (data: { nombre?: string; avatarUrl?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -76,6 +77,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [logout]);
 
+  const updateProfile = useCallback(async (data: { nombre?: string; avatarUrl?: string }) => {
+    const updatedUser = await authApi.updateProfile(data);
+    setUser(prev => prev ? { ...prev, ...updatedUser } : null);
+  }, []);
+
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
@@ -86,7 +92,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login,
     register,
     logout,
-    refreshUser
+    refreshUser,
+    updateProfile
   };
 
   return (

@@ -34,6 +34,15 @@ export const getProfile = async (): Promise<User> => {
   }
 };
 
+export const updateProfile = async (data: { nombre?: string; avatarUrl?: string }): Promise<Partial<User>> => {
+  try {
+    const response = await api.put<Partial<User>>('/auth/profile', data);
+    return response.data;
+  } catch (error) {
+    throw new Error(handleApiError(error));
+  }
+};
+
 export const updateProfile = async (data: { nombre?: string; avatarUrl?: string }): Promise<User> => {
   try {
     const response = await api.put<User>('/auth/profile', data);

@@ -118,7 +118,7 @@ const Instructor = () => {
             {/* CTA Buttons */}
             <div ref={ctaRef} className="mt-8 flex flex-col sm:flex-row gap-4" style={{ opacity: 0 }}>
               <a
-                href="https://forms.gle/P2qtnPHpnqpDqjjFA"
+                href="https://forms.gle/6PZVEbDmyRpJv9FC6"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-4 bg-[#C7A36D] text-[#0B0B0D] font-mono text-sm uppercase tracking-[0.14em] font-medium hover:bg-[#d4b07a] transition-colors duration-300 flex items-center justify-center gap-2"

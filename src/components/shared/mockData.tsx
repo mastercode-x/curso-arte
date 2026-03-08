@@ -150,7 +150,7 @@ export const CONFIG_MOCK = {
   whatsapp_numero: "+54 9 11 1234-5678",
   instagram_url: "https://instagram.com/poeticadelamirada",
   link_pago: "https://buy.stripe.com/ejemplo",
-  link_formulario: "https://forms.gle/P2qtnPHpnqpDqjjFA",
+  link_formulario: "https://forms.gle/6PZVEbDmyRpJv9FC6",
   cupos_totales: 12,
   fecha_inicio: "6 de Octubre 2026",
 };

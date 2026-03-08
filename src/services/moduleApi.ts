@@ -9,11 +9,11 @@ export interface Module {
   duracion?: string;
   objetivos: string[];
   contenido?: any;
-  ejercicio?: {
-    titulo: string;
-    descripcion: string;
-    deadline?: string;
-  };
+ejercicio?: {
+  titulo: string;       // era 'titulo' ✓ ya estaba bien
+  descripcion: string;  // era 'descripcion' ✓ ya estaba bien
+  deadline?: string;
+};
   recursos?: any[];
   createdAt: string;
   updatedAt: string;

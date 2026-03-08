@@ -69,10 +69,11 @@ export interface ContenidoModulo {
 }
 
 export interface Ejercicio {
-  title: string;
-  description: string;
-  deadline: string;
+  titulo: string;       // era 'title'
+  descripcion: string;  // era 'description'
+  deadline?: string;
 }
+
 
 export interface Recurso {
   title: string;
@@ -138,11 +139,11 @@ export interface SolicitudAcceso {
 export interface Pago {
   id: string;
   estudianteId: string;
-  nombre?: string;        // opcional
+  nombre?: string;           // opcional
   monto: number;
   moneda: string;
   proveedor: string;
-  referenciaExterna: string;
+  referenciaExterna?: string; // opcional
   estado: 'pendiente' | 'completado' | 'fallido' | 'reembolsado';
   fechaPago?: string;
   createdAt: string;

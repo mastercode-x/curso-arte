@@ -10,23 +10,17 @@ import { usePaymentStats } from '@/hooks/usePayments';
 import * as paymentApi from '@/services/paymentApi';
 import { useEffect } from 'react';
 
-interface Pago {
-  id: string;
-  nombre: string;
-  email: string;
-  monto: number;
-  moneda: string;
-  estado: string;
-  fechaPago?: string;
-  createdAt: string;
-}
+import type { Payment } from '@/services/paymentApi';
+
+
+
 
 const PaymentsManager: React.FC = () => {
-  const [payments, setPayments] = useState<Pago[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [estado, setEstado] = useState<string>('');
-  const [selectedPayment, setSelectedPayment] = useState<Pago | null>(null);
+const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const { stats } = usePaymentStats();
 
   const fetchPayments = async () => {
@@ -68,10 +62,10 @@ const PaymentsManager: React.FC = () => {
     }
   };
 
-  const filteredPayments = payments.filter(p => 
-    p.nombre.toLowerCase().includes(search.toLowerCase()) ||
-    p.email.toLowerCase().includes(search.toLowerCase())
-  );
+const filteredPayments = payments.filter(p => 
+  p.nombre?.toLowerCase().includes(search.toLowerCase()) ||
+  p.email?.toLowerCase().includes(search.toLowerCase())
+);
 
   return (
     <div className="space-y-6">
@@ -186,9 +180,9 @@ const PaymentsManager: React.FC = () => {
                   {filteredPayments.map((pago) => (
                     <tr key={pago.id} className="border-b border-[rgba(244,242,236,0.05)] hover:bg-[rgba(244,242,236,0.02)]">
                       <td className="py-3 px-4">
-                        <div>
-                          <p className="text-[#F4F2EC]">{pago.nombre}</p>
-                          <p className="text-sm text-[#B8B4AA]">{pago.email}</p>
+                        <div>                   
+                          <p className="text-[#F4F2EC]">{pago.nombre || 'Sin nombre'}</p>
+                          <p className="text-sm text-[#B8B4AA]">{pago.email || 'Sin email'}</p>
                         </div>
                       </td>
                       <td className="py-3 px-4 text-[#F4F2EC]">

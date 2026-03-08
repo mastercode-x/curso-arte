@@ -43,14 +43,7 @@ export const updateProfile = async (data: { nombre?: string; avatarUrl?: string 
   }
 };
 
-export const updateProfile = async (data: { nombre?: string; avatarUrl?: string }): Promise<User> => {
-  try {
-    const response = await api.put<User>('/auth/profile', data);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
-};
+
 
 export const changePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
   try {

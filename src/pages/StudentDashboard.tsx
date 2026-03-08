@@ -549,5 +549,3 @@ function ContentBlock({ content }: { content: any }) {
   return <p className="text-[#B8B4AA]">Contenido no disponible.</p>;
 }
 
-// Import Loader2
-import { Loader2 } from 'lucide-react';

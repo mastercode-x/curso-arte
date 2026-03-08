@@ -250,34 +250,3 @@ export interface PaginatedResponse<T> {
     totalPages: number;
   };
 }
-
-// Tipos de estadísticas
-export interface ApplicationStats {
-  total: number;
-  pendientes: number;
-  aprobadas: number;
-  rechazadas: number;
-}
-
-export interface PaymentStats {
-  total: number;
-  pendientes: number;
-  completados: number;
-  fallidos: number;
-  reembolsados: number;
-  ingresosTotales: number;
-}
-
-// Tipos de preferencia de pago
-export interface PaymentPreference {
-  id: string;
-  init_point: string;
-  sandbox_init_point: string;
-}
-
-export interface PaymentStatus {
-  status: string;
-  paymentId?: string;
-  monto?: number;
-  fecha?: string;
-}

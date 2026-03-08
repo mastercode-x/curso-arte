@@ -96,19 +96,3 @@ export const setCoursePrice = async (precio: number, moneda: string = 'USD'): Pr
     throw new Error(handleApiError(error));
   }
 };
-
-// Funciones para Mercado Pago
-export interface PaymentPreference {
-  id: string;
-  init_point: string;
-  sandbox_init_point: string;
-}
-
-export const createPaymentPreference = async (estudianteId: string): Promise<PaymentPreference> => {
-  try {
-    const response = await api.post<PaymentPreference>('/payments/create', { estudianteId });
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
-};

@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { DashboardProfesor, DashboardEstudiante } from '@/types';
-import * as dashboardApi from '@/services/dashboardApi';
+import type { DashboardEstudiante, DashboardProfesor } from '@/types';
+import * as studentApi from '@/services/studentApi';
+import * as adminApi from '@/services/adminApi';
 
-export const useProfessorDashboard = () => {
-  const [dashboard, setDashboard] = useState<DashboardProfesor | null>(null);
+export const useStudentDashboard = () => {
+  const [dashboard, setDashboard] = useState<DashboardEstudiante | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -11,7 +12,7 @@ export const useProfessorDashboard = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await dashboardApi.getProfessorDashboard();
+      const data = await studentApi.getMyDashboard();
       setDashboard(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error cargando dashboard');
@@ -27,8 +28,8 @@ export const useProfessorDashboard = () => {
   return { dashboard, isLoading, error, refetch: fetchDashboard };
 };
 
-export const useStudentDashboard = () => {
-  const [dashboard, setDashboard] = useState<DashboardEstudiante | null>(null);
+export const useProfessorDashboard = () => {
+  const [dashboard, setDashboard] = useState<DashboardProfesor | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,7 +37,7 @@ export const useStudentDashboard = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await dashboardApi.getStudentDashboard();
+      const data = await adminApi.getProfessorDashboard();
       setDashboard(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error cargando dashboard');

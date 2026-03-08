@@ -198,8 +198,9 @@ export const approveApplication = asyncHandler(async (req: Request, res: Respons
   });
 
   // Crear preferencia de pago con Mercado Pago
-  let paymentUrl = '';
-  if (user.estudiante) {
+let paymentUrl = '';
+if (user.estudiante) {
+  try {
     const preference = await createCheckoutPreference(
       user.estudiante.id,
       user.email,
@@ -208,24 +209,38 @@ export const approveApplication = asyncHandler(async (req: Request, res: Respons
       moneda
     );
     paymentUrl = preference?.initPoint || '';
+    logger.info(`Preferencia MP creada para ${user.email}: ${paymentUrl}`);
+  } catch (mpErr) {
+    logger.warn(`No se pudo crear preferencia de Mercado Pago para ${user.email}: ${mpErr}`);
+    // El email se envía igual aunque MP falle
   }
+}
 
   // Enviar email de aprobación con link de pago
-  await sendPaymentApprovedEmail(
-    solicitud.nombre,
-    solicitud.email,
-    paymentUrl,
-    precioCurso,
-    moneda
-  );
+  logger.info(`Enviando email de aprobación a ${solicitud.email}...`);
+const emailEnviado = await sendPaymentApprovedEmail(
+  solicitud.nombre,
+  solicitud.email,
+  paymentUrl,
+  precioCurso,
+  moneda
+);
 
-  logger.info(`Solicitud aprobada: ${solicitud.email}`);
+if (emailEnviado) {
+  logger.info(`Email de aprobación enviado exitosamente a ${solicitud.email}`);
+} else {
+  logger.error(`FALLO al enviar email de aprobación a ${solicitud.email} — revisar configuración SMTP`);
+}
 
-  res.json({
-    message: 'Solicitud aprobada exitosamente',
-    solicitud: solicitudActualizada,
-    paymentUrl
-  });
+res.json({
+  message: 'Solicitud aprobada exitosamente',
+  solicitud: solicitudActualizada,
+  paymentUrl,
+  emailEnviado   // el frontend puede usar esto para mostrar un aviso
+});
+
+
+
 });
 
 // Rechazar solicitud

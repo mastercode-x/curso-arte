@@ -37,15 +37,18 @@ const getEmailConfig = async () => {
 const createTransporter = async () => {
   const config = await getEmailConfig();
   
-  return nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.secure,
-    auth: config.auth,
-    tls: {
-      rejectUnauthorized: false // Para evitar problemas con certificados en desarrollo
-    }
-  });
+return nodemailer.createTransport({
+  host: config.host,
+  port: config.port,
+  secure: config.secure,
+  auth: config.auth,
+  connectionTimeout: 10000,   // 10 segundos para conectar
+  greetingTimeout: 10000,     // 10 segundos para el saludo SMTP
+  socketTimeout: 15000,       // 15 segundos de inactividad
+  tls: {
+    rejectUnauthorized: false
+  }
+});
 };
 
 // Verificar conexión SMTP
@@ -61,6 +64,9 @@ export const verifyEmailConfig = async (): Promise<boolean> => {
   }
 };
 
+
+
+
 export const sendEmail = async (
   to: string,
   subject: string,
@@ -68,23 +74,35 @@ export const sendEmail = async (
   fromName: string = 'Poética de la Mirada'
 ): Promise<boolean> => {
   try {
-    const transporter = await createTransporter();
     const config = await getEmailConfig();
-    
-    await transporter.sendMail({
+
+    // Validar que hay credenciales antes de intentar enviar
+    if (!config.auth.user || !config.auth.pass) {
+      logger.error(`Email NO enviado a ${to}: faltan credenciales SMTP (SMTP_USER o SMTP_PASS vacíos)`);
+      return false;
+    }
+
+    logger.info(`Intentando enviar email a ${to} via ${config.host}:${config.port} con usuario ${config.auth.user}`);
+
+    const transporter = await createTransporter();
+
+    const info = await transporter.sendMail({
       from: `"${fromName}" <${config.auth.user}>`,
       to,
       subject,
       html
     });
 
-    logger.info(`Email enviado a ${to}: ${subject}`);
+    logger.info(`Email enviado exitosamente a ${to}: ${subject} | messageId: ${info.messageId}`);
     return true;
-  } catch (error) {
-    logger.error('Error enviando email:', error);
-    return false;
+  } catch (error: any) {
+    logger.error(`Error enviando email a ${to}: ${error?.message || error}`);
+    if (error?.code) logger.error(`Código de error SMTP: ${error.code}`);
+    if (error?.response) logger.error(`Respuesta SMTP: ${error.response}`);
+    return false;  // NO relanzar — el email falla sin romper el flujo
   }
 };
+
 
 // Templates de email
 export const emailTemplates = {

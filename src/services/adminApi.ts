@@ -19,6 +19,7 @@ export interface AdminConfig {
   emailNotificaciones?: string;
   notificarWhatsApp: boolean;
   notificarEmail: boolean;
+  
 }
 
 // Obtener configuración del profesor
@@ -71,3 +72,7 @@ export const sendTestEmail = async (email: string) => {
   // Esta funcionalidad no está implementada en el backend actual
   throw new Error('Funcionalidad no disponible');
 };
+
+
+export const getProfessorDashboard = getDashboardSummary;
+export const setStripeKeys = setMPKeys; // alias por compatibilidad

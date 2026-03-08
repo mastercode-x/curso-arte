@@ -138,6 +138,7 @@ export interface SolicitudAcceso {
 export interface Pago {
   id: string;
   estudianteId: string;
+  nombre?: string;        // opcional
   monto: number;
   moneda: string;
   proveedor: string;

@@ -11,7 +11,7 @@ export const useModules = (estado?: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await moduleApi.getModules(estado);
+      const data = await moduleApi.getModules();
       setModules(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error cargando módulos');

@@ -5,7 +5,7 @@ export interface Module {
   titulo: string;
   descripcion?: string;
   orden: number;
-  estado: 'borrador' | 'publicado';
+  estado: 'borrador' | 'publicado' | 'programado';
   duracion?: string;
   objetivos: string[];
   contenido?: any;
@@ -88,3 +88,16 @@ export const getModuleStats = async () => {
   const response = await api.get('/modules/stats');
   return response.data;
 };
+
+
+// Alias para compatibilidad
+export const getModuleById = getModule;
+export const getModuleByOrder = async (orden: number) => {
+  const response = await api.get(`/modules/order/${orden}`);
+  return response.data;
+};
+export const duplicateModule = async (id: string) => {
+  const response = await api.post(`/modules/${id}/duplicate`);
+  return response.data;
+};
+export const publishModule = toggleModuleStatus;

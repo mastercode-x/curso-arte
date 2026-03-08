@@ -1,16 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPageUrl } from '../utils';
 import ThemeToggle from '../components/shared/ThemeToggle';
+import { toast } from 'sonner';
 import {
   LayoutDashboard, Users, BookOpen, CreditCard, UserCheck,
   Settings, LogOut, Bell, TrendingUp, DollarSign, Clock, CheckCircle,
   ChevronRight, Plus, Search, Filter, X, Eye, Check, XCircle,
   Edit, Trash2, Video, FileText, Link, AlignLeft, Image, ExternalLink, BarChart2,
-  Calendar
+  Calendar, Loader2
 } from 'lucide-react';
-import {
-  MODULOS_MOCK, SOLICITUDES_MOCK, ESTUDIANTES_MOCK, PAGOS_MOCK, PROGRESO_MOCK, CONFIG_MOCK
-} from '../components/shared/mockData';
+import * as applicationApi from '../services/applicationApi';
+import * as studentApi from '../services/studentApi';
+import * as paymentApi from '../services/paymentApi';
+import * as moduleApi from '../services/moduleApi';
+import * as adminApi from '../services/adminApi';
+import * as dashboardApi from '../services/dashboardApi';
 
 const SECTIONS = [
   { id: 'overview', icon: LayoutDashboard, label: 'Dashboard' },
@@ -25,13 +29,43 @@ export default function ProfessorDashboard() {
   const [section, setSection] = useState<string>('overview');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [showNotif, setShowNotif] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<any>(null);
 
-  const pendientes = SOLICITUDES_MOCK.filter(s => s.estado === 'pendiente').length;
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      const data = await dashboardApi.getProfessorDashboard();
+      setDashboardData(data);
+    } catch (error) {
+      toast.error('Error cargando datos del dashboard');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const pendientes = dashboardData?.solicitudesRecientes?.filter((s: any) => s.estado === 'pendiente').length || 0;
   const notifs = [
     { id: 1, text: `${pendientes} solicitudes pendientes de revisión`, time: "Ahora", unread: pendientes > 0 },
-    { id: 2, text: "Ana López completó el módulo 2", time: "Hace 1 hora", unread: true },
-    { id: 3, text: "Nuevo pago recibido de Roberto Vega", time: "Hace 2 días", unread: false },
+    ...(dashboardData?.estudiantesRecientes?.slice(0, 2).map((e: any, i: number) => ({
+      id: i + 2,
+      text: `${e.nombre} se inscribió al curso`,
+      time: "Reciente",
+      unread: false
+    })) || []),
   ];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex">
@@ -63,11 +97,11 @@ export default function ProfessorDashboard() {
         <div className="p-4 border-t border-[rgba(244,242,236,0.08)]">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-8 h-8 rounded-full bg-[rgba(199,163,109,0.2)] flex items-center justify-center text-xs font-serif text-[#C7A36D]">
-              {CONFIG_MOCK.nombre_profesor.charAt(0)}
+              {dashboardData?.configuracion?.nombreCurso?.charAt(0) || 'P'}
             </div>
             <div>
-              <p className="text-sm text-[#F4F2EC]">{CONFIG_MOCK.nombre_profesor}</p>
-              <p className="text-xs text-[#B8B4AA]">Profesor</p>
+              <p className="text-sm text-[#F4F2EC]">Profesor</p>
+              <p className="text-xs text-[#B8B4AA]">Admin</p>
             </div>
           </div>
           <button
@@ -118,7 +152,7 @@ export default function ProfessorDashboard() {
         </header>
 
         <div className="flex-1 p-6 lg:p-8 overflow-y-auto">
-          {section === 'overview' && <OverviewSection />}
+          {section === 'overview' && <OverviewSection data={dashboardData} />}
           {section === 'solicitudes' && <SolicitudesSection />}
           {section === 'estudiantes' && <EstudiantesSection />}
           {section === 'modulos' && <ModulosSection />}
@@ -131,22 +165,13 @@ export default function ProfessorDashboard() {
 }
 
 // ── OVERVIEW ─────────────────────────────────────────────────────
-function OverviewSection() {
-  const totalIngresos = PAGOS_MOCK.filter(p => p.estado === 'completado').reduce((s, p) => s + p.monto, 0);
-  const progresoPromedio = Math.round(PROGRESO_MOCK.reduce((s, p) => s + p.porcentaje, 0) / (PROGRESO_MOCK.length || 1));
-
+function OverviewSection({ data }: { data: any }) {
   const stats = [
-    { label: "Estudiantes activos", value: ESTUDIANTES_MOCK.filter(e => e.activo).length, icon: Users, color: "text-[#C7A36D]", bg: "bg-[rgba(199,163,109,0.1)]" },
-    { label: "Ingresos totales", value: `$${totalIngresos}`, icon: DollarSign, color: "text-green-400", bg: "bg-green-400/10" },
-    { label: "Solicitudes pendientes", value: SOLICITUDES_MOCK.filter(s => s.estado === 'pendiente').length, icon: Clock, color: "text-yellow-400", bg: "bg-yellow-400/10" },
-    { label: "Módulos publicados", value: MODULOS_MOCK.filter(m => m.estado === 'publicado').length, icon: BookOpen, color: "text-blue-400", bg: "bg-blue-400/10" },
+    { label: "Estudiantes activos", value: data?.estadisticas?.estudiantesPagados || 0, icon: Users, color: "text-[#C7A36D]", bg: "bg-[rgba(199,163,109,0.1)]" },
+    { label: "Ingresos totales", value: `$${data?.estadisticas?.ingresosTotales?.toLocaleString() || 0} ${data?.configuracion?.moneda || 'ARS'}`, icon: DollarSign, color: "text-green-400", bg: "bg-green-400/10" },
+    { label: "Solicitudes pendientes", value: data?.estadisticas?.solicitudesPendientes || 0, icon: Clock, color: "text-yellow-400", bg: "bg-yellow-400/10" },
+    { label: "Módulos publicados", value: data?.estadisticas?.modulosPublicados || 0, icon: BookOpen, color: "text-blue-400", bg: "bg-blue-400/10" },
   ];
-
-  const moduloProgreso = MODULOS_MOCK.slice(0, 5).map((m: any) => {
-    const registros = PROGRESO_MOCK.filter(p => p.modulo_id === m.id);
-    const promedio = registros.length ? Math.round(registros.reduce((s, r) => s + r.porcentaje, 0) / registros.length) : 0;
-    return { ...m, promedio };
-  });
 
   return (
     <div className="space-y-8">
@@ -168,35 +193,35 @@ function OverviewSection() {
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA] mb-5">Progreso por módulo</p>
           <div className="space-y-4">
-            {moduloProgreso.map((m, i) => (
+            {data?.progresoPorModulo?.slice(0, 5).map((m: any, i: number) => (
               <div key={m.id}>
                 <div className="flex justify-between text-sm mb-1.5">
                   <span className="text-[#F4F2EC] text-xs">{String(i + 1).padStart(2, '0')} — {m.titulo}</span>
-                  <span className="font-mono text-xs text-[#C7A36D]">{m.promedio}%</span>
+                  <span className="font-mono text-xs text-[#C7A36D]">{m.promedioCompletud}%</span>
                 </div>
                 <div className="h-1 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#C7A36D] rounded-full" style={{ width: `${m.promedio}%` }} />
+                  <div className="h-full bg-[#C7A36D] rounded-full" style={{ width: `${m.promedioCompletud}%` }} />
                 </div>
               </div>
-            ))}
+            )) || <p className="text-[#B8B4AA] text-sm">No hay datos disponibles</p>}
           </div>
         </div>
 
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA] mb-5">Últimas solicitudes</p>
           <div className="space-y-3">
-            {SOLICITUDES_MOCK.slice(0, 4).map((s: any) => (
+            {data?.solicitudesRecientes?.slice(0, 4).map((s: any) => (
               <div key={s.id} className="flex items-center gap-4">
                 <div className="w-8 h-8 rounded-full bg-[rgba(199,163,109,0.1)] flex items-center justify-center text-xs font-serif text-[#C7A36D]">
                   {s.nombre.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-[#F4F2EC] truncate">{s.nombre}</p>
-                  <p className="text-xs text-[#B8B4AA]">{s.pais}</p>
+                  <p className="text-xs text-[#B8B4AA]">{s.pais || 'Sin país'}</p>
                 </div>
                 <StatusBadge estado={s.estado} />
               </div>
-            ))}
+            )) || <p className="text-[#B8B4AA] text-sm">No hay solicitudes pendientes</p>}
           </div>
         </div>
       </div>
@@ -213,26 +238,22 @@ function OverviewSection() {
               </tr>
             </thead>
             <tbody>
-              {ESTUDIANTES_MOCK.map((e: any) => {
-                const progresoEst = PROGRESO_MOCK.filter(p => p.estudiante_id === e.id);
-                const completados = progresoEst.filter(p => p.completado).length;
-                return (
-                  <tr key={e.id} className="border-b border-[rgba(244,242,236,0.04)] hover:bg-[rgba(244,242,236,0.02)] transition-colors">
-                    <td className="py-3 pr-6 text-[#F4F2EC]">{e.nombre}</td>
-                    <td className="py-3 pr-6 text-[#B8B4AA]">{e.pais}</td>
-                    <td className="py-3 pr-6"><StatusBadge estado={e.estado_pago} /></td>
-                    <td className="py-3 pr-6 text-[#B8B4AA] text-xs">{e.fecha_inscripcion}</td>
-                    <td className="py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-24 h-1 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
-                          <div className="h-full bg-[#C7A36D]" style={{ width: `${(completados / MODULOS_MOCK.length) * 100}%` }} />
-                        </div>
-                        <span className="text-xs text-[#B8B4AA]">{completados}/{MODULOS_MOCK.length}</span>
+              {data?.estudiantesRecientes?.map((e: any) => (
+                <tr key={e.id} className="border-b border-[rgba(244,242,236,0.04)] hover:bg-[rgba(244,242,236,0.02)] transition-colors">
+                  <td className="py-3 pr-6 text-[#F4F2EC]">{e.nombre}</td>
+                  <td className="py-3 pr-6 text-[#B8B4AA]">{e.pais || '—'}</td>
+                  <td className="py-3 pr-6"><StatusBadge estado={e.estadoPago} /></td>
+                  <td className="py-3 pr-6 text-[#B8B4AA] text-xs">{e.fechaInscripcion ? new Date(e.fechaInscripcion).toLocaleDateString('es-AR') : '—'}</td>
+                  <td className="py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-24 h-1 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
+                        <div className="h-full bg-[#C7A36D]" style={{ width: `${e.progreso || 0}%` }} />
                       </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                      <span className="text-xs text-[#B8B4AA]">{e.progreso || 0}%</span>
+                    </div>
+                  </td>
+                </tr>
+              )) || <tr><td colSpan={5} className="py-4 text-[#B8B4AA] text-center">No hay estudiantes registrados</td></tr>}
             </tbody>
           </table>
         </div>
@@ -243,12 +264,64 @@ function OverviewSection() {
 
 // ── SOLICITUDES ────────────────────────────────────────────────────
 function SolicitudesSection() {
-  const [solicitudes, setSolicitudes] = useState(SOLICITUDES_MOCK);
+  const [solicitudes, setSolicitudes] = useState<any[]>([]);
   const [filter, setFilter] = useState('todas');
   const [selected, setSelected] = useState<null | any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState<any>(null);
+
+  useEffect(() => {
+    loadSolicitudes();
+  }, [filter]);
+
+  const loadSolicitudes = async () => {
+    try {
+      setIsLoading(true);
+      const estado = filter === 'todas' ? undefined : filter;
+      const [data, statsData] = await Promise.all([
+        applicationApi.getApplications({ estado, limit: 50 }),
+        applicationApi.getApplicationStats()
+      ]);
+      setSolicitudes(data.solicitudes || []);
+      setStats(statsData);
+    } catch (error) {
+      toast.error('Error cargando solicitudes');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleApprove = async (id: string) => {
+    try {
+      await applicationApi.approveApplication(id);
+      toast.success('Solicitud aprobada exitosamente');
+      loadSolicitudes();
+      setSelected(null);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Error aprobando solicitud');
+    }
+  };
+
+  const handleReject = async (id: string, motivo?: string) => {
+    try {
+      await applicationApi.rejectApplication(id, motivo);
+      toast.success('Solicitud rechazada');
+      loadSolicitudes();
+      setSelected(null);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Error rechazando solicitud');
+    }
+  };
 
   const filtered = filter === 'todas' ? solicitudes : solicitudes.filter((s: any) => s.estado === filter);
-  const updateEstado = (id: string, estado: string) => setSolicitudes(prev => prev.map((s: any) => s.id === id ? { ...s, estado } : s));
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -283,22 +356,27 @@ function SolicitudesSection() {
                 <tr key={s.id} className="border-b border-[rgba(244,242,236,0.04)] hover:bg-[rgba(244,242,236,0.02)] transition-colors">
                   <td className="px-5 py-4 text-[#F4F2EC]">{s.nombre}</td>
                   <td className="px-5 py-4 text-[#B8B4AA]">{s.email}</td>
-                  <td className="px-5 py-4 text-[#B8B4AA]">{s.pais}</td>
-                  <td className="px-5 py-4 text-[#B8B4AA] text-xs">{new Date(s.created_date).toLocaleDateString('es-AR')}</td>
+                  <td className="px-5 py-4 text-[#B8B4AA]">{s.pais || '—'}</td>
+                  <td className="px-5 py-4 text-[#B8B4AA] text-xs">{new Date(s.fechaSolicitud).toLocaleDateString('es-AR')}</td>
                   <td className="px-5 py-4"><StatusBadge estado={s.estado} /></td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2">
                       <button onClick={() => setSelected(s)} className="p-1.5 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors"><Eye className="w-4 h-4" /></button>
                       {s.estado === 'pendiente' && (
                         <>
-                          <button onClick={() => updateEstado(s.id, 'aprobado')} className="p-1.5 text-[#B8B4AA] hover:text-green-400 transition-colors"><Check className="w-4 h-4" /></button>
-                          <button onClick={() => updateEstado(s.id, 'rechazado')} className="p-1.5 text-[#B8B4AA] hover:text-red-400 transition-colors"><XCircle className="w-4 h-4" /></button>
+                          <button onClick={() => handleApprove(s.id)} className="p-1.5 text-[#B8B4AA] hover:text-green-400 transition-colors"><Check className="w-4 h-4" /></button>
+                          <button onClick={() => handleReject(s.id)} className="p-1.5 text-[#B8B4AA] hover:text-red-400 transition-colors"><XCircle className="w-4 h-4" /></button>
                         </>
                       )}
                     </div>
                   </td>
                 </tr>
               ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-[#B8B4AA]">No hay solicitudes {filter !== 'todas' ? `en estado "${filter}"` : ''}</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -331,19 +409,14 @@ function SolicitudesSection() {
               {selected.estado === 'pendiente' && (
                 <>
                   <button
-                    onClick={() => { updateEstado(selected.id, 'aprobado'); setSelected(null); }}
+                    onClick={() => handleApprove(selected.id)}
                     className="font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2 bg-green-600 text-white hover:bg-green-700 transition-colors"
                   >Aprobar</button>
                   <button
-                    onClick={() => { updateEstado(selected.id, 'rechazado'); setSelected(null); }}
+                    onClick={() => handleReject(selected.id)}
                     className="font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2 border border-red-500/40 text-red-400 hover:bg-red-500/10 transition-colors"
                   >Rechazar</button>
                 </>
-              )}
-              {selected.estado === 'aprobado' && !selected.link_pago_enviado && (
-                <button className="font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors">
-                  Enviar link de pago
-                </button>
               )}
             </div>
           </div>
@@ -357,15 +430,47 @@ function SolicitudesSection() {
 function EstudiantesSection() {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<null | any>(null);
-  const [estudiantes, setEstudiantes] = useState(ESTUDIANTES_MOCK);
+  const [estudiantes, setEstudiantes] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadEstudiantes();
+  }, []);
+
+  const loadEstudiantes = async () => {
+    try {
+      setIsLoading(true);
+      const data = await studentApi.getStudents({ limit: 100 });
+      setEstudiantes(data.estudiantes || []);
+    } catch (error) {
+      toast.error('Error cargando estudiantes');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleActivo = async (id: string) => {
+    try {
+      await studentApi.toggleStudentActive(id);
+      loadEstudiantes();
+      toast.success('Estado actualizado');
+    } catch (error) {
+      toast.error('Error actualizando estado');
+    }
+  };
 
   const filtered = estudiantes.filter(e =>
-    e.nombre.toLowerCase().includes(query.toLowerCase()) ||
-    e.email.toLowerCase().includes(query.toLowerCase())
+    e.nombre?.toLowerCase().includes(query.toLowerCase()) ||
+    e.email?.toLowerCase().includes(query.toLowerCase())
   );
 
-  const toggleActivo = (id) => setEstudiantes(prev => prev.map((e: any) => e.id === id ? { ...e, activo: !e.activo } : e));
-  const updatePago = (id, estado) => setEstudiantes(prev => prev.map((e: any) => e.id === id ? { ...e, estado_pago: estado } : e));
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -391,130 +496,125 @@ function EstudiantesSection() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((e: any) => {
-                const progresoEst = PROGRESO_MOCK.filter(p => p.estudiante_id === e.id);
-                const completados = progresoEst.filter(p => p.completado).length;
-                const pct = Math.round((completados / MODULOS_MOCK.length) * 100);
-                return (
-                  <tr key={e.id} className={`border-b border-[rgba(244,242,236,0.04)] transition-colors ${e.activo ? 'hover:bg-[rgba(244,242,236,0.02)]' : 'opacity-50'}`}>
-                    <td className="px-5 py-4">
-                      <div>
-                        <p className="text-[#F4F2EC]">{e.nombre}</p>
-                        <p className="text-xs text-[#B8B4AA]">{e.email}</p>
+              {filtered.map((e: any) => (
+                <tr key={e.id} className={`border-b border-[rgba(244,242,236,0.04)] transition-colors ${e.activo !== false ? 'hover:bg-[rgba(244,242,236,0.02)]' : 'opacity-50'}`}>
+                  <td className="px-5 py-4">
+                    <div>
+                      <p className="text-[#F4F2EC]">{e.nombre}</p>
+                      <p className="text-xs text-[#B8B4AA]">{e.email}</p>
+                    </div>
+                  </td>
+                  <td className="px-5 py-4 text-[#B8B4AA]">{e.pais || '—'}</td>
+                  <td className="px-5 py-4"><StatusBadge estado={e.estadoPago} /></td>
+                  <td className="px-5 py-4 text-xs text-[#B8B4AA]">{e.fechaInscripcion ? new Date(e.fechaInscripcion).toLocaleDateString('es-AR') : '—'}</td>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-20 h-1.5 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
+                        <div className="h-full bg-[#C7A36D] rounded-full" style={{ width: `${e.progreso || 0}%` }} />
                       </div>
-                    </td>
-                    <td className="px-5 py-4 text-[#B8B4AA]">{e.pais}</td>
-                    <td className="px-5 py-4"><StatusBadge estado={e.estado_pago} /></td>
-                    <td className="px-5 py-4 text-xs text-[#B8B4AA]">{e.fecha_inscripcion}</td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-20 h-1.5 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
-                          <div className="h-full bg-[#C7A36D] rounded-full" style={{ width: `${pct}%` }} />
-                        </div>
-                        <span className="text-xs text-[#B8B4AA]">{pct}%</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-1">
-                        <button onClick={() => window.location.href = createPageUrl(`#/estudiantedetalle?id=${e.id}`)} className="p-1.5 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors" title="Ver detalle">
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => toggleActivo(e.id)} className={`p-1.5 transition-colors ${e.activo ? 'text-[#B8B4AA] hover:text-yellow-400' : 'text-yellow-400 hover:text-[#B8B4AA]'}`} title={e.activo ? 'Desactivar' : 'Activar'}>
-                          <XCircle className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                      <span className="text-xs text-[#B8B4AA]">{e.progreso || 0}%</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => window.location.href = createPageUrl(`#/estudiantedetalle?id=${e.id}`)} className="p-1.5 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors" title="Ver detalle">
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => toggleActivo(e.id)} className={`p-1.5 transition-colors ${e.activo !== false ? 'text-[#B8B4AA] hover:text-yellow-400' : 'text-yellow-400 hover:text-[#B8B4AA]'}`} title={e.activo !== false ? 'Desactivar' : 'Activar'}>
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-[#B8B4AA]">No se encontraron estudiantes</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
-
-      {selected && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#141419] border border-[rgba(244,242,236,0.12)] w-full max-w-lg p-8 relative max-h-[90vh] overflow-y-auto">
-            <button onClick={() => setSelected(null)} className="absolute top-4 right-4 text-[#B8B4AA] hover:text-[#F4F2EC]"><X className="w-5 h-5" /></button>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#C7A36D] mb-2">Estudiante</p>
-            <h2 className="font-serif text-2xl text-[#F4F2EC] mb-6">{selected.nombre}</h2>
-            <div className="space-y-2 mb-6 text-sm">
-              {[["Email", selected.email], ["Teléfono", selected.telefono || '—'], ["País", selected.pais], ["Inscripción", selected.fecha_inscripcion]].map(([k, v]) => (
-                <div key={k} className="flex gap-4">
-                  <span className="text-[#B8B4AA] w-24 shrink-0">{k}</span>
-                  <span className="text-[#F4F2EC]">{v}</span>
-                </div>
-              ))}
-              <div className="flex gap-4 items-center">
-                <span className="text-[#B8B4AA] w-24 shrink-0">Estado</span>
-                <StatusBadge estado={selected.activo ? 'publicado' : 'borrador'} />
-              </div>
-            </div>
-            <div className="mb-6">
-              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-3">Progreso por módulo</p>
-              <div className="space-y-2">
-                {MODULOS_MOCK.map((m, i) => {
-                  const p = PROGRESO_MOCK.find(pr => pr.estudiante_id === selected.id && pr.modulo_id === m.id);
-                  return (
-                    <div key={m.id} className="flex items-center gap-3">
-                      <span className="text-[10px] font-mono text-[#B8B4AA] w-6">{String(i + 1).padStart(2, '0')}</span>
-                      <span className="text-xs text-[#F4F2EC] flex-1 truncate">{m.titulo}</span>
-                      <div className="w-16 h-1 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
-                        <div className="h-full bg-[#C7A36D]" style={{ width: `${p?.porcentaje || 0}%` }} />
-                      </div>
-                      <span className="text-[10px] text-[#B8B4AA] w-8 text-right">{p?.porcentaje || 0}%</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="border-t border-[rgba(244,242,236,0.08)] pt-5 space-y-3">
-              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-3">Acciones</p>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => { updatePago(selected.id, 'pagado'); setSelected(s => ({ ...s, estado_pago: 'pagado' })); }}
-                  className="font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2 bg-green-600/20 border border-green-600/40 text-green-400 hover:bg-green-600/30 transition-colors"
-                >Marcar como pagado</button>
-                <button
-                  onClick={() => { updatePago(selected.id, 'no_pagado'); setSelected(s => ({ ...s, estado_pago: 'no_pagado' })); }}
-                  className="font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2 border border-yellow-400/30 text-yellow-400 hover:bg-yellow-400/10 transition-colors"
-                >Sin pago</button>
-                <button
-                  onClick={() => { toggleActivo(selected.id); setSelected(s => ({ ...s, activo: !s.activo })); }}
-                  className="font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2 border border-red-400/30 text-red-400 hover:bg-red-400/10 transition-colors"
-                >{selected.activo ? 'Desactivar acceso' : 'Activar acceso'}</button>
-              </div>
-              <button className="w-full font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2.5 border border-[rgba(199,163,109,0.4)] text-[#C7A36D] hover:bg-[rgba(199,163,109,0.08)] transition-colors">
-                Enviar email al estudiante
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
 // ── MÓDULOS ──────────────────────────────────────────────────────
 function ModulosSection() {
-  const [modulos, setModulos] = useState(MODULOS_MOCK);
-  const [editId, setEditId] = useState(null);
+  const [modulos, setModulos] = useState<any[]>([]);
+  const [editId, setEditId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadModulos();
+  }, []);
+
+  const loadModulos = async () => {
+    try {
+      setIsLoading(true);
+      const data = await moduleApi.getModules();
+      setModulos(data || []);
+    } catch (error) {
+      toast.error('Error cargando módulos');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async (formData: any) => {
+    try {
+      if (editId) {
+        await moduleApi.updateModule(editId, formData);
+        toast.success('Módulo actualizado');
+      } else {
+        await moduleApi.createModule(formData);
+        toast.success('Módulo creado');
+      }
+      loadModulos();
+      setEditId(null);
+      setCreating(false);
+    } catch (error) {
+      toast.error('Error guardando módulo');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Estás seguro de eliminar este módulo?')) return;
+    try {
+      await moduleApi.deleteModule(id);
+      toast.success('Módulo eliminado');
+      loadModulos();
+    } catch (error) {
+      toast.error('Error eliminando módulo');
+    }
+  };
+
+  const handleToggleStatus = async (id: string) => {
+    try {
+      await moduleApi.toggleModuleStatus(id);
+      toast.success('Estado actualizado');
+      loadModulos();
+    } catch (error) {
+      toast.error('Error actualizando estado');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
+      </div>
+    );
+  }
 
   if (creating || editId) {
     const modulo = editId ? modulos.find(m => m.id === editId) : null;
     return (
       <ModuloEditor
         modulo={modulo}
-        onSave={(data) => {
-          if (editId) {
-            setModulos(prev => prev.map((m: any) => m.id === editId ? { ...m, ...data } : m));
-          } else {
-            setModulos(prev => [...prev, { ...data, id: `mod-0${prev.length + 1}` }]);
-          }
-          setEditId(null);
-          setCreating(false);
-        }}
+        onSave={handleSave}
         onCancel={() => { setEditId(null); setCreating(false); }}
       />
     );
@@ -537,22 +637,26 @@ function ModulosSection() {
             <div className="w-12 h-12 bg-[rgba(199,163,109,0.1)] flex items-center justify-center font-serif text-lg text-[#C7A36D] shrink-0">
               {String(i + 1).padStart(2, '0')}
             </div>
-            <img src={m.imagen_url} alt="" className="hidden md:block w-16 h-12 object-cover opacity-70" />
             <div className="flex-1 min-w-0">
               <p className="font-serif text-[#F4F2EC]">{m.titulo}</p>
               <p className="text-xs text-[#B8B4AA] mt-0.5 line-clamp-1">{m.descripcion}</p>
               <div className="flex gap-3 mt-1">
                 <span className="text-[10px] font-mono text-[#B8B4AA]">{m.duracion}</span>
-                <span className="text-[10px] font-mono text-[#B8B4AA]">· {(m.contenidos || []).length} contenidos</span>
+                <span className="text-[10px] font-mono text-[#B8B4AA]">· {(m.contenido?.length || 0)} contenidos</span>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <StatusBadge estado={m.estado} />
+              <button onClick={() => handleToggleStatus(m.id)}>
+                <StatusBadge estado={m.estado} />
+              </button>
               <button onClick={() => setEditId(m.id)} className="p-1.5 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors"><Edit className="w-4 h-4" /></button>
-              <button className="p-1.5 text-[#B8B4AA] hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
+              <button onClick={() => handleDelete(m.id)} className="p-1.5 text-[#B8B4AA] hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
             </div>
           </div>
         ))}
+        {modulos.length === 0 && (
+          <p className="text-center text-[#B8B4AA] py-8">No hay módulos creados</p>
+        )}
       </div>
     </div>
   );
@@ -560,28 +664,26 @@ function ModulosSection() {
 
 // ── MÓDULO EDITOR ────────────────────────────────────────────────
 function ModuloEditor({ modulo, onSave, onCancel }: any) {
-  // ✅ useState de form PRIMERO, scheduleMode lo inicializamos después
   const [form, setForm] = useState(modulo || {
     titulo: '', descripcion: '', duracion: '2 semanas', estado: 'borrador',
     objetivos: [''], ejercicio_titulo: '', ejercicio_descripcion: '',
-    ejercicio_deadline: '', contenidos: [], scheduledPublishAt: undefined,
+    ejercicio_deadline: '', contenidos: [],
   });
 
-  // ✅ Ahora sí podemos usar form.estado
   const [scheduleMode, setScheduleMode] = useState(form.estado === 'programado');
   const minDateTime = new Date().toISOString().slice(0, 16);
 
   const addObjetivo = () => setForm(f => ({ ...f, objetivos: [...(f.objetivos || []), ''] }));
-  const updateObjetivo = (i, val) => setForm(f => { const o = [...(f.objetivos || [])]; o[i] = val; return { ...f, objetivos: o }; });
-  const removeObjetivo = (i) => setForm(f => ({ ...f, objetivos: f.objetivos.filter((_, idx) => idx !== i) }));
+  const updateObjetivo = (i: number, val: string) => setForm(f => { const o = [...(f.objetivos || [])]; o[i] = val; return { ...f, objetivos: o }; });
+  const removeObjetivo = (i: number) => setForm(f => ({ ...f, objetivos: f.objetivos.filter((_: any, idx: number) => idx !== i) }));
 
-  const addContenido = (tipo) => setForm(f => ({
+  const addContenido = (tipo: string) => setForm(f => ({
     ...f, contenidos: [...(f.contenidos || []), { tipo, titulo: '', url: '', texto: '', orden: (f.contenidos || []).length + 1 }]
   }));
-  const updateContenido = (i, key, val) => setForm(f => {
+  const updateContenido = (i: number, key: string, val: string) => setForm(f => {
     const c = [...(f.contenidos || [])]; c[i] = { ...c[i], [key]: val }; return { ...f, contenidos: c };
   });
-  const removeContenido = (i) => setForm(f => ({ ...f, contenidos: f.contenidos.filter((_, idx) => idx !== i) }));
+  const removeContenido = (i: number) => setForm(f => ({ ...f, contenidos: f.contenidos.filter((_: any, idx: number) => idx !== i) }));
 
   return (
     <div>
@@ -617,11 +719,9 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
           </div>
         </div>
 
-        {/* ✅ Sección de publicación — reemplaza el <select> de Estado */}
+        {/* Publicación */}
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6 space-y-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA]">Publicación</p>
-
-          {/* Publicar inmediatamente */}
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-[#F4F2EC]">Publicar inmediatamente</p>
@@ -632,64 +732,10 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
               checked={!scheduleMode && form.estado === 'publicado'}
               onChange={(e) => {
                 setScheduleMode(false);
-                setForm({ ...form, estado: e.target.checked ? 'publicado' : 'borrador', scheduledPublishAt: undefined });
+                setForm({ ...form, estado: e.target.checked ? 'publicado' : 'borrador' });
               }}
               className="w-4 h-4 accent-[#C7A36D]"
             />
-          </div>
-
-          {/* Programar publicación */}
-          <div className="border-t border-[rgba(244,242,236,0.06)] pt-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-[#F4F2EC] flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-blue-400" />
-                  Programar publicación
-                </p>
-                <p className="text-xs text-[#B8B4AA] mt-0.5">Elige fecha y hora para publicar automáticamente</p>
-              </div>
-              <input
-                type="checkbox"
-                checked={scheduleMode}
-                onChange={(e) => {
-                  setScheduleMode(e.target.checked);
-                  setForm({
-                    ...form,
-                    estado: e.target.checked ? 'programado' : 'borrador',
-                    scheduledPublishAt: e.target.checked ? form.scheduledPublishAt : undefined,
-                  });
-                }}
-                className="w-4 h-4 accent-[#C7A36D]"
-              />
-            </div>
-
-            {scheduleMode && (
-              <div>
-                <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1">
-                  Fecha y hora de publicación
-                </label>
-                <input
-                  type="datetime-local"
-                  min={minDateTime}
-                  value={form.scheduledPublishAt ? new Date(form.scheduledPublishAt).toISOString().slice(0, 16) : ''}
-                  onChange={(e) => setForm({
-                    ...form,
-                    scheduledPublishAt: e.target.value ? new Date(e.target.value).toISOString() : undefined,
-                  })}
-                  className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors"
-                />
-                {form.scheduledPublishAt && (
-                  <p className="text-xs text-blue-400 mt-2 flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    Se publicará el{' '}
-                    {new Date(form.scheduledPublishAt).toLocaleString('es-ES', {
-                      day: 'numeric', month: 'long', year: 'numeric',
-                      hour: '2-digit', minute: '2-digit',
-                    })}
-                  </p>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
@@ -715,67 +761,13 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Ejercicio</p>
           <div>
             <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Título</label>
-            <input type="text" value={form.ejercicio_titulo || ''} onChange={e => setForm({...form, ejercicio_titulo: e.target.value})}
+            <input type="text" value={form.ejercicio?.titulo || ''} onChange={e => setForm({...form, ejercicio: { ...form.ejercicio, titulo: e.target.value }})}
               className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
           </div>
           <div>
             <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Descripción</label>
-            <textarea rows={3} value={form.ejercicio_descripcion || ''} onChange={e => setForm({...form, ejercicio_descripcion: e.target.value})}
+            <textarea rows={3} value={form.ejercicio?.descripcion || ''} onChange={e => setForm({...form, ejercicio: { ...form.ejercicio, descripcion: e.target.value }})}
               className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors resize-none" />
-          </div>
-          <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Fecha límite</label>
-            <input type="text" value={form.ejercicio_deadline || ''} onChange={e => setForm({...form, ejercicio_deadline: e.target.value})}
-              placeholder="ej: 20 de Octubre 2026"
-              className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
-          </div>
-        </div>
-
-        {/* Contenidos */}
-        <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
-          <div className="flex justify-between items-center mb-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA]">Contenidos</p>
-            <div className="flex gap-2">
-              {[
-                { tipo: 'video', icon: Video, label: 'Video' },
-                { tipo: 'pdf', icon: FileText, label: 'PDF' },
-                { tipo: 'texto', icon: AlignLeft, label: 'Texto' },
-                { tipo: 'zoom', icon: Link, label: 'Zoom' },
-                { tipo: 'imagen', icon: Image, label: 'Imagen' },
-              ].map(({ tipo, icon: Icon, label }) => (
-                <button key={tipo} onClick={() => addContenido(tipo)}
-                  className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.1em] px-2.5 py-1.5 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#C7A36D] hover:border-[rgba(199,163,109,0.3)] transition-colors">
-                  <Icon className="w-3 h-3" /> {label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="space-y-3">
-            {(form.contenidos || []).map((c, i) => (
-              <div key={i} className="border border-[rgba(244,242,236,0.06)] p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D]">{c.tipo}</span>
-                  <button onClick={() => removeContenido(i)} className="text-[#B8B4AA] hover:text-red-400 transition-colors"><X className="w-4 h-4" /></button>
-                </div>
-                <div className="space-y-2">
-                  <input type="text" value={c.titulo} onChange={e => updateContenido(i, 'titulo', e.target.value)} placeholder="Título"
-                    className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 py-2 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
-                  {['video', 'pdf', 'zoom', 'imagen'].includes(c.tipo) && (
-                    <input type="text" value={c.url} onChange={e => updateContenido(i, 'url', e.target.value)} placeholder="URL"
-                      className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 py-2 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
-                  )}
-                  {c.tipo === 'texto' && (
-                    <textarea rows={4} value={c.texto} onChange={e => updateContenido(i, 'texto', e.target.value)} placeholder="Contenido de texto..."
-                      className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 py-2 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors resize-none" />
-                  )}
-                </div>
-              </div>
-            ))}
-            {(form.contenidos || []).length === 0 && (
-              <p className="text-center text-[#B8B4AA] text-sm py-6 border border-dashed border-[rgba(244,242,236,0.06)]">
-                Agregá contenido usando los botones de arriba
-              </p>
-            )}
           </div>
         </div>
       </div>
@@ -785,15 +777,59 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
 
 // ── PAGOS ────────────────────────────────────────────────────────
 function PagosSection() {
-  const total = PAGOS_MOCK.filter(p => p.estado === 'completado').reduce((s, p) => s + p.monto, 0);
+  const [pagos, setPagos] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadPagos();
+  }, []);
+
+  const loadPagos = async () => {
+    try {
+      setIsLoading(true);
+      const [pagosData, statsData] = await Promise.all([
+        paymentApi.getAllPayments({ limit: 50 }),
+        paymentApi.getPaymentStats()
+      ]);
+      setPagos(pagosData.pagos || []);
+      setStats(statsData);
+    } catch (error) {
+      toast.error('Error cargando pagos');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRefund = async (id: string) => {
+    if (!confirm('¿Estás seguro de reembolsar este pago?')) return;
+    try {
+      await paymentApi.processRefund(id);
+      toast.success('Reembolso procesado');
+      loadPagos();
+    } catch (error) {
+      toast.error('Error procesando reembolso');
+    }
+  };
+
+  const totalIngresos = stats?.ingresosTotales || 0;
+  const moneda = 'ARS';
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { label: "Ingresos totales", value: `$${total} USD`, icon: DollarSign, color: "text-green-400", bg: "bg-green-400/10" },
-          { label: "Pagos completados", value: PAGOS_MOCK.filter(p => p.estado === 'completado').length, icon: CheckCircle, color: "text-[#C7A36D]", bg: "bg-[rgba(199,163,109,0.1)]" },
-          { label: "Pendientes de pago", value: ESTUDIANTES_MOCK.filter(e => e.estado_pago === 'no_pagado').length, icon: Clock, color: "text-yellow-400", bg: "bg-yellow-400/10" },
+          { label: "Ingresos totales", value: `$${totalIngresos.toLocaleString()} ${moneda}`, icon: DollarSign, color: "text-green-400", bg: "bg-green-400/10" },
+          { label: "Pagos completados", value: stats?.pagosCompletados || 0, icon: CheckCircle, color: "text-[#C7A36D]", bg: "bg-[rgba(199,163,109,0.1)]" },
+          { label: "Pendientes de pago", value: stats?.pagosPendientes || 0, icon: Clock, color: "text-yellow-400", bg: "bg-yellow-400/10" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-5 flex items-center gap-4">
             <div className={`w-10 h-10 rounded-lg ${bg} flex items-center justify-center`}>
@@ -818,19 +854,24 @@ function PagosSection() {
               </tr>
             </thead>
             <tbody>
-              {PAGOS_MOCK.map((p: any) => (
+              {pagos.map((p: any) => (
                 <tr key={p.id} className="border-b border-[rgba(244,242,236,0.04)] hover:bg-[rgba(244,242,236,0.02)] transition-colors">
                   <td className="px-5 py-4">
-                    <p className="text-[#F4F2EC]">{p.estudiante_nombre}</p>
-                    <p className="text-xs text-[#B8B4AA]">{p.estudiante_email}</p>
+                    <p className="text-[#F4F2EC]">{p.nombre}</p>
+                    <p className="text-xs text-[#B8B4AA]">{p.email}</p>
                   </td>
                   <td className="px-5 py-4 text-green-400 font-mono">${p.monto} {p.moneda}</td>
                   <td className="px-5 py-4 text-[#B8B4AA]">{p.proveedor}</td>
-                  <td className="px-5 py-4 text-[#B8B4AA] font-mono text-xs">{p.referencia_externa}</td>
+                  <td className="px-5 py-4 text-[#B8B4AA] font-mono text-xs">{p.referenciaExterna?.slice(0, 20)}...</td>
                   <td className="px-5 py-4"><StatusBadge estado={p.estado} /></td>
-                  <td className="px-5 py-4 text-[#B8B4AA] text-xs">{p.fecha_pago}</td>
+                  <td className="px-5 py-4 text-[#B8B4AA] text-xs">{p.fechaPago ? new Date(p.fechaPago).toLocaleDateString('es-AR') : '—'}</td>
                 </tr>
               ))}
+              {pagos.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-[#B8B4AA]">No hay pagos registrados</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -841,10 +882,44 @@ function PagosSection() {
 
 // ── CONFIGURACIÓN ────────────────────────────────────────────────
 function ConfiguracionSection() {
-  const [config, setConfig] = useState(CONFIG_MOCK);
+  const [config, setConfig] = useState<any>({});
+  const [isLoading, setIsLoading] = useState(true);
   const [saved, setSaved] = useState(false);
 
-  const save = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
+  useEffect(() => {
+    loadConfig();
+  }, []);
+
+  const loadConfig = async () => {
+    try {
+      setIsLoading(true);
+      const data = await adminApi.getConfig();
+      setConfig(data);
+    } catch (error) {
+      toast.error('Error cargando configuración');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const save = async () => {
+    try {
+      await adminApi.updateConfig(config);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+      toast.success('Configuración guardada');
+    } catch (error) {
+      toast.error('Error guardando configuración');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -858,28 +933,27 @@ function ConfiguracionSection() {
         {
           title: "Información del curso",
           fields: [
-            { key: "nombre_curso", label: "Nombre del curso", type: "text" },
-            { key: "descripcion_curso", label: "Descripción", type: "textarea" },
-            { key: "precio_curso", label: "Precio (USD)", type: "number" },
-            { key: "cupos_totales", label: "Cupos totales", type: "number" },
-            { key: "fecha_inicio", label: "Fecha de inicio", type: "text" },
+            { key: "nombreCurso", label: "Nombre del curso", type: "text" },
+            { key: "descripcionCurso", label: "Descripción", type: "textarea" },
+            { key: "precioCurso", label: "Precio", type: "number" },
+            { key: "moneda", label: "Moneda", type: "text" },
           ]
         },
         {
-          title: "Perfil del profesor",
+          title: "Configuración Mercado Pago",
           fields: [
-            { key: "nombre_profesor", label: "Nombre", type: "text" },
-            { key: "bio_profesor", label: "Bio", type: "textarea" },
-            { key: "email_contacto", label: "Email de contacto", type: "email" },
-            { key: "whatsapp_numero", label: "WhatsApp", type: "text" },
-            { key: "instagram_url", label: "Instagram URL", type: "url" },
+            { key: "mpAccessToken", label: "Access Token", type: "password" },
+            { key: "mpPublicKey", label: "Public Key", type: "password" },
           ]
         },
         {
-          title: "Links importantes",
+          title: "Configuración Email (SMTP)",
           fields: [
-            { key: "link_formulario", label: "Link del formulario Google", type: "url" },
-            { key: "link_pago", label: "Link de pago (Stripe/MP)", type: "url" },
+            { key: "smtpHost", label: "Host SMTP", type: "text" },
+            { key: "smtpPort", label: "Puerto", type: "number" },
+            { key: "smtpUser", label: "Usuario", type: "text" },
+            { key: "smtpPass", label: "Contraseña", type: "password" },
+            { key: "emailNotificaciones", label: "Email para notificaciones", type: "email" },
           ]
         },
       ].map(({ title, fields }: any) => (
@@ -926,12 +1000,13 @@ function StatusBadge({ estado }: any) {
     publicado: 'bg-[rgba(199,163,109,0.15)] text-[#C7A36D] border-[rgba(199,163,109,0.3)]',
     borrador: 'bg-[rgba(244,242,236,0.05)] text-[#B8B4AA] border-[rgba(244,242,236,0.1)]',
     programado: 'bg-blue-400/10 text-blue-400 border-blue-400/20',
+    reembolsado: 'bg-red-400/10 text-red-400 border-red-400/20',
   };
   const labels: Record<string, string> = {
     no_pagado: 'Sin pago', pendiente: 'Pendiente', aprobado: 'Aprobado',
     rechazado: 'Rechazado', pagado: 'Pagado', cancelado: 'Cancelado',
     completado: 'Completado', fallido: 'Fallido', publicado: 'Publicado',
-    borrador: 'Borrador', programado: 'Programado',
+    borrador: 'Borrador', programado: 'Programado', reembolsado: 'Reembolsado',
   };
   return (
     <span className={`inline-block font-mono text-[10px] uppercase tracking-[0.14em] px-2.5 py-1 border ${map[estado] || map.borrador}`}>

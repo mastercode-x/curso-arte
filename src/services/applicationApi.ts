@@ -1,17 +1,20 @@
-import { api, handleApiError } from './api';
-import type { SolicitudAcceso } from '@/types';
+import { api } from './api';
 
-interface PaginatedSolicitudes {
-  solicitudes: SolicitudAcceso[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+export interface Application {
+  id: string;
+  nombre: string;
+  email: string;
+  telefono?: string;
+  pais?: string;
+  experiencia?: string;
+  interes?: string;
+  estado: 'pendiente' | 'aprobado' | 'rechazado';
+  fechaSolicitud: string;
+  fechaRevision?: string;
+  motivoRechazo?: string;
 }
 
-interface SolicitudStats {
+export interface ApplicationStats {
   total: number;
   pendientes: number;
   aprobadas: number;
@@ -20,6 +23,7 @@ interface SolicitudStats {
   tasaRechazo: number;
 }
 
+// Crear nueva solicitud (público)
 export const createApplication = async (data: {
   nombre: string;
   email: string;
@@ -27,61 +31,42 @@ export const createApplication = async (data: {
   pais?: string;
   experiencia?: string;
   interes?: string;
-}): Promise<{ message: string; solicitud: SolicitudAcceso }> => {
-  try {
-    const response = await api.post('/applications', data);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+}) => {
+  const response = await api.post('/applications', data);
+  return response.data;
 };
 
-export const getApplications = async (params?: { 
-  estado?: string; 
-  search?: string; 
-  page?: number; 
-  limit?: number 
-}): Promise<PaginatedSolicitudes> => {
-  try {
-    const response = await api.get<PaginatedSolicitudes>('/applications', { params });
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Obtener todas las solicitudes (profesor)
+export const getApplications = async (params?: {
+  estado?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}) => {
+  const response = await api.get('/applications', { params });
+  return response.data;
 };
 
-export const getApplicationStats = async (): Promise<SolicitudStats> => {
-  try {
-    const response = await api.get<SolicitudStats>('/applications/stats');
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Obtener estadísticas de solicitudes (profesor)
+export const getApplicationStats = async (): Promise<ApplicationStats> => {
+  const response = await api.get('/applications/stats');
+  return response.data;
 };
 
-export const getApplicationDetail = async (id: string): Promise<SolicitudAcceso> => {
-  try {
-    const response = await api.get<SolicitudAcceso>(`/applications/${id}`);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Obtener detalle de una solicitud (profesor)
+export const getApplicationDetail = async (id: string) => {
+  const response = await api.get(`/applications/${id}`);
+  return response.data;
 };
 
-export const approveApplication = async (id: string): Promise<{ message: string; paymentUrl: string }> => {
-  try {
-    const response = await api.post(`/applications/${id}/approve`);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Aprobar solicitud (profesor)
+export const approveApplication = async (id: string) => {
+  const response = await api.post(`/applications/${id}/approve`);
+  return response.data;
 };
 
-export const rejectApplication = async (id: string, motivo?: string): Promise<{ message: string }> => {
-  try {
-    const response = await api.post(`/applications/${id}/reject`, { motivo });
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Rechazar solicitud (profesor)
+export const rejectApplication = async (id: string, motivo?: string) => {
+  const response = await api.post(`/applications/${id}/reject`, { motivo });
+  return response.data;
 };

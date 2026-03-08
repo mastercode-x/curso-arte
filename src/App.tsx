@@ -7,15 +7,16 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import ModulePage from './pages/ModulePage';
 import LoginPage from './pages/LoginPage';
-
-import { ThemeProvider } from './components/shared/ThemeContext';
-import ProfessorDashboard from './pages/ProfessorDashboard';
 import Register from './pages/Register';
+import ProfessorDashboard from './pages/ProfessorDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import EstudianteDetalle from './pages/EstudianteDetalle';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentFailed from './pages/PaymentFailed';
+import PaymentPending from './pages/PaymentPending';
+import OnboardingPage from './pages/OnboardingPage';
 
-
-
+import { ThemeProvider } from './components/shared/ThemeContext';
 import PaymentRequired from './components/PaymentRequired';
 
 // Export modules data for reuse (mantener compatibilidad con código existente)
@@ -307,7 +308,22 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<Register />} />
           
+          {/* Payment result routes */}
+          <Route path="/pago-exitoso" element={<PaymentSuccess />} />
+          <Route path="/pago-fallido" element={<PaymentFailed />} />
+          <Route path="/pago-pendiente" element={<PaymentPending />} />
+          
           {/* Protected routes (With Theme Support) */}
+          <Route 
+            path="/onboarding" 
+            element={
+              <ThemeProvider>
+                <ProtectedRoute requireStudent>
+                  <OnboardingPage />
+                </ProtectedRoute>
+              </ThemeProvider>
+            } 
+          />
           <Route 
             path="/dashboard" 
             element={

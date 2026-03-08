@@ -1,12 +1,19 @@
-import { api, handleApiError } from './api';
-import type { Pago } from '@/types';
+import { api } from './api';
 
-interface PaymentSession {
-  sessionId: string;
-  url: string;
+export interface Payment {
+  id: string;
+  estudianteId: string;
+  nombre?: string;
+  email?: string;
+  monto: number;
+  moneda: string;
+  proveedor: string;
+  estado: 'pendiente' | 'completado' | 'fallido' | 'reembolsado';
+  fechaPago?: string;
+  createdAt: string;
 }
 
-interface PaymentStats {
+export interface PaymentStats {
   totalPagos: number;
   pagosCompletados: number;
   pagosPendientes: number;
@@ -14,85 +21,59 @@ interface PaymentStats {
   ingresosTotales: number;
 }
 
-interface PaginatedPagos {
-  pagos: (Pago & { nombre: string; email: string })[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+export interface CoursePrice {
+  precio: number;
+  moneda: string;
 }
 
-export const createPaymentSession = async (): Promise<PaymentSession> => {
-  try {
-    const response = await api.post<PaymentSession>('/payments/create-session');
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Crear sesión de pago (estudiante)
+export const createPaymentSession = async () => {
+  const response = await api.post('/payments/create-session');
+  return response.data;
 };
 
-export const getMyPayments = async (): Promise<Pago[]> => {
-  try {
-    const response = await api.get<Pago[]>('/payments/my-payments');
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Verificar estado de pago
+export const checkPaymentStatus = async (sessionId: string) => {
+  const response = await api.get(`/payments/status/${sessionId}`);
+  return response.data;
 };
 
-export const checkPaymentStatus = async (sessionId: string): Promise<{ status: string }> => {
-  try {
-    const response = await api.get(`/payments/status/${sessionId}`);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Obtener mis pagos (estudiante)
+export const getMyPayments = async (): Promise<Payment[]> => {
+  const response = await api.get('/payments/my-payments');
+  return response.data;
 };
 
-export const getCoursePrice = async (): Promise<{ precio: number; moneda: string }> => {
-  try {
-    const response = await api.get('/payments/price');
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Obtener todos los pagos (profesor)
+export const getAllPayments = async (params?: {
+  estado?: string;
+  page?: number;
+  limit?: number;
+}): Promise<{ pagos: Payment[]; pagination: any }> => {
+  const response = await api.get('/payments', { params });
+  return response.data;
 };
 
-// Funciones del profesor
-export const getAllPayments = async (params?: { estado?: string; page?: number; limit?: number }): Promise<PaginatedPagos> => {
-  try {
-    const response = await api.get<PaginatedPagos>('/payments', { params });
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
-};
-
+// Obtener estadísticas de pagos (profesor)
 export const getPaymentStats = async (): Promise<PaymentStats> => {
-  try {
-    const response = await api.get<PaymentStats>('/payments/stats');
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+  const response = await api.get('/payments/stats');
+  return response.data;
 };
 
-export const processRefund = async (id: string): Promise<{ message: string }> => {
-  try {
-    const response = await api.post(`/payments/refund/${id}`);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Procesar reembolso (profesor)
+export const processRefund = async (paymentId: string) => {
+  const response = await api.post(`/payments/refund/${paymentId}`);
+  return response.data;
 };
 
-export const setCoursePrice = async (precio: number, moneda: string = 'USD'): Promise<{ message: string }> => {
-  try {
-    const response = await api.post('/payments/price', { precio, moneda });
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Configurar precio del curso (profesor)
+export const setCoursePrice = async (precio: number, moneda: string = 'ARS') => {
+  const response = await api.post('/payments/price', { precio, moneda });
+  return response.data;
+};
+
+// Obtener precio del curso (público)
+export const getCoursePrice = async (): Promise<CoursePrice> => {
+  const response = await api.get('/payments/price');
+  return response.data;
 };

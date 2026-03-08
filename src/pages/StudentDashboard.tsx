@@ -1,35 +1,60 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
-import { BookOpen, CheckCircle, Clock, Play, Award, LogOut, User, ChevronRight, Lock, Settings, X, Bell, Star } from 'lucide-react';
+import { BookOpen, CheckCircle, Clock, Play, Award, LogOut, User, ChevronRight, Lock, Settings, X, Bell, Star, Loader2 } from 'lucide-react';
 import ThemeToggle from '../components/shared/ThemeToggle';
-import { MODULOS_MOCK, PROGRESO_MOCK, CONFIG_MOCK } from '../components/shared/mockData';
-
-const ME_INITIAL = { id: "est-01", nombre: "Ana López", email: "ana@ejemplo.com", pais: "Chile", telefono: "+56 9 8765 4321", fecha_inscripcion: "2026-02-20" };
-
-const getModuleProgress = (estudianteId, moduloId) => PROGRESO_MOCK.find(p => p.estudiante_id === estudianteId && p.modulo_id === moduloId);
+import { toast } from 'sonner';
+import * as dashboardApi from '../services/dashboardApi';
+import * as moduleApi from '../services/moduleApi';
+import * as studentApi from '../services/studentApi';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function StudentDashboard() {
-  const [me, setMe] = useState(ME_INITIAL);
-  const [activeModuleId, setActiveModuleId] = useState(null);
+  const { user, logout } = useAuth();
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      const dashboardData = await dashboardApi.getStudentDashboard();
+      setData(dashboardData);
+    } catch (error) {
+      toast.error('Error cargando datos del dashboard');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const notifications = [
-    { id: 1, text: "El módulo 2 ya está disponible", time: "Hace 2 días", read: false },
-    { id: 2, text: "Nuevo encuentro Zoom agendado para el lunes", time: "Hace 3 días", read: false },
-    { id: 3, text: "Recordatorio: entrega del ejercicio módulo 1", time: "Hace 5 días", read: true },
+    { id: 1, text: "Bienvenido al curso Poética de la Mirada", time: "Ahora", read: false },
+    ...(data?.siguienteModulo ? [{ id: 2, text: `Continúa con: ${data.siguienteModulo.titulo}`, time: "Reciente", read: false }] : []),
   ];
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const progreso = MODULOS_MOCK.map(m => ({ ...m, progress: getModuleProgress(me.id, m.id) }));
-  const completados = progreso.filter(m => m.progress?.completado).length;
-  const totalProgress = Math.round((completados / MODULOS_MOCK.length) * 100);
-  const moduloActual = progreso.find(m => !m.progress?.completado && m.estado === 'publicado');
-  const allCompleted = completados === MODULOS_MOCK.length;
+  const perfil = data?.perfil || { nombre: user?.nombre || 'Estudiante', email: user?.email || '' };
+  const estadisticas = data?.estadisticas || { progresoGeneral: 0, totalModulos: 0, modulosCompletados: 0 };
+  const modulos = data?.modulos || [];
+  const siguienteModulo = data?.siguienteModulo;
+  const allCompleted = estadisticas.progresoGeneral === 100;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
+      </div>
+    );
+  }
 
   if (activeModuleId) {
-    return <ModuleViewer moduloId={activeModuleId} onBack={() => setActiveModuleId(null)} />;
+    return <ModuleViewer moduloId={activeModuleId} onBack={() => setActiveModuleId(null)} onComplete={loadDashboardData} />;
   }
 
   return (
@@ -83,13 +108,13 @@ export default function StudentDashboard() {
                 <div className="w-7 h-7 rounded-full bg-[rgba(199,163,109,0.2)] flex items-center justify-center">
                   <User className="w-4 h-4 text-[#C7A36D]" />
                 </div>
-                <span className="hidden md:block text-sm text-[#B8B4AA]">{me.nombre}</span>
+                <span className="hidden md:block text-sm text-[#B8B4AA]">{perfil.nombre}</span>
               </button>
               {showProfile && (
                 <div className="absolute right-0 top-full mt-2 w-64 bg-[#141419] border border-[rgba(244,242,236,0.12)] shadow-xl z-50">
                   <div className="p-4 border-b border-[rgba(244,242,236,0.08)]">
-                    <p className="text-sm text-[#F4F2EC]">{me.nombre}</p>
-                    <p className="text-xs text-[#B8B4AA]">{me.email}</p>
+                    <p className="text-sm text-[#F4F2EC]">{perfil.nombre}</p>
+                    <p className="text-xs text-[#B8B4AA]">{perfil.email}</p>
                   </div>
                   <div className="p-2">
                     <button
@@ -99,7 +124,7 @@ export default function StudentDashboard() {
                       <Settings className="w-4 h-4" /> Editar perfil
                     </button>
                     <button
-                      onClick={() => window.location.href = createPageUrl('Landing')}
+                      onClick={logout}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-[#B8B4AA] hover:text-red-400 hover:bg-red-400/5 transition-colors"
                     >
                       <LogOut className="w-4 h-4" /> Cerrar sesión
@@ -116,16 +141,16 @@ export default function StudentDashboard() {
         {/* Welcome */}
         <div className="mb-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#C7A36D] mb-2">Bienvenida de vuelta</p>
-            <h1 className="font-serif text-3xl text-[#F4F2EC]">{me.nombre}</h1>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#C7A36D] mb-2">Bienvenido de vuelta</p>
+            <h1 className="font-serif text-3xl text-[#F4F2EC]">{perfil.nombre}</h1>
           </div>
-          {moduloActual && (
+          {siguienteModulo && (
             <button
-              onClick={() => setActiveModuleId(moduloActual.id)}
+              onClick={() => setActiveModuleId(siguienteModulo.id)}
               className="flex items-center gap-3 px-6 py-3 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors"
             >
               <Play className="w-4 h-4" />
-              <span className="font-mono text-xs uppercase tracking-[0.14em]">Continuar: {moduloActual.titulo}</span>
+              <span className="font-mono text-xs uppercase tracking-[0.14em]">Continuar: {siguienteModulo.titulo}</span>
             </button>
           )}
         </div>
@@ -133,10 +158,10 @@ export default function StudentDashboard() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
-            { icon: Award, label: "Progreso general", value: `${totalProgress}%`, color: "text-[#C7A36D]", bg: "bg-[rgba(199,163,109,0.1)]" },
-            { icon: CheckCircle, label: "Completados", value: completados, color: "text-green-400", bg: "bg-green-400/10" },
-            { icon: Clock, label: "En progreso", value: progreso.filter(m => m.progress && !m.progress.completado && m.estado === 'publicado').length, color: "text-blue-400", bg: "bg-blue-400/10" },
-            { icon: BookOpen, label: "Total módulos", value: MODULOS_MOCK.length, color: "text-[#C7A36D]", bg: "bg-[rgba(199,163,109,0.1)]" },
+            { icon: Award, label: "Progreso general", value: `${estadisticas.progresoGeneral}%`, color: "text-[#C7A36D]", bg: "bg-[rgba(199,163,109,0.1)]" },
+            { icon: CheckCircle, label: "Completados", value: estadisticas.modulosCompletados, color: "text-green-400", bg: "bg-green-400/10" },
+            { icon: Clock, label: "En progreso", value: modulos.filter((m: any) => m.estado === 'en_progreso').length, color: "text-blue-400", bg: "bg-blue-400/10" },
+            { icon: BookOpen, label: "Total módulos", value: modulos.length, color: "text-[#C7A36D]", bg: "bg-[rgba(199,163,109,0.1)]" },
           ].map(({ icon: Icon, label, value, color, bg }) => (
             <div key={label} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-5 flex items-center gap-4">
               <div className={`w-10 h-10 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
@@ -154,12 +179,12 @@ export default function StudentDashboard() {
         <div className="mb-10 bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
           <div className="flex justify-between items-center mb-3">
             <span className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA]">Progreso del curso</span>
-            <span className="font-mono text-xs text-[#C7A36D]">{completados} / {MODULOS_MOCK.length} módulos</span>
+            <span className="font-mono text-xs text-[#C7A36D]">{estadisticas.modulosCompletados} / {modulos.length} módulos</span>
           </div>
           <div className="h-1.5 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
             <div
               className="h-full bg-[#C7A36D] rounded-full transition-all duration-700"
-              style={{ width: `${totalProgress}%` }}
+              style={{ width: `${estadisticas.progresoGeneral}%` }}
             />
           </div>
         </div>
@@ -168,11 +193,10 @@ export default function StudentDashboard() {
         <div className="mb-16">
           <h2 className="font-serif text-2xl text-[#F4F2EC] mb-6">Módulos del curso</h2>
           <div className="space-y-3">
-            {progreso.map((m, i) => {
-              const prog = m.progress;
-              const isCompleted = prog?.completado;
-              const isInProgress = prog && !prog.completado;
-              const isLocked = m.estado === 'borrador' || (!prog && i > 0 && !progreso[i - 1]?.progress?.completado);
+            {modulos.map((m: any, i: number) => {
+              const isCompleted = m.estado === 'completado';
+              const isInProgress = m.estado === 'en_progreso';
+              const isLocked = m.estado === 'no_iniciado' && i > 0 && modulos[i - 1]?.estado !== 'completado';
 
               return (
                 <div
@@ -207,13 +231,13 @@ export default function StudentDashboard() {
                   <div className="hidden md:flex items-center gap-6">
                     <div className="text-right">
                       <p className="text-xs text-[#B8B4AA]">{m.duracion}</p>
-                      {prog && !isCompleted && (
-                        <p className="text-xs text-blue-400">{prog.porcentaje}% completado</p>
+                      {isInProgress && (
+                        <p className="text-xs text-blue-400">{m.progreso}% completado</p>
                       )}
                     </div>
-                    {prog && !isCompleted && (
+                    {isInProgress && (
                       <div className="w-20 h-1 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-400" style={{ width: `${prog.porcentaje}%` }} />
+                        <div className="h-full bg-blue-400" style={{ width: `${m.progreso}%` }} />
                       </div>
                     )}
                     {!isLocked && <ChevronRight className="w-4 h-4 text-[#B8B4AA] group-hover:text-[#C7A36D] transition-colors" />}
@@ -246,7 +270,7 @@ export default function StudentDashboard() {
                 <p className="text-sm text-[#B8B4AA] mt-1">
                   {allCompleted
                     ? 'Completaste el curso. Podés descargar tu certificado.'
-                    : `Completá los ${MODULOS_MOCK.length} módulos para desbloquear el certificado.`}
+                    : `Completá los ${modulos.length} módulos para desbloquear el certificado.`}
                 </p>
               </div>
               {allCompleted && (
@@ -262,7 +286,7 @@ export default function StudentDashboard() {
         {/* Profile settings */}
         <div id="perfil-section" className="mb-10">
           <h2 className="font-serif text-2xl text-[#F4F2EC] mb-6">Mi perfil</h2>
-          <ProfileEditor me={me} onSave={setMe} />
+          <ProfileEditor perfil={perfil} onSave={loadDashboardData} />
         </div>
       </main>
     </div>
@@ -270,15 +294,29 @@ export default function StudentDashboard() {
 }
 
 // ── Profile Editor ────────────────────────────────────────────────
-function ProfileEditor({ me, onSave }) {
-  const [form, setForm] = useState(me);
+function ProfileEditor({ perfil, onSave }: { perfil: any, onSave: () => void }) {
+  const [form, setForm] = useState(perfil);
   const [saved, setSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = (e) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(form);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    try {
+      setIsSaving(true);
+      await studentApi.updateStudentProfile({
+        nombre: form.nombre,
+        telefono: form.telefono,
+        pais: form.pais,
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+      onSave();
+      toast.success('Perfil actualizado');
+    } catch (error) {
+      toast.error('Error actualizando perfil');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -292,50 +330,81 @@ function ProfileEditor({ me, onSave }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         {[
           { key: 'nombre', label: 'Nombre completo', type: 'text' },
-          { key: 'email', label: 'Email', type: 'email' },
+          { key: 'email', label: 'Email', type: 'email', disabled: true },
           { key: 'telefono', label: 'Teléfono', type: 'tel' },
           { key: 'pais', label: 'País', type: 'text' },
-        ].map(({ key, label, type }) => (
+        ].map(({ key, label, type, disabled }: any) => (
           <div key={key}>
             <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">{label}</label>
             <input
               type={type}
               value={form[key] || ''}
               onChange={e => setForm({ ...form, [key]: e.target.value })}
-              className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors"
+              disabled={disabled}
+              className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors disabled:opacity-50"
             />
           </div>
         ))}
       </div>
-      <div className="pt-4 border-t border-[rgba(244,242,236,0.06)] mb-5">
-        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-4">Cambiar contraseña</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Nueva contraseña</label>
-            <input type="password" placeholder="••••••••"
-              className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
-          </div>
-          <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Confirmar</label>
-            <input type="password" placeholder="••••••••"
-              className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
-          </div>
-        </div>
-      </div>
-      <button type="submit"
-        className="font-mono text-xs uppercase tracking-[0.14em] px-8 py-3.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors">
-        Guardar cambios
+      <button 
+        type="submit"
+        disabled={isSaving}
+        className="font-mono text-xs uppercase tracking-[0.14em] px-8 py-3.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors disabled:opacity-50"
+      >
+        {isSaving ? 'Guardando...' : 'Guardar cambios'}
       </button>
     </form>
   );
 }
 
 // ── Module Viewer ─────────────────────────────────────────────────
-function ModuleViewer({ moduloId, onBack }) {
-  const modulo = MODULOS_MOCK.find(m => m.id === moduloId);
+function ModuleViewer({ moduloId, onBack, onComplete }: { moduloId: string, onBack: () => void, onComplete?: () => void }) {
+  const [modulo, setModulo] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeContentIdx, setActiveContentIdx] = useState(0);
+  const [isCompleting, setIsCompleting] = useState(false);
+
+  useEffect(() => {
+    loadModulo();
+  }, [moduloId]);
+
+  const loadModulo = async () => {
+    try {
+      setIsLoading(true);
+      const data = await moduleApi.getModule(moduloId);
+      setModulo(data);
+    } catch (error) {
+      toast.error('Error cargando módulo');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleComplete = async () => {
+    try {
+      setIsCompleting(true);
+      await moduleApi.updateModuleProgress(moduloId, { completudPorcentaje: 100, completado: true });
+      toast.success('¡Módulo completado!');
+      onComplete?.();
+      onBack();
+    } catch (error) {
+      toast.error('Error completando módulo');
+    } finally {
+      setIsCompleting(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
+      </div>
+    );
+  }
+
   if (!modulo) return null;
-  const contenidos = modulo.contenidos || [];
+
+  const contenidos = modulo.contenido || [];
   const active = contenidos[activeContentIdx];
 
   return (
@@ -345,11 +414,11 @@ function ModuleViewer({ moduloId, onBack }) {
           <button onClick={onBack} className="flex items-center gap-2 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors text-sm mb-4">
             ← Volver
           </button>
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D] mb-1">Módulo {MODULOS_MOCK.indexOf(modulo) + 1}</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D] mb-1">Módulo</p>
           <h2 className="font-serif text-lg text-[#F4F2EC] leading-tight">{modulo.titulo}</h2>
         </div>
         <nav className="flex-1 overflow-y-auto p-4">
-          {contenidos.map((c, i) => (
+          {contenidos.map((c: any, i: number) => (
             <button key={i} onClick={() => setActiveContentIdx(i)}
               className={`w-full text-left flex items-center gap-3 p-3 rounded mb-1 transition-colors ${
                 i === activeContentIdx ? 'bg-[rgba(199,163,109,0.1)] text-[#C7A36D]' : 'text-[#B8B4AA] hover:text-[#F4F2EC] hover:bg-[rgba(244,242,236,0.03)]'
@@ -369,7 +438,7 @@ function ModuleViewer({ moduloId, onBack }) {
         </div>
         <div className="max-w-4xl mx-auto px-6 py-10">
           <div className="mb-8">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#C7A36D] mb-3">Módulo {MODULOS_MOCK.indexOf(modulo) + 1}</p>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#C7A36D] mb-3">Módulo</p>
             <h1 className="font-serif text-4xl text-[#F4F2EC] mb-4">{modulo.titulo}</h1>
             <p className="text-[#B8B4AA] leading-relaxed">{modulo.descripcion}</p>
           </div>
@@ -377,7 +446,7 @@ function ModuleViewer({ moduloId, onBack }) {
             <div className="mb-8 bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
               <p className="font-mono text-xs uppercase tracking-[0.14em] text-[#C7A36D] mb-4">Objetivos</p>
               <ul className="space-y-2">
-                {modulo.objetivos.map((obj, i) => (
+                {modulo.objetivos.map((obj: string, i: number) => (
                   <li key={i} className="flex items-start gap-3 text-[#B8B4AA] text-sm">
                     <span className="text-[#C7A36D] mt-0.5">·</span>{obj}
                   </li>
@@ -388,7 +457,7 @@ function ModuleViewer({ moduloId, onBack }) {
           {contenidos.length > 0 && active && (
             <div className="mb-8 bg-[#141419] border border-[rgba(244,242,236,0.08)]">
               <div className="flex overflow-x-auto border-b border-[rgba(244,242,236,0.08)]">
-                {contenidos.map((c, i) => (
+                {contenidos.map((c: any, i: number) => (
                   <button key={i} onClick={() => setActiveContentIdx(i)}
                     className={`px-5 py-3 font-mono text-[10px] uppercase tracking-[0.14em] whitespace-nowrap border-b-2 transition-colors ${
                       i === activeContentIdx ? 'border-[#C7A36D] text-[#C7A36D]' : 'border-transparent text-[#B8B4AA] hover:text-[#F4F2EC]'
@@ -400,20 +469,26 @@ function ModuleViewer({ moduloId, onBack }) {
               <div className="p-6"><ContentBlock content={active} /></div>
             </div>
           )}
-          {modulo.ejercicio_titulo && (
+          {modulo.ejercicio?.titulo && (
             <div className="mb-8 border border-[rgba(199,163,109,0.2)] bg-[rgba(199,163,109,0.04)] p-6">
               <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#C7A36D] mb-3">Ejercicio</p>
-              <h3 className="font-serif text-xl text-[#F4F2EC] mb-3">{modulo.ejercicio_titulo}</h3>
-              <p className="text-[#B8B4AA] text-sm leading-relaxed mb-4">{modulo.ejercicio_descripcion}</p>
-              <div className="flex items-center gap-2 text-xs text-[#B8B4AA]">
-                <Clock className="w-3.5 h-3.5" />
-                <span>Fecha límite: {modulo.ejercicio_deadline}</span>
-              </div>
+              <h3 className="font-serif text-xl text-[#F4F2EC] mb-3">{modulo.ejercicio.titulo}</h3>
+              <p className="text-[#B8B4AA] text-sm leading-relaxed mb-4">{modulo.ejercicio.descripcion}</p>
+              {modulo.ejercicio.deadline && (
+                <div className="flex items-center gap-2 text-xs text-[#B8B4AA]">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Fecha límite: {modulo.ejercicio.deadline}</span>
+                </div>
+              )}
             </div>
           )}
           <div className="flex justify-end">
-            <button className="font-mono text-xs uppercase tracking-[0.14em] px-6 py-3 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors" onClick={onBack}>
-              Marcar como completado ✓
+            <button 
+              className="font-mono text-xs uppercase tracking-[0.14em] px-6 py-3 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors disabled:opacity-50"
+              onClick={handleComplete}
+              disabled={isCompleting}
+            >
+              {isCompleting ? 'Guardando...' : 'Marcar como completado ✓'}
             </button>
           </div>
         </div>
@@ -422,11 +497,11 @@ function ModuleViewer({ moduloId, onBack }) {
   );
 }
 
-function ContentIcon(tipo) {
+function ContentIcon(tipo: string) {
   return { video: '▶', pdf: '📄', texto: '📝', zoom: '📹', imagen: '🖼' }[tipo] || '·';
 }
 
-function ContentBlock({ content }) {
+function ContentBlock({ content }: { content: any }) {
   const { tipo, titulo, texto, url } = content;
   if (tipo === 'video') return (
     <div>
@@ -439,7 +514,7 @@ function ContentBlock({ content }) {
   if (tipo === 'texto') return (
     <div className="prose-dark">
       {titulo && <h2>{titulo}</h2>}
-      {texto?.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
+      {texto?.split('\n\n').map((p: string, i: number) => <p key={i}>{p}</p>)}
     </div>
   );
   if (tipo === 'pdf') return (

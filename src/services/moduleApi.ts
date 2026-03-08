@@ -1,91 +1,90 @@
-import { api, handleApiError } from './api';
-import type { Modulo } from '@/types';
+import { api } from './api';
 
-export const getModules = async (estado?: string): Promise<Modulo[]> => {
-  try {
-    const response = await api.get<Modulo[]>('/modules', { params: { estado } });
+export interface Module {
+  id: string;
+  titulo: string;
+  descripcion?: string;
+  orden: number;
+  estado: 'borrador' | 'publicado';
+  duracion?: string;
+  objetivos: string[];
+  contenido?: any;
+  ejercicio?: {
+    titulo: string;
+    descripcion: string;
+    deadline?: string;
+  };
+  recursos?: any[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ModuleProgress {
+  moduloId: string;
+  completudPorcentaje: number;
+  fechaCompletado?: string;
+  ultimaActividad?: string;
+}
+
+// Obtener todos los módulos (autenticado)
+export const getModules = async () => {
+  const response = await api.get('/modules');
+  return response.data;
+};
+
+// Obtener un módulo por ID (estudiante/profesor)
+export const getModule = async (id: string) => {
+  const response = await api.get(`/modules/${id}`);
+  return response.data;
+};
+
+// Crear módulo (profesor)
+export const createModule = async (data: Partial<Module>) => {
+  const response = await api.post('/modules', data);
+  return response.data;
+};
+
+// Actualizar módulo (profesor)
+export const updateModule = async (id: string, data: Partial<Module>) => {
+  const response = await api.put(`/modules/${id}`, data);
+  return response.data;
+};
+
+// Eliminar módulo (profesor)
+export const deleteModule = async (id: string) => {
+  const response = await api.delete(`/modules/${id}`);
+  return response.data;
+};
+
+// Publicar/Despublicar módulo (profesor) - usando publishModule
+export const toggleModuleStatus = async (id: string) => {
+  const response = await api.post(`/modules/${id}/publish`);
+  return response.data;
+};
+
+// Actualizar progreso del estudiante (estudiante)
+export const updateModuleProgress = async (moduleId: string, data: {
+  completudPorcentaje: number;
+  completado?: boolean;
+}) => {
+  if (data.completado) {
+    const response = await api.post(`/students/me/progress/${moduleId}/complete`);
     return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
   }
+  const response = await api.post(`/students/me/progress/${moduleId}`, {
+    completudPorcentaje: data.completudPorcentaje
+  });
+  return response.data;
 };
 
-export const getModuleById = async (id: string): Promise<Modulo> => {
-  try {
-    const response = await api.get<Modulo>(`/modules/${id}`);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Obtener progreso del estudiante actual (estudiante)
+export const getMyProgress = async () => {
+  const response = await api.get('/students/me/progress');
+  return response.data;
 };
 
-export const getModuleByOrder = async (order: number): Promise<Modulo> => {
-  try {
-    const response = await api.get<Modulo>(`/modules/by-order/${order}`);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
-};
-
-// Funciones del profesor
-export const createModule = async (data: Partial<Modulo>): Promise<Modulo> => {
-  try {
-    const response = await api.post<Modulo>('/modules', data);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
-};
-
-export const updateModule = async (id: string, data: Partial<Modulo>): Promise<Modulo> => {
-  try {
-    const response = await api.put<Modulo>(`/modules/${id}`, data);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
-};
-
-export const deleteModule = async (id: string): Promise<void> => {
-  try {
-    await api.delete(`/modules/${id}`);
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
-};
-
-export const publishModule = async (id: string): Promise<void> => {
-  try {
-    await api.post(`/modules/${id}/publish`);
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
-};
-
-export const duplicateModule = async (id: string): Promise<Modulo> => {
-  try {
-    const response = await api.post<Modulo>(`/modules/${id}/duplicate`);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
-};
-
-export const getModuleStats = async (): Promise<any[]> => {
-  try {
-    const response = await api.get('/modules/stats');
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
-};
-
-
-export const scheduleModule = async (id: string, scheduledPublishAt: string): Promise<void> => {
-  try {
-    await api.post(`/modules/${id}/schedule`, { scheduledPublishAt });
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Obtener estadísticas de módulos (profesor)
+export const getModuleStats = async () => {
+  const response = await api.get('/modules/stats');
+  return response.data;
 };

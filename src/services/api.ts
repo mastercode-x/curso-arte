@@ -1,7 +1,8 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { getAuthToken } from '@/contexts/AuthContext';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://curso-vaip.onrender.com/api';
+// URL del backend en Railway
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://curso2-production.up.railway.app/api';
 
 // Crear instancia de axios
 export const api = axios.create({

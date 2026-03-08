@@ -1,112 +1,73 @@
-import { api, handleApiError } from './api';
-import type { DashboardProfesor, ConfiguracionProfesor } from '@/types';
+import { api } from './api';
 
-interface DashboardSummary {
-  estudiantes: {
-    total: number;
-    activos: number;
-    pagados: number;
-    pendientesPago: number;
-    nuevosEstaSemana: number;
-  };
-  solicitudes: {
-    pendientes: number;
-  };
-  modulos: {
-    total: number;
-    publicados: number;
-  };
-  finanzas: {
-    ingresosTotales: number;
-  };
+export interface AdminConfig {
+  nombreCurso: string;
+  descripcionCurso?: string;
+  precioCurso: number;
+  moneda: string;
+  bioProfesor?: string;
+  fotoProfesorUrl?: string;
+  emailContacto?: string;
+  whatsappNumero?: string;
+  pais?: string;
+  mpAccessToken?: string;
+  mpPublicKey?: string;
+  smtpHost?: string;
+  smtpPort?: number;
+  smtpUser?: string;
+  smtpPass?: string;
+  emailNotificaciones?: string;
+  notificarWhatsApp: boolean;
+  notificarEmail: boolean;
 }
 
-interface DetailedStats {
-  estudiantesPorMes: any[];
-  pagosPorMes: any[];
-  progresoPorModulo: any[];
-  tasas: {
-    aprobacion: number;
-    conversion: number;
-  };
-}
-
-export const getDashboardSummary = async (): Promise<DashboardSummary> => {
-  try {
-    const response = await api.get<DashboardSummary>('/admin/dashboard');
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Obtener configuración del profesor
+export const getConfig = async (): Promise<AdminConfig> => {
+  const response = await api.get('/admin/config');
+  return response.data;
 };
 
-export const getProfessorDashboard = async (): Promise<DashboardProfesor> => {
-  try {
-    const response = await api.get<DashboardProfesor>('/dashboard/professor');
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Actualizar configuración del profesor
+export const updateConfig = async (data: Partial<AdminConfig>) => {
+  const response = await api.put('/admin/config', data);
+  return response.data;
 };
 
-export const getDetailedStats = async (): Promise<DetailedStats> => {
-  try {
-    const response = await api.get<DetailedStats>('/admin/stats');
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Configurar credenciales de Mercado Pago
+export const setMPKeys = async (mpAccessToken: string, mpPublicKey: string) => {
+  const response = await api.post('/admin/mp-keys', { mpAccessToken, mpPublicKey });
+  return response.data;
 };
 
-export const getConfig = async (): Promise<{ profesorId: string; configuracion: ConfiguracionProfesor }> => {
-  try {
-    const response = await api.get('/admin/config');
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Verificar configuración de email - usando un endpoint alternativo
+export const verifyEmailConfig = async () => {
+  // El backend no tiene este endpoint directo, verificamos a través de la config
+  const config = await getConfig();
+  const hasEmailConfig = config.smtpHost && config.smtpUser;
+  return { valid: hasEmailConfig, config };
 };
 
-export const updateConfig = async (data: Partial<ConfiguracionProfesor>): Promise<{ message: string; config: ConfiguracionProfesor }> => {
-  try {
-    const response = await api.put('/admin/config', data);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Verificar configuración de Mercado Pago
+export const verifyMpConfig = async () => {
+  const config = await getConfig();
+  const hasMpConfig = config.mpAccessToken && config.mpPublicKey;
+  return { valid: hasMpConfig, config };
 };
 
-export const setStripeKeys = async (data: {
-  stripeSecretKey: string;
-  stripePublicKey: string;
-  stripeWebhookSecret: string;
-}): Promise<{ message: string }> => {
-  try {
-    const response = await api.post('/admin/stripe-keys', data);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Obtener estadísticas generales
+export const getGeneralStats = async () => {
+  const response = await api.get('/admin/stats');
+  return response.data;
 };
 
-export const getRecentActivity = async (): Promise<{ ultimas24Horas: any }> => {
-  try {
-    const response = await api.get('/dashboard/activity');
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Obtener resumen del dashboard
+export const getDashboardSummary = async () => {
+  const response = await api.get('/admin/dashboard');
+  return response.data;
 };
 
-export const createInitialProfessor = async (data: {
-  email: string;
-  password: string;
-  nombre: string;
-}): Promise<{ message: string; user: any }> => {
-  try {
-    const response = await api.post('/admin/setup', data);
-    return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+// Enviar email de prueba - no disponible en backend actual
+export const sendTestEmail = async (email: string) => {
+  // Esta funcionalidad no está implementada en el backend actual
+  throw new Error('Funcionalidad no disponible');
 };

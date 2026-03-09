@@ -201,6 +201,15 @@ const ModulesManager: React.FC = () => {
                 className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]"
               />
             </div>
+            <div>
+              <Label className="text-[#F4F2EC]">URL de imagen de portada</Label>
+              <Input
+                value={editingModule?.imagenUrl || ''}
+                onChange={(e) => setEditingModule({ ...editingModule, imagenUrl: e.target.value })}
+                placeholder="/images/module01_bg.jpg o URL externa"
+                className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]"
+              />
+            </div>
             <div className="flex items-center gap-2">
               <Switch
                 checked={editingModule?.estado === 'publicado'}

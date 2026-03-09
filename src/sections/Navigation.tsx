@@ -41,18 +41,25 @@ const Navigation = () => {
 
   return (
     <>
+      {/* Header Background - Glassmorphism effect */}
+      <div className={`fixed top-0 left-0 right-0 z-[99] h-[8vh] backdrop-blur-md transition-all duration-500 ${
+        isVisible 
+          ? 'bg-[rgba(11,11,13,0.85)] border-b border-[rgba(244,242,236,0.1)]' 
+          : 'bg-transparent border-b border-transparent'
+      }`} />
+
       {/* Wordmark - always visible */}
-      <div className={`fixed top-[4vh] left-[4vw] z-[100] max-w-[30vw] md:max-w-full transition-opacity duration-500 ${
-        isVisible ? 'opacity-50' : 'opacity-100'
+      <div className={`fixed top-[4vh] left-[4vw] z-[100] max-w-[30vw] md:max-w-full transition-all duration-500 ${
+        isVisible ? 'opacity-100' : 'opacity-100'
       }`}>
-        <span className="font-serif text-base md:text-lg lg:text-xl text-[#F4F2EC] tracking-tight leading-tight break-words">
+        <span className="font-serif text-base md:text-lg lg:text-xl text-[#F4F2EC] tracking-tight leading-tight break-words drop-shadow-lg">
           Poética de la Mirada
         </span>
       </div>
 
       {/* Navigation - appears after hero */}
       <nav
-        className={`fixed top-[4vh] right-[4vw] z-[100] transition-opacity duration-500 ${
+        className={`fixed top-[4vh] right-[4vw] z-[100] transition-all duration-500 ${
           isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
@@ -87,7 +94,7 @@ const Navigation = () => {
             
             {/* Dropdown Menu */}
             {showModulesDropdown && (
-              <div className="absolute top-full right-0 mt-2 bg-[#1a1a1f] border border-[#C7A36D]/30 rounded-lg shadow-lg min-w-[200px] py-2">
+              <div className="absolute top-full right-0 mt-2 bg-[rgba(26,26,31,0.95)] backdrop-blur-md border border-[rgba(199,163,109,0.3)] rounded-lg shadow-xl min-w-[200px] py-2">
                 {modulesData.map((module) => (
                   <button
                     key={module.id}
@@ -107,7 +114,7 @@ const Navigation = () => {
               href="https://curso2-nine.vercel.app/#/login"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-xs uppercase tracking-[0.14em] px-4 py-2 border border-[#C7A36D] text-[#C7A36D] hover:bg-[#C7A36D] hover:text-[#0B0B0D] transition-all duration-300 rounded-sm"
+              className="font-mono text-xs uppercase tracking-[0.14em] px-4 py-2 border border-[#C7A36D] text-[#C7A36D] hover:bg-[#C7A36D] hover:text-[#0B0B0D] transition-all duration-300 rounded-sm drop-shadow-md"
             >
               Acceder
             </a>

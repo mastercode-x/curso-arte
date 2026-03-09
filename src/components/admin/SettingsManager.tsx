@@ -17,6 +17,8 @@ const SettingsManager: React.FC = () => {
     precioCurso: 100,
     moneda: 'ARS',
     bioProfesor: '',
+    fotoProfesorUrl: '',
+    googleFormUrl: '',
     emailContacto: '',
     whatsappNumero: '',
     notificarEmail: true,
@@ -91,6 +93,24 @@ const SettingsManager: React.FC = () => {
               <div>
                 <Label className="text-[#F4F2EC]">Biografía del profesor</Label>
                 <Textarea value={config.bioProfesor} onChange={(e) => setConfig({ ...config, bioProfesor: e.target.value })} className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" rows={3} />
+              </div>
+              <div>
+                <Label className="text-[#F4F2EC]">URL Foto del profesor</Label>
+                <Input value={config.fotoProfesorUrl} onChange={(e) => setConfig({ ...config, fotoProfesorUrl: e.target.value })} placeholder="/images/instructor_portrait.jpg" className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-[#F4F2EC]">Precio del curso</Label>
+                  <Input type="number" value={config.precioCurso} onChange={(e) => setConfig({ ...config, precioCurso: Number(e.target.value) })} className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
+                </div>
+                <div>
+                  <Label className="text-[#F4F2EC]">Moneda</Label>
+                  <Input value={config.moneda} onChange={(e) => setConfig({ ...config, moneda: e.target.value })} className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
+                </div>
+              </div>
+              <div>
+                <Label className="text-[#F4F2EC]">URL Formulario de Google</Label>
+                <Input value={config.googleFormUrl} onChange={(e) => setConfig({ ...config, googleFormUrl: e.target.value })} placeholder="https://docs.google.com/forms/..." className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
               </div>
               <Button onClick={handleSaveGeneral} disabled={isLoading} className="bg-[#C7A36D] hover:bg-[#d4b07a] text-[#0B0B0D]">
                 <Save className="w-4 h-4 mr-2" />Guardar cambios

@@ -939,23 +939,7 @@ function ConfiguracionSection() {
             { key: "moneda", label: "Moneda", type: "text" },
           ]
         },
-        {
-          title: "Configuración Mercado Pago",
-          fields: [
-            { key: "mpAccessToken", label: "Access Token", type: "password" },
-            { key: "mpPublicKey", label: "Public Key", type: "password" },
-          ]
-        },
-        {
-          title: "Configuración Email (SMTP)",
-          fields: [
-            { key: "smtpHost", label: "Host SMTP", type: "text" },
-            { key: "smtpPort", label: "Puerto", type: "number" },
-            { key: "smtpUser", label: "Usuario", type: "text" },
-            { key: "smtpPass", label: "Contraseña", type: "password" },
-            { key: "emailNotificaciones", label: "Email para notificaciones", type: "email" },
-          ]
-        },
+        
       ].map(({ title, fields }: any) => (
         <div key={title} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-5">{title}</p>

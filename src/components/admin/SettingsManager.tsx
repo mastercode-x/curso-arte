@@ -99,44 +99,6 @@ const SettingsManager: React.FC = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="pagos" className="mt-6 space-y-6">
-          <Card className="bg-[#141419] border-[rgba(244,242,236,0.08)]">
-            <CardHeader><CardTitle className="text-lg font-serif text-[#F4F2EC]">Precio del curso</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-[#F4F2EC]">Precio</Label>
-                  <Input type="number" value={config.precioCurso} onChange={(e) => setConfig({ ...config, precioCurso: parseFloat(e.target.value) })} className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
-                </div>
-                <div>
-                  <Label className="text-[#F4F2EC]">Moneda</Label>
-                  <Input value={config.moneda} onChange={(e) => setConfig({ ...config, moneda: e.target.value })} className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
-                </div>
-              </div>
-              <Button onClick={handleSaveGeneral} disabled={isLoading} className="bg-[#C7A36D] hover:bg-[#d4b07a] text-[#0B0B0D]">
-                <CreditCard className="w-4 h-4 mr-2" />Actualizar precio
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-[#141419] border-[rgba(244,242,236,0.08)]">
-            <CardHeader><CardTitle className="text-lg font-serif text-[#F4F2EC]">Configuración de Mercado Pago</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label className="text-[#F4F2EC]">Access Token</Label>
-                <Input type="password" value={mpKeys.mpAccessToken} onChange={(e) => setMpKeys({ ...mpKeys, mpAccessToken: e.target.value })} placeholder="APP_USR-..." className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
-              </div>
-              <div>
-                <Label className="text-[#F4F2EC]">Public Key</Label>
-                <Input value={mpKeys.mpPublicKey} onChange={(e) => setMpKeys({ ...mpKeys, mpPublicKey: e.target.value })} placeholder="APP_USR-..." className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
-              </div>
-              <Button onClick={handleSaveMPKeys} disabled={isLoading} className="bg-[#C7A36D] hover:bg-[#d4b07a] text-[#0B0B0D]">
-                <Save className="w-4 h-4 mr-2" />Guardar claves
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         <TabsContent value="notificaciones" className="mt-6">
           <Card className="bg-[#141419] border-[rgba(244,242,236,0.08)]">
             <CardHeader><CardTitle className="text-lg font-serif text-[#F4F2EC]">Configuración de notificaciones</CardTitle></CardHeader>

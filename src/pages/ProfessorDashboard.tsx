@@ -388,20 +388,20 @@ function SolicitudesSection() {
             <button onClick={() => setSelected(null)} className="absolute top-4 right-4 text-[#B8B4AA] hover:text-[#F4F2EC]"><X className="w-5 h-5" /></button>
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#C7A36D] mb-2">Solicitud</p>
             <h2 className="font-serif text-2xl text-[#F4F2EC] mb-6">{selected.nombre}</h2>
-            <div className="space-y-3 mb-6 text-sm">
-              {[["Email", selected.email], ["Teléfono", selected.telefono], ["País", selected.pais]].map(([k, v]) => (
+            <div className="space-y-4 mb-6 text-sm">
+              {[["Email", selected.email], ["Teléfono", selected.telefono]].map(([k, v]) => (
                 <div key={k} className="flex gap-4">
                   <span className="text-[#B8B4AA] w-24 shrink-0">{k}</span>
                   <span className="text-[#F4F2EC]">{v || '—'}</span>
                 </div>
               ))}
               <div>
-                <p className="text-[#B8B4AA] mb-1">Experiencia</p>
+                <p className="text-[#B8B4AA] mb-1 font-medium">Vínculo con el arte</p>
                 <p className="text-[#F4F2EC] text-sm leading-relaxed">{selected.experiencia || '—'}</p>
               </div>
               <div>
-                <p className="text-[#B8B4AA] mb-1">Interés</p>
-                <p className="text-[#F4F2EC] text-sm leading-relaxed">{selected.interes || '—'}</p>
+                <p className="text-[#B8B4AA] mb-1 font-medium">Motivación e interés</p>
+                <p className="text-[#F4F2EC] text-sm leading-relaxed whitespace-pre-wrap">{selected.interes || '—'}</p>
               </div>
             </div>
             <div className="flex gap-3">

@@ -23,7 +23,7 @@ export default function Register() {
             Para registrarte necesitás un enlace válido enviado por el profesor. Si ya realizaste el pago y no recibiste el enlace, escribinos.
           </p>
           <a
-            href="mailto:hola@poeticadelamirada.com"
+            href="mailto:curso@ernestoengel.site"
             className="inline-block font-mono text-xs uppercase tracking-[0.14em] px-6 py-3 border border-[rgba(199,163,109,0.4)] text-[#C7A36D] hover:bg-[rgba(199,163,109,0.08)] transition-colors"
           >
             Contactar al profesor

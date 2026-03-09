@@ -56,8 +56,8 @@ async function main() {
   // Crear módulos iniciales
   const modulosData = [
     {
-      titulo: 'El silencio de la mirada',
-      descripcion: 'Antes de pintar, mirar. Aprender a detenerse, recorrer una imagen con la atención y registrar lo que se siente antes de lo que se piensa.',
+      titulo: 'La observación como acto interior',
+      descripcion: 'Detenerse. Callar. Disponerse a ver. Antes de pintar, aprender a mirar con paciencia y atención plena, registrando lo que se siente antes de lo que se piensa.',
       orden: 1,
       duracion: '2 semanas',
       objetivos: ['Desarrollar la capacidad de observación prolongada', 'Registrar sensaciones antes de juicios', 'Construir un vocabulario visual personal'],
@@ -70,8 +70,8 @@ async function main() {
       recursos: [{ title: 'Ways of Seeing - John Berger', type: 'libro' }]
     },
     {
-      titulo: 'La composición y el equilibrio',
-      descripcion: 'Reglas para romperlas. Usar la geometría como punto de partida, y luego desplazar, recortar, equilibrar por instinto.',
+      titulo: 'Las reglas como punto de partida',
+      descripcion: 'Conocerlas para luego tensarlas, quebrarlas o trascenderlas. Usar la geometría como inicio, y luego desplazar, recortar, equilibrar por instinto.',
       orden: 2,
       duracion: '2 semanas',
       objetivos: ['Comprender las reglas clásicas de composición', 'Aprender a romperlas con intención', 'Desarrollar el equilibrio por instinto'],
@@ -83,8 +83,8 @@ async function main() {
       recursos: [{ title: 'La composición en la pintura - Jacques Block', type: 'libro' }]
     },
     {
-      titulo: 'El color y su poética',
-      descripcion: 'El color no decora: dice. Cómo construir una paleta con intención, mantener la coherencia y dejar que el contraste cuente la historia.',
+      titulo: 'El color como emoción',
+      descripcion: 'Como vibración, como lenguaje no verbal. El color no decora: dice. Cómo construir una paleta con intención y dejar que el contraste cuente la historia.',
       orden: 3,
       duracion: '2 semanas',
       objetivos: ['Comprender la psicología del color', 'Construir paletas con intención', 'Usar el contraste como narrativa'],
@@ -96,8 +96,8 @@ async function main() {
       recursos: [{ title: 'Interacción del color - Josef Albers', type: 'libro' }]
     },
     {
-      titulo: 'La materia y la textura',
-      descripcion: 'Capas, impasto, transparencias. Cómo la textura modifica la luz y cómo la materia se convierte en narrativa.',
+      titulo: 'El diálogo con los materiales',
+      descripcion: 'La huella, el cuerpo, el tiempo inscripto en la obra. Capas, impasto, transparencias: cómo la materia se convierte en narrativa.',
       orden: 4,
       duracion: '2 semanas',
       objetivos: ['Explorar diferentes técnicas de textura', 'Comprender cómo la materia afecta la luz', 'Usar la textura como elemento narrativo'],
@@ -107,8 +107,8 @@ async function main() {
       recursos: []
     },
     {
-      titulo: 'La forma y la abstracción',
-      descripcion: 'Simplificar sin perder la emoción. Ejercicios de reducción, ritmo y silencio para que la forma respire.',
+      titulo: 'Del reconocimiento a la síntesis',
+      descripcion: 'De lo visible a lo esencial. Simplificar sin perder la emoción. Ejercicios de reducción, ritmo y silencio para que la forma respire.',
       orden: 5,
       duracion: '2 semanas',
       objetivos: ['Aprender a simplificar formas complejas', 'Mantener la emoción en la abstracción', 'Crear ritmo visual'],
@@ -118,8 +118,8 @@ async function main() {
       recursos: []
     },
     {
-      titulo: 'La luz y la atmósfera',
-      descripcion: 'La luz como protagonista. Cómo capturar la atmósfera, jugar con sombras y resplandores, y crear profundidad emocional.',
+      titulo: 'La luz como constructora',
+      descripcion: 'Constructora de espacio, clima y profundidad emocional. Cómo capturar la atmósfera, jugar con sombras y resplandores.',
       orden: 6,
       duracion: '2 semanas',
       objetivos: ['Comprender la luz como elemento narrativo', 'Capturar diferentes atmósferas', 'Crear profundidad emocional'],
@@ -129,8 +129,8 @@ async function main() {
       recursos: []
     },
     {
-      titulo: 'La naturaleza como espejo',
-      descripcion: 'El paisaje interior y exterior. Aprender a leer la naturaleza como metáfora y traducirla en imágenes propias.',
+      titulo: 'El entorno como reflejo interior',
+      descripcion: 'La naturaleza no como motivo, sino como resonancia. Aprender a leer el paisaje como metáfora y traducirlo en imágenes propias.',
       orden: 7,
       duracion: '2 semanas',
       objetivos: ['Leer el paisaje como metáfora', 'Conectar naturaleza e interioridad', 'Crear imágenes desde la experiencia'],
@@ -140,8 +140,8 @@ async function main() {
       recursos: []
     },
     {
-      titulo: 'La obra y su sentido',
-      descripcion: 'Del proceso al resultado. Cómo encontrar la intención detrás de cada obra y darle cierre sin perder la apertura.',
+      titulo: 'La obra terminada como pregunta abierta',
+      descripcion: 'El lugar del artista, del observador y del tiempo. Cómo encontrar la intención detrás de cada obra y darle cierre sin perder la apertura.',
       orden: 8,
       duracion: '2 semanas',
       objetivos: ['Encontrar la intención de la obra', 'Dar cierre al proceso creativo', 'Mantener la apertura en la finalización'],

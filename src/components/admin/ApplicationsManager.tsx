@@ -179,22 +179,16 @@ const ApplicationsManager: React.FC = () => {
                   <p className="text-[#F4F2EC]">{selectedApplication.telefono}</p>
                 </div>
               )}
-              {selectedApplication.pais && (
-                <div>
-                  <p className="text-sm text-[#B8B4AA]">País</p>
-                  <p className="text-[#F4F2EC]">{selectedApplication.pais}</p>
-                </div>
-              )}
               {selectedApplication.experiencia && (
                 <div>
-                  <p className="text-sm text-[#B8B4AA]">Experiencia</p>
-                  <p className="text-[#F4F2EC]">{selectedApplication.experiencia}</p>
+                  <p className="text-sm text-[#B8B4AA] font-medium">Vínculo con el arte</p>
+                  <p className="text-[#F4F2EC] whitespace-pre-wrap">{selectedApplication.experiencia}</p>
                 </div>
               )}
               {selectedApplication.interes && (
                 <div>
-                  <p className="text-sm text-[#B8B4AA]">Interés</p>
-                  <p className="text-[#F4F2EC]">{selectedApplication.interes}</p>
+                  <p className="text-sm text-[#B8B4AA] font-medium">Motivación e interés</p>
+                  <p className="text-[#F4F2EC] whitespace-pre-wrap">{selectedApplication.interes}</p>
                 </div>
               )}
               {selectedApplication.estado === 'rechazado' && selectedApplication.motivoRechazo && (

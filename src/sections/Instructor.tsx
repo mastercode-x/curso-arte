@@ -130,11 +130,11 @@ const Instructor = () => {
 
             {/* Contact link */}
             <a
-              href="mailto:hola@poeticadelamirada.com"
+              href="mailto:curso@ernestoengel.site"
               className="mt-4 inline-flex items-center gap-2 text-sm text-[#B8B4AA] hover:text-[#C7A36D] transition-colors duration-300"
             >
               <Mail className="w-4 h-4" />
-              ¿Preguntas? Escribinos a hola@poeticadelamirada.com
+              ¿Preguntas? Escribinos a curso@ernestoengel.site
             </a>
 
             {/* Divider */}

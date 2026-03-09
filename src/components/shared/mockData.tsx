@@ -146,7 +146,7 @@ export const CONFIG_MOCK = {
   nombre_profesor: "Ernesto Engel",
   bio_profesor: "Artista visual y docente. Su trabajo explora el paisaje, la memoria y la pintura como acto de atención.",
   foto_profesor_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
-  email_contacto: "hola@poeticadelamirada.com",
+  email_contacto: "curso@ernestoengel.site",
   whatsapp_numero: "+54 9 11 1234-5678",
   instagram_url: "https://instagram.com/poeticadelamirada",
   link_pago: "https://buy.stripe.com/ejemplo",

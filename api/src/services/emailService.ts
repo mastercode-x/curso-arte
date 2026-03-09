@@ -2,12 +2,6 @@ import nodemailer from 'nodemailer';
 import { logger } from '../utils/logger';
 import { PrismaClient } from '@prisma/client';
 
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-
-
 const prisma = new PrismaClient();
 
 // Obtener configuración SMTP desde la base de datos o variables de entorno
@@ -42,20 +36,23 @@ const getEmailConfig = async () => {
 // Crear transporter con configuración actual
 const createTransporter = async () => {
   const config = await getEmailConfig();
-  
-return nodemailer.createTransport({
-  host: config.host,
-  port: config.port,
-  secure: config.secure,
-  auth: config.auth,
-  connectionTimeout: 10000,   // 10 segundos para conectar
-  greetingTimeout: 10000,     // 10 segundos para el saludo SMTP
-  socketTimeout: 15000,       // 15 segundos de inactividad
-  tls: {
-    rejectUnauthorized: false
-  }
-});
+
+  return nodemailer.createTransport({
+    host: config.host,
+    port: config.port,
+    secure: config.secure,
+    auth: config.auth,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+    tls: {
+      rejectUnauthorized: false,
+      // AGREGAR ESTA LÍNEA para ayudar a resolver problemas de red en Railway
+      servername: config.host 
+    }
+  });
 };
+
 
 // Verificar conexión SMTP
 export const verifyEmailConfig = async (): Promise<boolean> => {
@@ -70,8 +67,6 @@ export const verifyEmailConfig = async (): Promise<boolean> => {
   }
 };
 
-
-
 export const sendEmail = async (
   to: string,
   subject: string,
@@ -79,12 +74,16 @@ export const sendEmail = async (
   fromName: string = 'Poética de la Mirada'
 ): Promise<boolean> => {
   try {
-    await resend.emails.send({
-      from: `${fromName} <onboarding@resend.dev>`,
+    const transporter = await createTransporter();
+    const config = await getEmailConfig();
+    
+    await transporter.sendMail({
+      from: `"${fromName}" <${config.auth.user}>`,
       to,
       subject,
       html
     });
+
     logger.info(`Email enviado a ${to}: ${subject}`);
     return true;
   } catch (error) {
@@ -92,7 +91,6 @@ export const sendEmail = async (
     return false;
   }
 };
-
 
 // Templates de email
 export const emailTemplates = {

@@ -91,7 +91,7 @@ export const sendEmail = async (
 ): Promise<boolean> => {
   try {
     await resend.emails.send({
-      from: `${fromName} <onboarding@resend.dev>`,
+      from: `Poética de la Mirada <curso@ernestoengelcurso.site>`,
       to,
       subject,
       html

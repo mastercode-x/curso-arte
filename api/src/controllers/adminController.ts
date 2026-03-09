@@ -70,10 +70,13 @@ export const getDashboardSummary = asyncHandler(async (req: Request, res: Respon
 
 // Obtener configuración del profesor
 export const getConfig = asyncHandler(async (req: Request, res: Response) => {
+  const isPublic = req.query.public === 'true';
   const userId = req.user?.userId;
 
+  const where: any = isPublic ? {} : { userId };
+  
   const profesor = await prisma.profesor.findFirst({
-    where: { userId },
+    where,
     include: { configuracion: true }
   });
 
@@ -111,6 +114,7 @@ export const updateConfig = asyncHandler(async (req: Request, res: Response) => 
     emailContacto,
     whatsappNumero,
     pais,
+    googleFormUrl,
     notificarEmail,
     notificarWhatsApp
   } = req.body;
@@ -136,6 +140,7 @@ export const updateConfig = asyncHandler(async (req: Request, res: Response) => 
       emailContacto,
       whatsappNumero,
       pais,
+      googleFormUrl,
       notificarEmail,
       notificarWhatsApp
     },
@@ -150,6 +155,7 @@ export const updateConfig = asyncHandler(async (req: Request, res: Response) => 
       emailContacto,
       whatsappNumero,
       pais,
+      googleFormUrl,
       notificarEmail: notificarEmail ?? true,
       notificarWhatsApp: notificarWhatsApp ?? false
     }

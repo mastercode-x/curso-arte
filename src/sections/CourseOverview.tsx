@@ -5,7 +5,7 @@ import { Video, BookOpen, Clock, Library } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const CourseOverview = () => {
+const CourseOverview = ({ config }: { config?: any }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
@@ -148,9 +148,9 @@ const CourseOverview = () => {
             className="font-serif text-[6vw] md:text-[5vw] lg:text-[56px] font-medium text-[#F4F2EC] leading-[1.05] tracking-[-0.02em]"
             style={{ opacity: 0, transform: 'translateX(-50vw)' }}
           >
-            Ocho módulos.
+            {config?.nombreCurso || 'Ocho módulos.'}
             <br />
-            Un encuentro por semana.
+            {!config?.nombreCurso && 'Un encuentro por semana.'}
           </h2>
 
           <p
@@ -158,7 +158,7 @@ const CourseOverview = () => {
             className="mt-6 md:mt-8 text-base md:text-lg text-[#B8B4AA] leading-relaxed max-w-[32vw]"
             style={{ opacity: 0, transform: 'translateY(10vh)' }}
           >
-            Cada módulo combina teoría, práctica guiada y tiempo de decantación. Los encuentros son virtuales, en vivo, con espacio para preguntas y revisión de ejercicios.
+            {config?.descripcionCurso || 'Cada módulo combina teoría, práctica guiada y tiempo de decantación. Los encuentros son virtuales, en vivo, con espacio para preguntas y revisión de ejercicios.'}
           </p>
         </div>
 

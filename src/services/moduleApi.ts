@@ -32,6 +32,12 @@ export const getModules = async () => {
   return response.data;
 };
 
+// Obtener módulos públicos (para landing page)
+export const getPublicModules = async () => {
+  const response = await api.get('/modules', { params: { public: 'true' } });
+  return response.data;
+};
+
 // Obtener un módulo por ID (estudiante/profesor)
 export const getModule = async (id: string) => {
   const response = await api.get(`/modules/${id}`);

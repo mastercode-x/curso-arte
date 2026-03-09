@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Hero from '../sections/Hero';
@@ -7,17 +7,39 @@ import ModuleSection from '../sections/ModuleSection';
 import Calendar from '../sections/Calendar';
 import Instructor from '../sections/Instructor';
 import Navigation from '../sections/Navigation';
-import { modulesData } from '../App';
+import * as moduleApi from '../services/moduleApi';
+import * as adminApi from '../services/adminApi';
 
 // Registrar el plugin de GSAP
 gsap.registerPlugin(ScrollTrigger);
 
-
-
 const LandingPage: React.FC = () => {
   const mainRef = useRef<HTMLDivElement>(null);
+  const [modules, setModules] = useState<any[]>([]);
+  const [config, setConfig] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [modulesData, configData] = await Promise.all([
+          moduleApi.getPublicModules(),
+          adminApi.getPublicConfig()
+        ]);
+        setModules(modulesData);
+        setConfig(configData);
+      } catch (error) {
+        console.error('Error fetching landing data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (loading) return;
+
     // Global snap for pinned sections
     const setupGlobalSnap = () => {
       const pinned = ScrollTrigger.getAll()
@@ -57,13 +79,21 @@ const LandingPage: React.FC = () => {
       });
     };
 
-    const timer = setTimeout(setupGlobalSnap, 500);
+    const timer = setTimeout(setupGlobalSnap, 1000);
 
     return () => {
       clearTimeout(timer);
       ScrollTrigger.getAll().forEach(st => st.kill());
     };
-  }, []);
+  }, [loading, modules]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center">
+        <div className="font-serif text-[#C7A36D] animate-pulse text-2xl">Poética de la Mirada...</div>
+      </div>
+    );
+  }
 
   return (
     <div ref={mainRef} className="relative">
@@ -74,19 +104,19 @@ const LandingPage: React.FC = () => {
       <Navigation />
       
       {/* Hero Section */}
-      <Hero />
+      <Hero config={config} />
       
       {/* Course Overview */}
-      <CourseOverview />
+      <CourseOverview config={config} />
       
       {/* Module Sections */}
-      {modulesData.map((module, index) => (
+      {modules.map((module, index) => (
         <ModuleSection
           key={module.id}
-          badge={module.badge}
-          title={module.title}
-          description={module.description}
-          image={module.image}
+          badge={`MÓDULO ${String(module.orden || index + 1).padStart(2, '0')}`}
+          title={module.titulo}
+          description={module.descripcion}
+          image={module.imagenUrl || `/images/module0${(index % 7) + 1}_bg.jpg`}
           zIndex={30 + index * 10}
           moduleId={module.id}
         />
@@ -96,7 +126,7 @@ const LandingPage: React.FC = () => {
       <Calendar />
       
       {/* Instructor & Enrollment */}
-      <Instructor />
+      <Instructor config={config} />
     </div>
   );
 }

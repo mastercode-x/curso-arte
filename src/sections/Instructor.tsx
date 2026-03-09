@@ -5,7 +5,7 @@ import { Instagram, ExternalLink, Mail, Youtube, TrendingUp } from 'lucide-react
 
 gsap.registerPlugin(ScrollTrigger);
 
-const Instructor = () => {
+const Instructor = ({ config }: { config?: any }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -95,7 +95,7 @@ const Instructor = () => {
               <div className="absolute -inset-3 border-2 border-[#C7A36D] rounded-sm" />
               
               <img
-                src="/images/instructor_portrait.jpg"
+                src={config?.fotoProfesorUrl || "/images/instructor_portrait.jpg"}
                 alt="Instructor"
                 className="w-full h-full object-cover rounded-sm"
               />
@@ -118,7 +118,7 @@ const Instructor = () => {
             {/* CTA Buttons */}
             <div ref={ctaRef} className="mt-8 flex flex-col sm:flex-row gap-4" style={{ opacity: 0 }}>
               <a
-                href="https://forms.gle/6PZVEbDmyRpJv9FC6"
+                href={config?.googleFormUrl || "https://forms.gle/6PZVEbDmyRpJv9FC6"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-4 bg-[#C7A36D] text-[#0B0B0D] font-mono text-sm uppercase tracking-[0.14em] font-medium hover:bg-[#d4b07a] transition-colors duration-300 flex items-center justify-center gap-2"
@@ -130,11 +130,11 @@ const Instructor = () => {
 
             {/* Contact link */}
             <a
-              href="mailto:curso@ernestoengel.site"
+              href={`mailto:${config?.emailContacto || 'hola@poeticadelamirada.com'}`}
               className="mt-4 inline-flex items-center gap-2 text-sm text-[#B8B4AA] hover:text-[#C7A36D] transition-colors duration-300"
             >
               <Mail className="w-4 h-4" />
-              ¿Preguntas? Escribinos a curso@ernestoengel.site
+              ¿Preguntas? Escribinos a {config?.emailContacto || 'hola@poeticadelamirada.com'}
             </a>
 
             {/* Divider */}
@@ -146,10 +146,10 @@ const Instructor = () => {
                 Autor del curso
               </span>
               <h3 className="mt-2 font-serif text-2xl md:text-3xl font-medium text-[#F4F2EC]">
-                Ernesto Engel
+                {config?.bioProfesor?.split('\n')[0] || 'Ernesto Engel'}
               </h3>
               <p className="mt-3 text-[#B8B4AA] leading-relaxed max-w-md">
-                Artista visual y docente. Su trabajo explora el paisaje, la memoria y la pintura como acto de atención.
+                {config?.bioProfesor || 'Artista visual y docente. Su trabajo explora el paisaje, la memoria y la pintura como acto de atención.'}
               </p>
 
               {/* Social Links */}

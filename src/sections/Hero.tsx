@@ -5,7 +5,7 @@ import { ChevronDown } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const Hero = () => {
+const Hero = ({ config }: { config?: any }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const titleLine1Ref = useRef<HTMLHeadingElement>(null);
@@ -161,15 +161,17 @@ const Hero = () => {
             className="font-serif text-[12vw] md:text-[8vw] lg:text-[96px] font-medium text-[#F4F2EC] leading-[0.95] tracking-[-0.02em]"
             style={{ opacity: 0 }}
           >
-            Poética
+            {config?.nombreCurso || 'Poética'}
           </h1>
-          <h1
-            ref={titleLine2Ref}
-            className="font-serif text-[12vw] md:text-[8vw] lg:text-[96px] font-medium text-[#F4F2EC] leading-[0.95] tracking-[-0.02em] mt-2"
-            style={{ opacity: 0 }}
-          >
-            de la mirada
-          </h1>
+          {!config?.nombreCurso && (
+            <h1
+              ref={titleLine2Ref}
+              className="font-serif text-[12vw] md:text-[8vw] lg:text-[96px] font-medium text-[#F4F2EC] leading-[0.95] tracking-[-0.02em] mt-2"
+              style={{ opacity: 0 }}
+            >
+              de la mirada
+            </h1>
+          )}
         </div>
 
         {/* Subheadline */}
@@ -178,7 +180,7 @@ const Hero = () => {
           className="mt-8 md:mt-12 text-base md:text-lg text-[#B8B4AA] max-w-[34vw] leading-relaxed"
           style={{ opacity: 0 }}
         >
-          Un curso para aprender a ver antes de pintar. Ocho módulos, encuentros virtuales y tiempo de decantación.
+          {config?.descripcionCurso || 'Un curso para aprender a ver antes de pintar. Ocho módulos, encuentros virtuales y tiempo de decantación.'}
         </p>
 
         {/* CTA Button */}

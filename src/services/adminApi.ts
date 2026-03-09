@@ -10,6 +10,7 @@ export interface AdminConfig {
   emailContacto?: string;
   whatsappNumero?: string;
   pais?: string;
+  googleFormUrl?: string;
   mpAccessToken?: string;
   mpPublicKey?: string;
   smtpHost?: string;
@@ -26,6 +27,12 @@ export interface AdminConfig {
 export const getConfig = async (): Promise<AdminConfig> => {
   const response = await api.get('/admin/config');
   return response.data;
+};
+
+// Obtener configuración pública del profesor (para landing page)
+export const getPublicConfig = async (): Promise<AdminConfig> => {
+  const response = await api.get('/admin/config/public');
+  return response.data.configuracion;
 };
 
 // Actualizar configuración del profesor

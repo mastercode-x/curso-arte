@@ -55,6 +55,7 @@ export interface Modulo {
   contenido: ContenidoModulo[];
   ejercicio?: Ejercicio;
   recursos: Recurso[];
+  imagenUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -232,6 +233,7 @@ export interface ConfiguracionProfesor {
   emailContacto?: string;
   whatsappNumero?: string;
   pais?: string;
+  googleFormUrl?: string;
   notificarEmail: boolean;
   notificarWhatsApp: boolean;
 }

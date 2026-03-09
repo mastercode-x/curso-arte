@@ -11,8 +11,9 @@ export const getModules = asyncHandler(async (req: Request, res: Response) => {
 
   const where: any = {};
   
-  // Si es estudiante, solo ver módulos publicados
-  if (req.user?.rol === 'estudiante') {
+  // Si es acceso público o estudiante, solo ver módulos publicados
+  const isPublic = req.query.public === 'true';
+  if (isPublic || req.user?.rol === 'estudiante') {
     where.estado = 'publicado';
   } else if (estado) {
     where.estado = estado;
@@ -85,6 +86,7 @@ export const createModule = asyncHandler(async (req: Request, res: Response) => 
     objetivos,
     ejercicio,
     recursos,
+    imagenUrl,
     estado = 'borrador'
   } = req.body;
 
@@ -113,6 +115,7 @@ export const createModule = asyncHandler(async (req: Request, res: Response) => 
       objetivos: objetivos || [],
       ejercicio: ejercicio || {},
       recursos: recursos || [],
+      imagenUrl: imagenUrl || null,
       estado
     }
   });
@@ -138,6 +141,7 @@ export const updateModule = asyncHandler(async (req: Request, res: Response) => 
     objetivos,
     ejercicio,
     recursos,
+    imagenUrl,
     estado
   } = req.body;
 
@@ -162,6 +166,7 @@ export const updateModule = asyncHandler(async (req: Request, res: Response) => 
       objetivos,
       ejercicio,
       recursos,
+      imagenUrl,
       estado
     }
   });

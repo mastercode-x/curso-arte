@@ -27,6 +27,11 @@ router.post(
 router.get('/dashboard', authenticate, requireProfessor, getDashboardSummary);
 router.get('/stats', authenticate, requireProfessor, getDetailedStats);
 router.get('/config', authenticate, requireProfessor, getConfig);
+router.get('/config/public', (req, res, next) => {
+  // Endpoint público para la landing page
+  req.query.public = 'true';
+  next();
+}, getConfig);
 router.put(
   '/config',
   authenticate,

@@ -17,7 +17,11 @@ import { authenticate, requireProfessor } from '../middleware/auth';
 const router = Router();
 
 // Rutas públicas (requieren autenticación pero no ser profesor)
-router.get('/', authenticate, getModules);
+router.get('/', (req, res, next) => {
+  // Permitir acceso público si viene con query public=true
+  if (req.query.public === 'true') return next();
+  return authenticate(req, res, next);
+}, getModules);
 router.get('/stats', authenticate, requireProfessor, getModuleStats);
 router.get('/by-order/:order', authenticate, getModuleByOrder);
 router.get('/:id', authenticate, [param('id').notEmpty()], getModuleById);

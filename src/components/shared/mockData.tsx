@@ -3,8 +3,8 @@
 export const MODULOS_MOCK = [
   {
     id: "mod-01",
-    titulo: "El silencio de la mirada",
-    descripcion: "Antes de pintar, mirar. Aprender a detenerse, recorrer una imagen con la atención y registrar lo que se siente antes de lo que se piensa.",
+    titulo: "La observación como acto interior",
+    descripcion: "Detenerse. Callar. Disponerse a ver. Antes de pintar, aprender a mirar con paciencia y atención plena, registrando lo que se siente antes de lo que se piensa.",
     orden: 1, estado: "publicado", duracion: "2 semanas",
     imagen_url: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&q=80",
     objetivos: ["Desarrollar la capacidad de observación prolongada", "Registrar sensaciones antes de juicios", "Construir un vocabulario visual personal"],
@@ -20,8 +20,8 @@ export const MODULOS_MOCK = [
   },
   {
     id: "mod-02",
-    titulo: "La composición y el equilibrio",
-    descripcion: "Reglas para romperlas. Usar la geometría como punto de partida, y luego desplazar, recortar, equilibrar por instinto.",
+    titulo: "Las reglas como punto de partida",
+    descripcion: "Conocerlas para luego tensarlas, quebrarlas o trascenderlas. Usar la geometría como inicio, y luego desplazar, recortar, equilibrar por instinto.",
     orden: 2, estado: "publicado", duracion: "2 semanas",
     imagen_url: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&q=80",
     objetivos: ["Comprender las reglas clásicas de composición", "Aprender a romperlas con intención", "Desarrollar el equilibrio por instinto"],
@@ -35,8 +35,8 @@ export const MODULOS_MOCK = [
   },
   {
     id: "mod-03",
-    titulo: "El color y su poética",
-    descripcion: "El color no decora: dice. Cómo construir una paleta con intención, mantener la coherencia y dejar que el contraste cuente la historia.",
+    titulo: "El color como emoción",
+    descripcion: "Como vibración, como lenguaje no verbal. El color no decora: dice. Cómo construir una paleta con intención y dejar que el contraste cuente la historia.",
     orden: 3, estado: "publicado", duracion: "2 semanas",
     imagen_url: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&q=80",
     objetivos: ["Comprender la psicología del color", "Construir paletas con intención", "Usar el contraste como narrativa"],
@@ -47,8 +47,8 @@ export const MODULOS_MOCK = [
   },
   {
     id: "mod-04",
-    titulo: "La materia y la textura",
-    descripcion: "Capas, impasto, transparencias. Cómo la textura modifica la luz y cómo la materia se convierte en narrativa.",
+    titulo: "El diálogo con los materiales",
+    descripcion: "La huella, el cuerpo, el tiempo inscripto en la obra. Capas, impasto, transparencias: cómo la materia se convierte en narrativa.",
     orden: 4, estado: "publicado", duracion: "2 semanas",
     imagen_url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80",
     objetivos: ["Explorar técnicas de textura", "Comprender cómo la materia modifica la luz"],
@@ -59,8 +59,8 @@ export const MODULOS_MOCK = [
   },
   {
     id: "mod-05",
-    titulo: "La forma y la abstracción",
-    descripcion: "Simplificar sin perder la emoción. Ejercicios de reducción, ritmo y silencio para que la forma respire.",
+    titulo: "Del reconocimiento a la síntesis",
+    descripcion: "De lo visible a lo esencial. Simplificar sin perder la emoción. Ejercicios de reducción, ritmo y silencio para que la forma respire.",
     orden: 5, estado: "borrador", duracion: "2 semanas",
     imagen_url: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=800&q=80",
     objetivos: ["Reducir formas complejas", "Encontrar el ritmo visual"],
@@ -71,8 +71,8 @@ export const MODULOS_MOCK = [
   },
   {
     id: "mod-06",
-    titulo: "La luz y la atmósfera",
-    descripcion: "La luz como protagonista. Cómo capturar la atmósfera, jugar con sombras y crear profundidad emocional.",
+    titulo: "La luz como constructora",
+    descripcion: "Constructora de espacio, clima y profundidad emocional. Cómo capturar la atmósfera, jugar con sombras y resplandores.",
     orden: 6, estado: "borrador", duracion: "2 semanas",
     imagen_url: "https://images.unsplash.com/photo-1490750967868-88df5691cc95?w=800&q=80",
     objetivos: ["Capturar la atmósfera lumínica", "Usar sombras como herramienta narrativa"],
@@ -83,8 +83,8 @@ export const MODULOS_MOCK = [
   },
   {
     id: "mod-07",
-    titulo: "La naturaleza como espejo",
-    descripcion: "El paisaje interior y exterior. Aprender a leer la naturaleza como metáfora y traducirla en imágenes propias.",
+    titulo: "El entorno como reflejo interior",
+    descripcion: "La naturaleza no como motivo, sino como resonancia. Aprender a leer el paisaje como metáfora y traducirlo en imágenes propias.",
     orden: 7, estado: "borrador", duracion: "2 semanas",
     imagen_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
     objetivos: ["Leer el paisaje como metáfora", "Desarrollar un lenguaje visual propio"],
@@ -95,8 +95,8 @@ export const MODULOS_MOCK = [
   },
   {
     id: "mod-08",
-    titulo: "La obra y su sentido",
-    descripcion: "Del proceso al resultado. Cómo encontrar la intención detrás de cada obra y darle cierre sin perder la apertura.",
+    titulo: "La obra terminada como pregunta abierta",
+    descripcion: "El lugar del artista, del observador y del tiempo. Cómo encontrar la intención detrás de cada obra y darle cierre sin perder la apertura.",
     orden: 8, estado: "borrador", duracion: "2 semanas",
     imagen_url: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80",
     objetivos: ["Articular la intención creativa", "Construir una obra con coherencia"],

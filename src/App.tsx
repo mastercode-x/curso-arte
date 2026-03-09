@@ -51,8 +51,8 @@ export const modulesData = [
   {
     id: 1,
     badge: 'MÓDULO 01',
-    title: 'El silencio de la mirada',
-    description: 'Antes de pintar, mirar. Aprender a detenerse, recorrer una imagen con la atención y registrar lo que se siente antes de lo que se piensa.',
+    title: 'La observación como acto interior',
+    description: 'Detenerse. Callar. Disponerse a ver. Antes de pintar, aprender a mirar con paciencia y atención plena, registrando lo que se siente antes de lo que se piensa.',
     image: '/images/module01_bg.jpg',
     duration: '2 semanas',
     objectives: [
@@ -91,8 +91,8 @@ export const modulesData = [
   {
     id: 2,
     badge: 'MÓDULO 02',
-    title: 'La composición y el equilibrio',
-    description: 'Reglas para romperlas. Usar la geometría como punto de partida, y luego desplazar, recortar, equilibrar por instinto.',
+    title: 'Las reglas como punto de partida',
+    description: 'Conocerlas para luego tensarlas, quebrarlas o trascenderlas. Usar la geometría como inicio, y luego desplazar, recortar, equilibrar por instinto.',
     image: '/images/module02_bg.jpg',
     duration: '2 semanas',
     objectives: [
@@ -125,8 +125,8 @@ export const modulesData = [
   {
     id: 3,
     badge: 'MÓDULO 03',
-    title: 'El color y su poética',
-    description: 'El color no decora: dice. Cómo construir una paleta con intención, mantener la coherencia y dejar que el contraste cuente la historia.',
+    title: 'El color como emoción',
+    description: 'Como vibración, como lenguaje no verbal. El color no decora: dice. Cómo construir una paleta con intención y dejar que el contraste cuente la historia.',
     image: '/images/module03_bg.jpg',
     duration: '2 semanas',
     objectives: [
@@ -154,8 +154,8 @@ export const modulesData = [
   {
     id: 4,
     badge: 'MÓDULO 04',
-    title: 'La materia y la textura',
-    description: 'Capas, impasto, transparencias. Cómo la textura modifica la luz y cómo la materia se convierte en narrativa.',
+    title: 'El diálogo con los materiales',
+    description: 'La huella, el cuerpo, el tiempo inscripto en la obra. Capas, impasto, transparencias: cómo la materia se convierte en narrativa.',
     image: '/images/module04_bg.jpg',
     duration: '2 semanas',
     objectives: [
@@ -183,8 +183,8 @@ export const modulesData = [
   {
     id: 5,
     badge: 'MÓDULO 05',
-    title: 'La forma y la abstracción',
-    description: 'Simplificar sin perder la emoción. Ejercicios de reducción, ritmo y silencio para que la forma respire.',
+    title: 'Del reconocimiento a la síntesis',
+    description: 'De lo visible a lo esencial. Simplificar sin perder la emoción. Ejercicios de reducción, ritmo y silencio para que la forma respire.',
     image: '/images/module05_bg.jpg',
     duration: '2 semanas',
     objectives: [
@@ -212,8 +212,8 @@ export const modulesData = [
   {
     id: 6,
     badge: 'MÓDULO 06',
-    title: 'La luz y la atmósfera',
-    description: 'La luz como protagonista. Cómo capturar la atmósfera, jugar con sombras y resplandores, y crear profundidad emocional.',
+    title: 'La luz como constructora',
+    description: 'Constructora de espacio, clima y profundidad emocional. Cómo capturar la atmósfera, jugar con sombras y resplandores.',
     image: '/images/module06_bg.jpg',
     duration: '2 semanas',
     objectives: [
@@ -241,8 +241,8 @@ export const modulesData = [
   {
     id: 7,
     badge: 'MÓDULO 07',
-    title: 'La naturaleza como espejo',
-    description: 'El paisaje interior y exterior. Aprender a leer la naturaleza como metáfora y traducirla en imágenes propias.',
+    title: 'El entorno como reflejo interior',
+    description: 'La naturaleza no como motivo, sino como resonancia. Aprender a leer el paisaje como metáfora y traducirlo en imágenes propias.',
     image: '/images/module07_bg.jpg',
     duration: '2 semanas',
     objectives: [
@@ -270,8 +270,8 @@ export const modulesData = [
   {
     id: 8,
     badge: 'MÓDULO 08',
-    title: 'La obra y su sentido',
-    description: 'Del proceso al resultado. Cómo encontrar la intención detrás de cada obra y darle cierre sin perder la apertura.',
+    title: 'La obra terminada como pregunta abierta',
+    description: 'El lugar del artista, del observador y del tiempo. Cómo encontrar la intención detrás de cada obra y darle cierre sin perder la apertura.',
     image: '/images/module08_bg.jpg',
     duration: '2 semanas',
     objectives: [

@@ -2,6 +2,12 @@ import nodemailer from 'nodemailer';
 import { logger } from '../utils/logger';
 import { PrismaClient } from '@prisma/client';
 
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+
+
 const prisma = new PrismaClient();
 
 // Obtener configuración SMTP desde la base de datos o variables de entorno
@@ -66,7 +72,6 @@ export const verifyEmailConfig = async (): Promise<boolean> => {
 
 
 
-
 export const sendEmail = async (
   to: string,
   subject: string,
@@ -74,32 +79,17 @@ export const sendEmail = async (
   fromName: string = 'Poética de la Mirada'
 ): Promise<boolean> => {
   try {
-    const config = await getEmailConfig();
-
-    // Validar que hay credenciales antes de intentar enviar
-    if (!config.auth.user || !config.auth.pass) {
-      logger.error(`Email NO enviado a ${to}: faltan credenciales SMTP (SMTP_USER o SMTP_PASS vacíos)`);
-      return false;
-    }
-
-    logger.info(`Intentando enviar email a ${to} via ${config.host}:${config.port} con usuario ${config.auth.user}`);
-
-    const transporter = await createTransporter();
-
-    const info = await transporter.sendMail({
-      from: `"${fromName}" <${config.auth.user}>`,
+    await resend.emails.send({
+      from: `${fromName} <onboarding@resend.dev>`,
       to,
       subject,
       html
     });
-
-    logger.info(`Email enviado exitosamente a ${to}: ${subject} | messageId: ${info.messageId}`);
+    logger.info(`Email enviado a ${to}: ${subject}`);
     return true;
-  } catch (error: any) {
-    logger.error(`Error enviando email a ${to}: ${error?.message || error}`);
-    if (error?.code) logger.error(`Código de error SMTP: ${error.code}`);
-    if (error?.response) logger.error(`Respuesta SMTP: ${error.response}`);
-    return false;  // NO relanzar — el email falla sin romper el flujo
+  } catch (error) {
+    logger.error('Error enviando email:', error);
+    return false;
   }
 };
 

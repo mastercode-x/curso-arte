@@ -2,6 +2,11 @@ import nodemailer from 'nodemailer';
 import { logger } from '../utils/logger';
 import { PrismaClient } from '@prisma/client';
 
+
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 const prisma = new PrismaClient();
 
 // Obtener configuración SMTP desde la base de datos o variables de entorno
@@ -37,18 +42,29 @@ const getEmailConfig = async () => {
 const createTransporter = async () => {
   const config = await getEmailConfig();
 
+  // Si el host es gmail, usamos el servicio preconfigurado de nodemailer
+  if (config.host.includes('gmail.com')) {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: config.auth,
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 20000,
+    });
+  }
+
+  // Para otros proveedores, mantenemos la configuración manual
   return nodemailer.createTransport({
     host: config.host,
     port: config.port,
     secure: config.secure,
     auth: config.auth,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
     tls: {
       rejectUnauthorized: false,
-      // AGREGAR ESTA LÍNEA para ayudar a resolver problemas de red en Railway
-      servername: config.host 
+      servername: config.host
     }
   });
 };
@@ -74,20 +90,16 @@ export const sendEmail = async (
   fromName: string = 'Poética de la Mirada'
 ): Promise<boolean> => {
   try {
-    const transporter = await createTransporter();
-    const config = await getEmailConfig();
-    
-    await transporter.sendMail({
-      from: `"${fromName}" <${config.auth.user}>`,
+    await resend.emails.send({
+      from: `${fromName} <onboarding@resend.dev>`,
       to,
       subject,
       html
     });
-
     logger.info(`Email enviado a ${to}: ${subject}`);
     return true;
-  } catch (error) {
-    logger.error('Error enviando email:', error);
+  } catch (error: any) {
+    logger.error(`Error enviando email a ${to}: ${error?.message}`);
     return false;
   }
 };

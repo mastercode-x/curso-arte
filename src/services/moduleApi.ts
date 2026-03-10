@@ -9,12 +9,14 @@ export interface Module {
   duracion?: string;
   objetivos: string[];
   contenido?: any;
-ejercicio?: {
-  titulo: string;       // era 'titulo' ✓ ya estaba bien
-  descripcion: string;  // era 'descripcion' ✓ ya estaba bien
-  deadline?: string;
-};
+  ejercicio?: {
+    titulo: string;
+    descripcion: string;
+    deadline?: string;
+  };
   recursos?: any[];
+  imagenUrl?: string;
+  scheduledPublishAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -62,9 +64,15 @@ export const deleteModule = async (id: string) => {
   return response.data;
 };
 
-// Publicar/Despublicar módulo (profesor) - usando publishModule
-export const toggleModuleStatus = async (id: string) => {
-  const response = await api.post(`/modules/${id}/publish`);
+// Publicar/Despublicar módulo (profesor)
+export const toggleModuleStatus = async (id: string, despublicar: boolean = false) => {
+  const response = await api.post(`/modules/${id}/publish`, { despublicar });
+  return response.data;
+};
+
+// Programar publicación de módulo (profesor)
+export const scheduleModulePublish = async (id: string, scheduledPublishAt: string) => {
+  const response = await api.post(`/modules/${id}/schedule`, { scheduledPublishAt });
   return response.data;
 };
 
@@ -98,12 +106,16 @@ export const getModuleStats = async () => {
 
 // Alias para compatibilidad
 export const getModuleById = getModule;
+
+// CORREGIDO: URL correcta para obtener módulo por orden
 export const getModuleByOrder = async (orden: number) => {
-  const response = await api.get(`/modules/order/${orden}`);
+  const response = await api.get(`/modules/by-order/${orden}`);
   return response.data;
 };
+
 export const duplicateModule = async (id: string) => {
   const response = await api.post(`/modules/${id}/duplicate`);
   return response.data;
 };
+
 export const publishModule = toggleModuleStatus;

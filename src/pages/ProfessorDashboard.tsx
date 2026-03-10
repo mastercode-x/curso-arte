@@ -565,11 +565,34 @@ function ModulosSection() {
 
   const handleSave = async (formData: any) => {
     try {
+      // Transform form data to match backend schema
+      const transformedData = {
+        titulo: formData.titulo,
+        descripcion: formData.descripcion,
+        duracion: formData.duracion,
+        estado: formData.estado,
+        imagenUrl: formData.imagenUrl || null,
+        objetivos: formData.objetivos?.filter((o: string) => o.trim() !== '') || [],
+        contenido: formData.contenidos?.map((c: any, index: number) => ({
+          tipo: c.tipo,
+          titulo: c.titulo,
+          url: c.url || null,
+          texto: c.texto || null,
+          orden: index + 1,
+        })) || [],
+        ejercicio: formData.ejercicio_titulo ? {
+          titulo: formData.ejercicio_titulo,
+          descripcion: formData.ejercicio_descripcion || null,
+          deadline: formData.ejercicio_deadline || null,
+        } : null,
+        scheduledPublishAt: formData.scheduledPublishAt || null,
+      };
+
       if (editId) {
-        await moduleApi.updateModule(editId, formData);
+        await moduleApi.updateModule(editId, transformedData);
         toast.success('Módulo actualizado');
       } else {
-        await moduleApi.createModule(formData);
+        await moduleApi.createModule(transformedData);
         toast.success('Módulo creado');
       }
       loadModulos();
@@ -668,12 +691,28 @@ function ModulosSection() {
 
 // ── MÓDULO EDITOR ────────────────────────────────────────────────
 function ModuloEditor({ modulo, onSave, onCancel }: any) {
-  // ✅ useState de form PRIMERO, scheduleMode lo inicializamos después
-  const [form, setForm] = useState(modulo || {
+  // Transform backend data to form format when editing
+  const initialForm = modulo ? {
+    titulo: modulo.titulo || '',
+    descripcion: modulo.descripcion || '',
+    duracion: modulo.duracion || '2 semanas',
+    estado: modulo.estado || 'borrador',
+    objetivos: modulo.objetivos?.length > 0 ? modulo.objetivos : [''],
+    ejercicio_titulo: modulo.ejercicio?.titulo || '',
+    ejercicio_descripcion: modulo.ejercicio?.descripcion || '',
+    ejercicio_deadline: modulo.ejercicio?.deadline || '',
+    contenidos: modulo.contenido || [],
+    scheduledPublishAt: modulo.scheduledPublishAt || undefined,
+    imagenUrl: modulo.imagenUrl || '',
+  } : {
     titulo: '', descripcion: '', duracion: '2 semanas', estado: 'borrador',
     objetivos: [''], ejercicio_titulo: '', ejercicio_descripcion: '',
     ejercicio_deadline: '', contenidos: [], scheduledPublishAt: undefined,
-  });
+    imagenUrl: '',
+  };
+
+  // ✅ useState de form PRIMERO, scheduleMode lo inicializamos después
+  const [form, setForm] = useState(initialForm);
 
   // ✅ Ahora sí podemos usar form.estado
   const [scheduleMode, setScheduleMode] = useState(form.estado === 'programado');
@@ -722,6 +761,18 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
             <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Duración</label>
             <input type="text" value={form.duracion} onChange={e => setForm({...form, duracion: e.target.value})}
               className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
+          </div>
+          <div>
+            <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">URL de la imagen</label>
+            <input type="text" value={form.imagenUrl || ''} onChange={e => setForm({...form, imagenUrl: e.target.value})}
+              placeholder="https://ejemplo.com/imagen.jpg"
+              className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
+            {form.imagenUrl && (
+              <div className="mt-3 relative">
+                <img src={form.imagenUrl} alt="Vista previa" className="w-full h-32 object-cover border border-[rgba(244,242,236,0.1)]"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              </div>
+            )}
           </div>
         </div>
 

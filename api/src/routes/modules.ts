@@ -8,6 +8,8 @@ import {
   updateModule,
   deleteModule,
   publishModule,
+  scheduleModulePublish,
+  processScheduledPublishes,
   duplicateModule,
   reorderModules,
   getModuleStats
@@ -43,7 +45,11 @@ router.put(
 );
 router.delete('/:id', authenticate, requireProfessor, [param('id').notEmpty()], deleteModule);
 router.post('/:id/publish', authenticate, requireProfessor, [param('id').notEmpty()], publishModule);
+router.post('/:id/schedule', authenticate, requireProfessor, [param('id').notEmpty()], scheduleModulePublish);
 router.post('/:id/duplicate', authenticate, requireProfessor, [param('id').notEmpty()], duplicateModule);
 router.post('/reorder', authenticate, requireProfessor, reorderModules);
+
+// Ruta para procesar publicaciones programadas (puede llamarse desde un cron job)
+router.post('/process-scheduled', processScheduledPublishes);
 
 export default router;

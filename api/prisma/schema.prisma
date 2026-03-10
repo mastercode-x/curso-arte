@@ -85,19 +85,21 @@ model SolicitudAcceso {
 }
 
 model Modulo {
-  id              String    @id @default(uuid())
-  titulo          String
-  descripcion     String?   @db.Text
-  orden           Int       @default(0)
-  moduloPrevioId  String?   @map("modulo_previo_id")
-  contenido       Json?     // Estructura flexible para el contenido
-  estado          EstadoModulo @default(borrador)
-  duracion        String?   @default("2 semanas")
-  objetivos       String[]  @default([])
-  ejercicio       Json?     // { titulo, descripcion, deadline }
-  recursos        Json?     // Array de recursos
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  id                String    @id @default(uuid())
+  titulo            String
+  descripcion       String?   @db.Text
+  orden             Int       @default(0)
+  moduloPrevioId    String?   @map("modulo_previo_id")
+  contenido         Json?     // Estructura flexible para el contenido
+  estado            EstadoModulo @default(borrador)
+  duracion          String?   @default("2 semanas")
+  objetivos         String[]  @default([])
+  ejercicio         Json?     // { titulo, descripcion, deadline }
+  recursos          Json?     // Array de recursos
+  imagenUrl         String?   @map("imagen_url")
+  scheduledPublishAt DateTime? @map("scheduled_publish_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
 
   // Relaciones
   progreso ProgresoEstudiante[]
@@ -205,6 +207,7 @@ enum EstadoSolicitud {
 enum EstadoModulo {
   borrador
   publicado
+  programado
 }
 
 enum EstadoPagoTransaccion {

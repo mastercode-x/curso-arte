@@ -662,28 +662,34 @@ function ModulosSection() {
   );
 }
 
+
+
+
+
 // ── MÓDULO EDITOR ────────────────────────────────────────────────
 function ModuloEditor({ modulo, onSave, onCancel }: any) {
+  // ✅ useState de form PRIMERO, scheduleMode lo inicializamos después
   const [form, setForm] = useState(modulo || {
     titulo: '', descripcion: '', duracion: '2 semanas', estado: 'borrador',
     objetivos: [''], ejercicio_titulo: '', ejercicio_descripcion: '',
-    ejercicio_deadline: '', contenidos: [],
+    ejercicio_deadline: '', contenidos: [], scheduledPublishAt: undefined,
   });
 
+  // ✅ Ahora sí podemos usar form.estado
   const [scheduleMode, setScheduleMode] = useState(form.estado === 'programado');
   const minDateTime = new Date().toISOString().slice(0, 16);
 
   const addObjetivo = () => setForm(f => ({ ...f, objetivos: [...(f.objetivos || []), ''] }));
-  const updateObjetivo = (i: number, val: string) => setForm(f => { const o = [...(f.objetivos || [])]; o[i] = val; return { ...f, objetivos: o }; });
-  const removeObjetivo = (i: number) => setForm(f => ({ ...f, objetivos: f.objetivos.filter((_: any, idx: number) => idx !== i) }));
+  const updateObjetivo = (i, val) => setForm(f => { const o = [...(f.objetivos || [])]; o[i] = val; return { ...f, objetivos: o }; });
+  const removeObjetivo = (i) => setForm(f => ({ ...f, objetivos: f.objetivos.filter((_, idx) => idx !== i) }));
 
-  const addContenido = (tipo: string) => setForm(f => ({
+  const addContenido = (tipo) => setForm(f => ({
     ...f, contenidos: [...(f.contenidos || []), { tipo, titulo: '', url: '', texto: '', orden: (f.contenidos || []).length + 1 }]
   }));
-  const updateContenido = (i: number, key: string, val: string) => setForm(f => {
+  const updateContenido = (i, key, val) => setForm(f => {
     const c = [...(f.contenidos || [])]; c[i] = { ...c[i], [key]: val }; return { ...f, contenidos: c };
   });
-  const removeContenido = (i: number) => setForm(f => ({ ...f, contenidos: f.contenidos.filter((_: any, idx: number) => idx !== i) }));
+  const removeContenido = (i) => setForm(f => ({ ...f, contenidos: f.contenidos.filter((_, idx) => idx !== i) }));
 
   return (
     <div>
@@ -719,9 +725,11 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
           </div>
         </div>
 
-        {/* Publicación */}
+        {/* ✅ Sección de publicación — reemplaza el <select> de Estado */}
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6 space-y-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA]">Publicación</p>
+
+          {/* Publicar inmediatamente */}
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-[#F4F2EC]">Publicar inmediatamente</p>
@@ -732,10 +740,64 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
               checked={!scheduleMode && form.estado === 'publicado'}
               onChange={(e) => {
                 setScheduleMode(false);
-                setForm({ ...form, estado: e.target.checked ? 'publicado' : 'borrador' });
+                setForm({ ...form, estado: e.target.checked ? 'publicado' : 'borrador', scheduledPublishAt: undefined });
               }}
               className="w-4 h-4 accent-[#C7A36D]"
             />
+          </div>
+
+          {/* Programar publicación */}
+          <div className="border-t border-[rgba(244,242,236,0.06)] pt-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-[#F4F2EC] flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-blue-400" />
+                  Programar publicación
+                </p>
+                <p className="text-xs text-[#B8B4AA] mt-0.5">Elige fecha y hora para publicar automáticamente</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={scheduleMode}
+                onChange={(e) => {
+                  setScheduleMode(e.target.checked);
+                  setForm({
+                    ...form,
+                    estado: e.target.checked ? 'programado' : 'borrador',
+                    scheduledPublishAt: e.target.checked ? form.scheduledPublishAt : undefined,
+                  });
+                }}
+                className="w-4 h-4 accent-[#C7A36D]"
+              />
+            </div>
+
+            {scheduleMode && (
+              <div>
+                <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1">
+                  Fecha y hora de publicación
+                </label>
+                <input
+                  type="datetime-local"
+                  min={minDateTime}
+                  value={form.scheduledPublishAt ? new Date(form.scheduledPublishAt).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => setForm({
+                    ...form,
+                    scheduledPublishAt: e.target.value ? new Date(e.target.value).toISOString() : undefined,
+                  })}
+                  className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors"
+                />
+                {form.scheduledPublishAt && (
+                  <p className="text-xs text-blue-400 mt-2 flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    Se publicará el{' '}
+                    {new Date(form.scheduledPublishAt).toLocaleString('es-ES', {
+                      day: 'numeric', month: 'long', year: 'numeric',
+                      hour: '2-digit', minute: '2-digit',
+                    })}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -761,13 +823,67 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Ejercicio</p>
           <div>
             <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Título</label>
-            <input type="text" value={form.ejercicio?.titulo || ''} onChange={e => setForm({...form, ejercicio: { ...form.ejercicio, titulo: e.target.value }})}
+            <input type="text" value={form.ejercicio_titulo || ''} onChange={e => setForm({...form, ejercicio_titulo: e.target.value})}
               className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
           </div>
           <div>
             <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Descripción</label>
-            <textarea rows={3} value={form.ejercicio?.descripcion || ''} onChange={e => setForm({...form, ejercicio: { ...form.ejercicio, descripcion: e.target.value }})}
+            <textarea rows={3} value={form.ejercicio_descripcion || ''} onChange={e => setForm({...form, ejercicio_descripcion: e.target.value})}
               className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors resize-none" />
+          </div>
+          <div>
+            <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Fecha límite</label>
+            <input type="text" value={form.ejercicio_deadline || ''} onChange={e => setForm({...form, ejercicio_deadline: e.target.value})}
+              placeholder="ej: 20 de Octubre 2026"
+              className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
+          </div>
+        </div>
+
+        {/* Contenidos */}
+        <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
+          <div className="flex justify-between items-center mb-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA]">Contenidos</p>
+            <div className="flex gap-2">
+              {[
+                { tipo: 'video', icon: Video, label: 'Video' },
+                { tipo: 'pdf', icon: FileText, label: 'PDF' },
+                { tipo: 'texto', icon: AlignLeft, label: 'Texto' },
+                { tipo: 'zoom', icon: Link, label: 'Zoom' },
+                { tipo: 'imagen', icon: Image, label: 'Imagen' },
+              ].map(({ tipo, icon: Icon, label }) => (
+                <button key={tipo} onClick={() => addContenido(tipo)}
+                  className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.1em] px-2.5 py-1.5 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#C7A36D] hover:border-[rgba(199,163,109,0.3)] transition-colors">
+                  <Icon className="w-3 h-3" /> {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-3">
+            {(form.contenidos || []).map((c, i) => (
+              <div key={i} className="border border-[rgba(244,242,236,0.06)] p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D]">{c.tipo}</span>
+                  <button onClick={() => removeContenido(i)} className="text-[#B8B4AA] hover:text-red-400 transition-colors"><X className="w-4 h-4" /></button>
+                </div>
+                <div className="space-y-2">
+                  <input type="text" value={c.titulo} onChange={e => updateContenido(i, 'titulo', e.target.value)} placeholder="Título"
+                    className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 py-2 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
+                  {['video', 'pdf', 'zoom', 'imagen'].includes(c.tipo) && (
+                    <input type="text" value={c.url} onChange={e => updateContenido(i, 'url', e.target.value)} placeholder="URL"
+                      className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 py-2 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
+                  )}
+                  {c.tipo === 'texto' && (
+                    <textarea rows={4} value={c.texto} onChange={e => updateContenido(i, 'texto', e.target.value)} placeholder="Contenido de texto..."
+                      className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 py-2 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors resize-none" />
+                  )}
+                </div>
+              </div>
+            ))}
+            {(form.contenidos || []).length === 0 && (
+              <p className="text-center text-[#B8B4AA] text-sm py-6 border border-dashed border-[rgba(244,242,236,0.06)]">
+                Agregá contenido usando los botones de arriba
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -933,13 +1049,30 @@ function ConfiguracionSection() {
         {
           title: "Información del curso",
           fields: [
-            { key: "nombreCurso", label: "Nombre del curso", type: "text" },
-            { key: "descripcionCurso", label: "Descripción", type: "textarea" },
-            { key: "precioCurso", label: "Precio", type: "number" },
-            { key: "moneda", label: "Moneda", type: "text" },
+            { key: "nombre_curso", label: "Nombre del curso", type: "text" },
+            { key: "descripcion_curso", label: "Descripción", type: "textarea" },
+            { key: "precio_curso", label: "Precio (USD)", type: "number" },
+            { key: "cupos_totales", label: "Cupos totales", type: "number" },
+            { key: "fecha_inicio", label: "Fecha de inicio", type: "text" },
           ]
         },
-        
+        {
+          title: "Perfil del profesor",
+          fields: [
+            { key: "nombre_profesor", label: "Nombre", type: "text" },
+            { key: "bio_profesor", label: "Bio", type: "textarea" },
+            { key: "email_contacto", label: "Email de contacto", type: "email" },
+            { key: "whatsapp_numero", label: "WhatsApp", type: "text" },
+            { key: "instagram_url", label: "Instagram URL", type: "url" },
+          ]
+        },
+        {
+          title: "Links importantes",
+          fields: [
+            { key: "link_formulario", label: "Link del formulario Google", type: "url" },
+            { key: "link_pago", label: "Link de pago (Stripe/MP)", type: "url" },
+          ]
+        },
       ].map(({ title, fields }: any) => (
         <div key={title} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-5">{title}</p>

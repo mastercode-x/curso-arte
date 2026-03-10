@@ -96,7 +96,6 @@ model Modulo {
   objetivos       String[]  @default([])
   ejercicio       Json?     // { titulo, descripcion, deadline }
   recursos        Json?     // Array de recursos
-  imagenUrl       String?   @map("imagen_url")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
@@ -153,7 +152,6 @@ model ConfiguracionProfesor {
   emailContacto     String?   @map("email_contacto")
   whatsappNumero    String?   @map("whatsapp_numero")
   pais              String?
-  googleFormUrl     String?   @map("google_form_url")
   // Mercado Pago Configuration
   mpAccessToken     String?   @map("mp_access_token")
   mpPublicKey       String?   @map("mp_public_key")

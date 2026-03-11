@@ -168,34 +168,34 @@ const Calendar = () => {
       {/* Subtle vignette */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#0B0B0D_70%)]" />
 
-      <div className="relative z-10 px-[6vw]">
+      <div className="relative z-10 px-6 sm:px-[6vw]">
         {/* Header */}
-        <div ref={headerRef} className="mb-12 md:mb-16" style={{ opacity: 0 }}>
-          <span className="font-mono text-xs uppercase tracking-[0.14em] text-[#C7A36D]">
+        <div ref={headerRef} className="mb-8 sm:mb-12 md:mb-16" style={{ opacity: 0 }}>
+          <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.14em] text-[#C7A36D]">
             Cronograma 2026
           </span>
-          <h2 className="mt-4 font-serif text-[8vw] md:text-[5vw] lg:text-[56px] font-medium text-[#F4F2EC] leading-[1.05] tracking-[-0.02em]">
+          <h2 className="mt-3 sm:mt-4 font-serif text-[10vw] sm:text-[8vw] md:text-[5vw] lg:text-[56px] font-medium text-[#F4F2EC] leading-[1.05] tracking-[-0.02em]">
             Encuentros y calendario
           </h2>
-          <p className="mt-4 text-base md:text-lg text-[#B8B4AA] max-w-[50vw]">
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base md:text-lg text-[#B8B4AA] max-w-full sm:max-w-[70vw] lg:max-w-[50vw]">
             Una sesión por semana, con tiempo para practicar entre encuentros. 
             Cada módulo incluye un encuentro virtual en vivo y una semana de decantación.
           </p>
         </div>
 
         {/* Stats Cards */}
-        <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+        <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8 sm:mb-12">
           {stats.map((stat, index) => (
             <div
               key={index}
-              className="stat-item p-6 bg-[rgba(244,242,236,0.03)] border border-[rgba(244,242,236,0.08)] rounded-lg"
+              className="stat-item p-4 sm:p-6 bg-[rgba(244,242,236,0.03)] border border-[rgba(244,242,236,0.08)] rounded-lg"
               style={{ opacity: 0 }}
             >
-              <stat.icon className="w-5 h-5 text-[#C7A36D] mb-3" />
-              <div className="font-serif text-3xl md:text-4xl font-medium text-[#F4F2EC]">
+              <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#C7A36D] mb-2 sm:mb-3" />
+              <div className="font-serif text-2xl sm:text-3xl md:text-4xl font-medium text-[#F4F2EC]">
                 {stat.value}
               </div>
-              <div className="mt-1 font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA]">
+              <div className="mt-1 font-mono text-[10px] sm:text-xs uppercase tracking-[0.14em] text-[#B8B4AA]">
                 {stat.label}
               </div>
             </div>
@@ -203,9 +203,9 @@ const Calendar = () => {
         </div>
 
         {/* Schedule Table */}
-        <div ref={rowsRef} className="max-w-5xl">
+        <div ref={rowsRef} className="max-w-5xl overflow-x-auto -mx-6 sm:mx-0 px-6 sm:px-0">
           {/* Table Header */}
-          <div className="hidden md:grid grid-cols-[120px_140px_1fr_140px] gap-4 pb-4 border-b border-[rgba(244,242,236,0.12)]">
+          <div className="hidden md:grid grid-cols-[120px_140px_1fr_140px] gap-4 pb-4 border-b border-[rgba(244,242,236,0.12)] min-w-[600px]">
             <span className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA]">Semana</span>
             <span className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA]">Fecha</span>
             <span className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA]">Actividad</span>
@@ -213,30 +213,28 @@ const Calendar = () => {
           </div>
 
           {/* Table Rows */}
-          <div className="space-y-0">
+          <div className="space-y-0 min-w-[600px] md:min-w-0">
             {schedule.map((item, index) => (
               <div
                 key={index}
-                className="calendar-row grid grid-cols-1 md:grid-cols-[120px_140px_1fr_140px] gap-2 md:gap-4 py-4 md:py-5 border-b border-[rgba(244,242,236,0.06)] hover:bg-[rgba(244,242,236,0.02)] transition-colors duration-300 group"
+                className="calendar-row grid grid-cols-[100px_120px_1fr_120px] md:grid-cols-[120px_140px_1fr_140px] gap-2 md:gap-4 py-3 md:py-5 border-b border-[rgba(244,242,236,0.06)] hover:bg-[rgba(244,242,236,0.02)] transition-colors duration-300 group"
                 style={{ opacity: 0 }}
               >
                 {/* Week */}
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs uppercase tracking-[0.14em] text-[#C7A36D] md:hidden">Semana:</span>
-                  <span className="font-medium text-[#F4F2EC] group-hover:text-[#C7A36D] transition-colors">
+                  <span className="font-medium text-sm text-[#F4F2EC] group-hover:text-[#C7A36D] transition-colors">
                     {item.week}
                   </span>
                 </div>
 
                 {/* Date */}
                 <div className="flex items-center gap-2">
-                  <CalendarDays className="w-4 h-4 text-[#B8B4AA] md:hidden" />
-                  <span className="text-[#B8B4AA]">{item.date}</span>
+                  <span className="text-sm text-[#B8B4AA]">{item.date}</span>
                 </div>
 
                 {/* Activity with badge */}
                 <div className="flex items-center gap-3">
-                  <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border ${getActivityStyle(item.activity)}`}>
+                  <span className={`inline-flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium border ${getActivityStyle(item.activity)}`}>
                     <MapPin className="w-3 h-3" />
                     {item.activity}
                   </span>
@@ -245,11 +243,11 @@ const Calendar = () => {
                 {/* Module */}
                 <div className="flex items-center">
                   {item.module ? (
-                    <span className="text-sm text-[#B8B4AA]">
+                    <span className="text-xs sm:text-sm text-[#B8B4AA]">
                       {item.module}
                     </span>
                   ) : (
-                    <span className="text-sm text-[#B8B4AA]/50">—</span>
+                    <span className="text-xs sm:text-sm text-[#B8B4AA]/50">—</span>
                   )}
                 </div>
               </div>
@@ -258,8 +256,8 @@ const Calendar = () => {
         </div>
 
         {/* CTA */}
-        <div ref={ctaRef} className="mt-12 md:mt-16 flex flex-col sm:flex-row items-start sm:items-center gap-6" style={{ opacity: 0 }}>
-          <button className="px-8 py-4 bg-[#C7A36D] text-[#0B0B0D] font-mono text-sm uppercase tracking-[0.14em] font-medium hover:bg-[#d4b07a] transition-colors duration-300">
+        <div ref={ctaRef} className="mt-8 sm:mt-12 md:mt-16 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6" style={{ opacity: 0 }}>
+          <button className="px-6 sm:px-8 py-3 sm:py-4 bg-[#C7A36D] text-[#0B0B0D] font-mono text-xs sm:text-sm uppercase tracking-[0.14em] font-medium hover:bg-[#d4b07a] transition-colors duration-300">
             Reservar mi lugar
           </button>
           <div className="flex flex-col gap-1">

@@ -140,12 +140,12 @@ const CourseOverview = ({ config }: { config?: any }) => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 h-full flex items-center px-[6vw]">
+      <div className="relative z-10 h-full flex flex-col lg:flex-row items-center justify-center lg:justify-start px-6 sm:px-[6vw] py-20 lg:py-0">
         {/* Left Text Block */}
-        <div className="w-[40vw]">
+        <div className="w-full lg:w-[40vw] mb-8 lg:mb-0">
           <h2
             ref={headlineRef}
-            className="font-serif text-[6vw] md:text-[5vw] lg:text-[56px] font-medium text-[#F4F2EC] leading-[1.05] tracking-[-0.02em]"
+            className="font-serif text-[8vw] sm:text-[6vw] md:text-[5vw] lg:text-[56px] font-medium text-[#F4F2EC] leading-[1.05] tracking-[-0.02em]"
             style={{ opacity: 0, transform: 'translateX(-50vw)' }}
           >
             Ocho módulos.
@@ -155,7 +155,7 @@ const CourseOverview = ({ config }: { config?: any }) => {
 
           <p
             ref={bodyRef}
-            className="mt-6 md:mt-8 text-base md:text-lg text-[#B8B4AA] leading-relaxed max-w-[32vw]"
+            className="mt-4 sm:mt-6 md:mt-8 text-sm sm:text-base md:text-lg text-[#B8B4AA] leading-relaxed max-w-full lg:max-w-[32vw]"
             style={{ opacity: 0, transform: 'translateY(10vh)' }}
           >
             Cada módulo contará con clases grabadas, material pedagógico complementario, encuentros en vivo con espacio para revisión de ejercicios.
@@ -165,29 +165,29 @@ const CourseOverview = ({ config }: { config?: any }) => {
         {/* Right Floating Card */}
         <div
           ref={cardRef}
-          className="absolute right-[6vw] top-[22vh] w-[34vw] min-h-[56vh] bg-[rgba(11,11,13,0.72)] backdrop-blur-md border border-[rgba(244,242,236,0.08)] rounded-lg p-7 md:p-8"
+          className="relative lg:absolute lg:right-[6vw] lg:top-[22vh] w-full sm:w-[80vw] lg:w-[34vw] min-h-auto lg:min-h-[56vh] bg-[rgba(11,11,13,0.72)] backdrop-blur-md border border-[rgba(244,242,236,0.08)] rounded-lg p-5 sm:p-7 md:p-8"
           style={{ opacity: 0, transform: 'translateX(60vw)' }}
         >
           {/* Accent line */}
-          <div className="w-12 h-0.5 bg-[#C7A36D] mb-6" />
+          <div className="w-12 h-0.5 bg-[#C7A36D] mb-4 sm:mb-6" />
 
           <h3
             ref={cardTitleRef}
-            className="font-serif text-2xl md:text-3xl font-medium text-[#F4F2EC] mb-8"
+            className="font-serif text-xl sm:text-2xl md:text-3xl font-medium text-[#F4F2EC] mb-6 sm:mb-8"
             style={{ opacity: 0 }}
           >
             Estructura del curso
           </h3>
 
-          <ul ref={bulletsRef} className="space-y-5">
+          <ul ref={bulletsRef} className="space-y-4 sm:space-y-5">
             {features.map((feature, index) => (
               <li
                 key={index}
-                className="flex items-center gap-4 text-[#B8B4AA]"
+                className="flex items-center gap-3 sm:gap-4 text-[#B8B4AA]"
                 style={{ opacity: 0 }}
               >
-                <feature.icon className="w-5 h-5 text-[#C7A36D] flex-shrink-0" />
-                <span className="text-sm md:text-base">{feature.text}</span>
+                <feature.icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#C7A36D] flex-shrink-0" />
+                <span className="text-sm sm:text-base">{feature.text}</span>
               </li>
             ))}
           </ul>

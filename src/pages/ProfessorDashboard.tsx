@@ -158,7 +158,7 @@ export default function ProfessorDashboard() {
           </div>
         </header>
 
-        <div className="flex-1 p-6 lg:p-8 overflow-y-auto">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           {section === 'overview' && <OverviewSection data={dashboardData} />}
           {section === 'solicitudes' && <SolicitudesSection />}
           {section === 'estudiantes' && <EstudiantesSection />}
@@ -182,17 +182,17 @@ function OverviewSection({ data }: { data: any }) {
   ];
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {stats.map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className={`w-10 h-10 rounded-lg ${bg} flex items-center justify-center`}>
-                <Icon className={`w-5 h-5 ${color}`} />
+          <div key={label} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${bg} flex items-center justify-center`}>
+                <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${color}`} />
               </div>
             </div>
-            <p className={`text-2xl font-bold ${color} mb-1`}>{value}</p>
-            <p className="text-xs text-[#B8B4AA]">{label}</p>
+            <p className={`text-xl sm:text-2xl font-bold ${color} mb-1`}>{value}</p>
+            <p className="text-[10px] sm:text-xs text-[#B8B4AA]">{label}</p>
           </div>
         ))}
       </div>

@@ -82,17 +82,17 @@ const Instructor = ({ config }: { config?: any }) => {
       id="inscripcion"
       className="relative bg-[#141419] py-20 md:py-32"
     >
-      <div className="relative z-10 px-[6vw]">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <div className="relative z-10 px-6 sm:px-[6vw]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
           {/* Portrait */}
           <div
             ref={portraitRef}
-            className="relative"
+            className="relative order-2 lg:order-1"
             style={{ opacity: 0 }}
           >
-            <div className="relative aspect-[3/4] max-w-md mx-auto lg:mx-0 lg:ml-[4vw]">
+            <div className="relative aspect-[3/4] max-w-[280px] sm:max-w-md mx-auto lg:mx-0 lg:ml-[4vw]">
               {/* Gold border frame */}
-              <div className="absolute -inset-3 border-2 border-[#C7A36D] rounded-sm" />
+              <div className="absolute -inset-2 sm:-inset-3 border-2 border-[#C7A36D] rounded-sm" />
               
               <img
                 src={config?.fotoProfesorUrl || "/images/instructor_portrait.jpg"}
@@ -106,59 +106,59 @@ const Instructor = ({ config }: { config?: any }) => {
           </div>
 
           {/* Content */}
-          <div ref={contentRef} className="lg:pl-8" style={{ opacity: 0 }}>
-            <h2 className="font-serif text-[10vw] md:text-[6vw] lg:text-[64px] font-medium text-[#F4F2EC] leading-[1.05] tracking-[-0.02em]">
+          <div ref={contentRef} className="lg:pl-8 order-1 lg:order-2" style={{ opacity: 0 }}>
+            <h2 className="font-serif text-[12vw] sm:text-[10vw] md:text-[6vw] lg:text-[64px] font-medium text-[#F4F2EC] leading-[1.05] tracking-[-0.02em]">
               Inscribite hoy
             </h2>
 
-            <p className="mt-6 text-base md:text-lg text-[#B8B4AA] leading-relaxed max-w-lg">
+            <p className="mt-4 sm:mt-6 text-sm sm:text-base md:text-lg text-[#B8B4AA] leading-relaxed max-w-lg">
               Este es un grupo reducido. Si querés priorizar tu práctica y recibir acompañamiento directo, reservá tu lugar ahora.
             </p>
 
             {/* CTA Buttons */}
-            <div ref={ctaRef} className="mt-8 flex flex-col sm:flex-row gap-4" style={{ opacity: 0 }}>
+            <div ref={ctaRef} className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4" style={{ opacity: 0 }}>
               <a
                 href={config?.googleFormUrl || "https://forms.gle/6PZVEbDmyRpJv9FC6"}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-8 py-4 bg-[#C7A36D] text-[#0B0B0D] font-mono text-sm uppercase tracking-[0.14em] font-medium hover:bg-[#d4b07a] transition-colors duration-300 flex items-center justify-center gap-2"
+                className="px-6 sm:px-8 py-3 sm:py-4 bg-[#C7A36D] text-[#0B0B0D] font-mono text-xs sm:text-sm uppercase tracking-[0.14em] font-medium hover:bg-[#d4b07a] transition-colors duration-300 flex items-center justify-center gap-2"
               >
-                Formulario de admisión — Poética de la Mirada
-                <ExternalLink className="w-4 h-4" />
+                <span className="truncate">Formulario de admisión</span>
+                <ExternalLink className="w-4 h-4 flex-shrink-0" />
               </a>
             </div>
 
             {/* Contact link */}
             <a
               href={`mailto:${config?.emailContacto || 'hola@poeticadelamirada.com'}`}
-              className="mt-4 inline-flex items-center gap-2 text-sm text-[#B8B4AA] hover:text-[#C7A36D] transition-colors duration-300"
+              className="mt-4 inline-flex items-center gap-2 text-xs sm:text-sm text-[#B8B4AA] hover:text-[#C7A36D] transition-colors duration-300"
             >
               <Mail className="w-4 h-4" />
-              ¿Preguntas? Escribinos a {config?.emailContacto || 'hola@poeticadelamirada.com'}
+              <span className="truncate">¿Preguntas? Escribinos</span>
             </a>
 
             {/* Divider */}
-            <div className="my-10 w-16 h-0.5 bg-[rgba(244,242,236,0.15)]" />
+            <div className="my-8 sm:my-10 w-16 h-0.5 bg-[rgba(244,242,236,0.15)]" />
 
             {/* Instructor Info */}
             <div>
-              <span className="font-mono text-xs uppercase tracking-[0.14em] text-[#C7A36D]">
+              <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.14em] text-[#C7A36D]">
                 Autor del curso
               </span>
-              <h3 className="mt-2 font-serif text-2xl md:text-3xl font-medium text-[#F4F2EC]">
+              <h3 className="mt-2 font-serif text-xl sm:text-2xl md:text-3xl font-medium text-[#F4F2EC]">
                 {config?.bioProfesor?.split('\n')[0] || 'Ernesto Engel'}
               </h3>
-              <p className="mt-3 text-[#B8B4AA] leading-relaxed max-w-md">
+              <p className="mt-3 text-sm text-[#B8B4AA] leading-relaxed max-w-md">
                 {config?.bioProfesor || 'Artista visual y docente. Su trabajo explora el paisaje, la memoria y la pintura como acto de atención.'}
               </p>
 
               {/* Social Links */}
-              <div className="mt-6 flex gap-4">
+              <div className="mt-6 flex flex-wrap gap-3 sm:gap-4">
                 {socials.map((social, index) => (
                   <a
                     key={index}
                     href={social.href}
-                    className="flex items-center gap-2 text-sm text-[#B8B4AA] hover:text-[#C7A36D] transition-colors duration-300"
+                    className="flex items-center gap-2 text-xs sm:text-sm text-[#B8B4AA] hover:text-[#C7A36D] transition-colors duration-300"
                   >
                     <social.icon className="w-4 h-4" />
                     <span>{social.label}</span>
@@ -170,12 +170,12 @@ const Instructor = ({ config }: { config?: any }) => {
         </div>
 
         {/* Footer */}
-        <footer className="mt-20 md:mt-32 pt-8 border-t border-[rgba(244,242,236,0.08)]">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <span className="font-serif text-lg text-[#F4F2EC]">
+        <footer className="mt-16 sm:mt-20 md:mt-32 pt-6 sm:pt-8 border-t border-[rgba(244,242,236,0.08)]">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
+            <span className="font-serif text-base sm:text-lg text-[#F4F2EC]">
               Poética de la Mirada
             </span>
-            <span className="text-sm text-[#B8B4AA]">
+            <span className="text-xs sm:text-sm text-[#B8B4AA]">
               © 2026 Todos los derechos reservados
             </span>
           </div>

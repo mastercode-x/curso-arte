@@ -153,12 +153,12 @@ const Hero = ({ config }: { config?: any }) => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 h-full flex flex-col justify-center px-[6vw]">
+      <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-[6vw]">
         {/* Title */}
-        <div className="max-w-[52vw]">
+        <div className="max-w-full sm:max-w-[80vw] lg:max-w-[52vw]">
           <h1
             ref={titleLine1Ref}
-            className="font-serif text-[12vw] md:text-[8vw] lg:text-[96px] font-medium text-[#F4F2EC] leading-[0.95] tracking-[-0.02em]"
+            className="font-serif text-[14vw] sm:text-[12vw] md:text-[8vw] lg:text-[96px] font-medium text-[#F4F2EC] leading-[0.95] tracking-[-0.02em]"
             style={{ opacity: 0 }}
           >
             {config?.nombreCurso || 'Poética'}
@@ -166,7 +166,7 @@ const Hero = ({ config }: { config?: any }) => {
           {!config?.nombreCurso && (
             <h1
               ref={titleLine2Ref}
-              className="font-serif text-[12vw] md:text-[8vw] lg:text-[96px] font-medium text-[#F4F2EC] leading-[0.95] tracking-[-0.02em] mt-2"
+              className="font-serif text-[14vw] sm:text-[12vw] md:text-[8vw] lg:text-[96px] font-medium text-[#F4F2EC] leading-[0.95] tracking-[-0.02em] mt-2"
               style={{ opacity: 0 }}
             >
               de la mirada
@@ -177,7 +177,7 @@ const Hero = ({ config }: { config?: any }) => {
         {/* Subheadline */}
         <p
           ref={subheadRef}
-          className="mt-8 md:mt-12 text-base md:text-lg text-[#B8B4AA] max-w-[34vw] leading-relaxed"
+          className="mt-6 sm:mt-8 md:mt-12 text-sm sm:text-base md:text-lg text-[#B8B4AA] max-w-full sm:max-w-[50vw] lg:max-w-[34vw] leading-relaxed"
           style={{ opacity: 0 }}
         >
           {config?.descripcionCurso || 'Un curso para aprender a ver antes de pintar. Ocho módulos, encuentros virtuales y tiempo de decantación.'}
@@ -187,7 +187,7 @@ const Hero = ({ config }: { config?: any }) => {
         <button
           ref={ctaRef}
           onClick={scrollToCourse}
-          className="mt-8 md:mt-10 px-8 py-4 bg-[#C7A36D] text-[#0B0B0D] font-mono text-sm uppercase tracking-[0.14em] font-medium hover:bg-[#d4b07a] transition-colors duration-300 w-fit"
+          className="mt-6 sm:mt-8 md:mt-10 px-6 sm:px-8 py-3 sm:py-4 bg-[#C7A36D] text-[#0B0B0D] font-mono text-xs sm:text-sm uppercase tracking-[0.14em] font-medium hover:bg-[#d4b07a] transition-colors duration-300 w-fit"
           style={{ opacity: 0 }}
         >
           Ver el programa
@@ -200,7 +200,7 @@ const Hero = ({ config }: { config?: any }) => {
         className="absolute bottom-[4vh] right-[4vw] flex flex-col items-center gap-2"
         style={{ opacity: 0 }}
       >
-        <span className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA]">
+        <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.14em] text-[#B8B4AA]">
           Scroll
         </span>
         <ChevronDown className="w-4 h-4 text-[#B8B4AA] animate-bounce" />

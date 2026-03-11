@@ -139,11 +139,11 @@ const ModuleSection = ({ badge, title, description, image, zIndex, moduleId, dur
       </div>
 
       {/* Content */}
-      <div className="relative z-10 h-full flex flex-col justify-center px-[6vw]">
+      <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-[6vw]">
         {/* Badge */}
         <span
           ref={badgeRef}
-          className="font-mono text-xs uppercase tracking-[0.14em] text-[#C7A36D] mb-6"
+          className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.14em] text-[#C7A36D] mb-4 sm:mb-6"
           style={{ opacity: 0, transform: 'translateX(20vw)' }}
         >
           {badge}
@@ -152,7 +152,7 @@ const ModuleSection = ({ badge, title, description, image, zIndex, moduleId, dur
         {/* Title */}
         <h2
           ref={headlineRef}
-          className="font-serif text-[8vw] md:text-[6vw] lg:text-[64px] font-medium text-[#F4F2EC] leading-[1.05] tracking-[-0.02em] max-w-[38vw]"
+          className="font-serif text-[10vw] sm:text-[8vw] md:text-[6vw] lg:text-[64px] font-medium text-[#F4F2EC] leading-[1.05] tracking-[-0.02em] max-w-full sm:max-w-[60vw] lg:max-w-[38vw]"
           style={{ opacity: 0, transform: 'translateX(-55vw)' }}
         >
           {title}
@@ -161,7 +161,7 @@ const ModuleSection = ({ badge, title, description, image, zIndex, moduleId, dur
         {/* Description */}
         <p
           ref={bodyRef}
-          className="mt-6 md:mt-8 text-base md:text-lg text-[#B8B4AA] leading-relaxed max-w-[38vw]"
+          className="mt-4 sm:mt-6 md:mt-8 text-sm sm:text-base md:text-lg text-[#B8B4AA] leading-relaxed max-w-full sm:max-w-[50vw] lg:max-w-[38vw]"
           style={{ opacity: 0, transform: 'translateY(10vh)' }}
         >
           {description}
@@ -171,14 +171,14 @@ const ModuleSection = ({ badge, title, description, image, zIndex, moduleId, dur
         {duration && (
           <div
             ref={ctaRef}
-            className="mt-8 md:mt-10"
+            className="mt-6 sm:mt-8 md:mt-10"
             style={{ opacity: 0, transform: 'translateY(5vh)' }}
           >
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-[rgba(199,163,109,0.1)] border border-[rgba(199,163,109,0.2)] rounded-sm">
+            <span className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-[rgba(199,163,109,0.1)] border border-[rgba(199,163,109,0.2)] rounded-sm">
               <svg className="w-4 h-4 text-[#C7A36D]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="font-mono text-xs uppercase tracking-[0.08em] text-[#C7A36D]">
+              <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.08em] text-[#C7A36D]">
                 {duration}
               </span>
             </span>
@@ -189,7 +189,7 @@ const ModuleSection = ({ badge, title, description, image, zIndex, moduleId, dur
         {!duration && (
           <div
             ref={ctaRef}
-            className="mt-8 md:mt-10"
+            className="mt-6 sm:mt-8 md:mt-10"
             style={{ opacity: 0, transform: 'translateY(5vh)' }}
           ></div>
         )}
@@ -199,3 +199,6 @@ const ModuleSection = ({ badge, title, description, image, zIndex, moduleId, dur
 };
 
 export default ModuleSection;
+
+
+// hol

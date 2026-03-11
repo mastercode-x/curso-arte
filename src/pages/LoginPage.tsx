@@ -38,15 +38,15 @@ const LoginPage: React.FC = () => {
       {/* Background gradient */}
       <div className="fixed inset-0 bg-gradient-to-br from-[#C7A36D]/5 via-transparent to-[#C7A36D]/5 pointer-events-none" />
       
-      <Card className="w-full max-w-md bg-[#141419] border-[rgba(244,242,236,0.08)] relative z-10">
+      <Card className="w-full max-w-md bg-[#141419] border-[rgba(244,242,236,0.08)] relative z-10 mx-4">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 rounded-full bg-[rgba(199,163,109,0.15)] flex items-center justify-center mb-4">
-            <span className="text-[#C7A36D] text-xl font-serif">P</span>
+          <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[rgba(199,163,109,0.15)] flex items-center justify-center mb-3 sm:mb-4">
+            <span className="text-[#C7A36D] text-lg sm:text-xl font-serif">P</span>
           </div>
-          <CardTitle className="text-2xl font-serif text-[#F4F2EC]">
+          <CardTitle className="text-xl sm:text-2xl font-serif text-[#F4F2EC]">
             Bienvenido de vuelta
           </CardTitle>
-          <CardDescription className="text-[#B8B4AA]">
+          <CardDescription className="text-[#B8B4AA] text-sm">
             Inicia sesión para continuar tu viaje artístico
           </CardDescription>
         </CardHeader>

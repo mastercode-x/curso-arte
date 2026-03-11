@@ -78,7 +78,7 @@ const Navigation = () => {
         isVisible ? 'opacity-50' : 'opacity-100'
       }`}>
         <img 
-          src="../../public/images/logo.png" 
+          src="public/images/logo.png" 
           alt="Poética de la Mirada" 
           className="h-8 md:h-10 w-auto object-contain"
           onError={(e) => {

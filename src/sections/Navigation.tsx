@@ -4,7 +4,7 @@ import * as moduleApi from '../services/moduleApi';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+gsap.registerPlugin(ScrollTrigger); // ← sacar ScrollToPlugin
 
 interface PublicModule {
   id: string;

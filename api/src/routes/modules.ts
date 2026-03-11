@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { body, param } from 'express-validator';
 import {
+  getPublicModules,
   getModules,
   getModuleById,
   getModuleByOrder,
@@ -18,12 +19,16 @@ import { authenticate, requireProfessor } from '../middleware/auth';
 
 const router = Router();
 
-// Rutas públicas (requieren autenticación pero no ser profesor)
-router.get('/', (req, res, next) => {
-  // Permitir acceso público si viene con query public=true
-  if (req.query.public === 'true') return next();
-  return authenticate(req, res, next);
-}, getModules);
+// ============================================
+// RUTAS PÚBLICAS (sin autenticación)
+// ============================================
+// Deben declararse ANTES de las rutas protegidas
+router.get('/public', getPublicModules);
+
+// ============================================
+// RUTAS PROTEGIDAS (requieren autenticación)
+// ============================================
+router.get('/', authenticate, getModules);
 router.get('/stats', authenticate, requireProfessor, getModuleStats);
 router.get('/by-order/:order', authenticate, getModuleByOrder);
 router.get('/:id', authenticate, [param('id').notEmpty()], getModuleById);

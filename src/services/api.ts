@@ -4,7 +4,7 @@ import { getAuthToken } from '@/contexts/AuthContext';
 // URL del backend en Railway
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://curso2-production.up.railway.app/api';
 
-// Crear instancia de axios
+// Crear instancia de axios para peticiones autenticadas
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -12,7 +12,15 @@ export const api = axios.create({
   }
 });
 
-// Interceptor para agregar token
+// Crear instancia de axios para peticiones públicas (sin interceptores de auth)
+export const publicApi = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+// Interceptor para agregar token (solo en api autenticada)
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getAuthToken();
@@ -24,7 +32,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor para manejar errores
+// Interceptor para manejar errores (solo en api autenticada)
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {

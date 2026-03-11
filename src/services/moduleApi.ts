@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api, publicApi } from './api';
 
 export interface Module {
   id: string;
@@ -34,9 +34,9 @@ export const getModules = async () => {
   return response.data;
 };
 
-// Obtener módulos públicos (para landing page)
+// Obtener módulos públicos (para landing page) - sin autenticación
 export const getPublicModules = async () => {
-  const response = await api.get('/modules', { params: { public: 'true' } });
+  const response = await publicApi.get('/modules/public');
   return response.data;
 };
 

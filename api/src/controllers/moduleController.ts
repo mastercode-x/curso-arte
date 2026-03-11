@@ -5,6 +5,30 @@ import { logger } from '../utils/logger';
 
 const prisma = new PrismaClient();
 
+// Obtener módulos públicos (sin autenticación - para landing page)
+export const getPublicModules = asyncHandler(async (req: Request, res: Response) => {
+  const modulos = await prisma.modulo.findMany({
+    where: {
+      estado: 'publicado'
+    },
+    orderBy: { orden: 'asc' },
+    select: {
+      id: true,
+      titulo: true,
+      descripcion: true,
+      duracion: true,
+      orden: true,
+      imagenUrl: true,
+      contenido: true,
+      objetivos: true,
+      ejercicio: true,
+      recursos: true,
+    }
+  });
+
+  res.json(modulos);
+});
+
 // Obtener todos los módulos (públicos para estudiantes)
 export const getModules = asyncHandler(async (req: Request, res: Response) => {
   const { estado = 'publicado' } = req.query;

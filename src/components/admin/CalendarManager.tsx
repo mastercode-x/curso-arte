@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, Edit2, Calendar, MapPin, AlertCircle } from 'lucide-react';
+import { Save, Plus, Trash2, Edit2, Calendar as CalendarIcon, MapPin, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 import * as calendarApi from '@/services/calendarApi';
 import * as moduleApi from '@/services/moduleApi';
 import { useToast } from '@/hooks/use-toast';
@@ -36,6 +41,7 @@ const CalendarManager: React.FC = () => {
     date: '',
     activity: '',
     module: null,
+    orden: 0,
   });
   const { toast } = useToast();
 
@@ -71,6 +77,7 @@ const CalendarManager: React.FC = () => {
         date: '',
         activity: '',
         module: null,
+        orden: events.length > 0 ? Math.max(...events.map(e => e.orden || 0)) + 1 : 1,
       });
     }
     setIsDialogOpen(true);
@@ -84,6 +91,7 @@ const CalendarManager: React.FC = () => {
       date: '',
       activity: '',
       module: null,
+      orden: 0,
     });
   };
 
@@ -98,17 +106,17 @@ const CalendarManager: React.FC = () => {
         // Actualizar evento existente
         await calendarApi.updateCalendarEvent(editingEvent.id, formData);
         setEvents(events.map(e => e.id === editingEvent.id ? { ...formData, id: editingEvent.id } : e));
-        toast({ title: 'Éxito', description: 'Evento actualizado correctamente.' });
+        toast({ title: 'Éxito', description: 'Evento actualizado correctamente.', duration: 2000 });
       } else {
         // Crear nuevo evento
         const newEvent = await calendarApi.createCalendarEvent(formData);
         setEvents([...events, newEvent]);
-        toast({ title: 'Éxito', description: 'Evento creado correctamente.' });
+        toast({ title: 'Éxito', description: 'Evento creado correctamente.', duration: 2000 });
       }
       handleCloseDialog();
     } catch (error) {
       console.error('Error saving event:', error);
-      toast({ title: 'Error', description: 'No se pudo guardar el evento.', variant: 'destructive' });
+      toast({ title: 'Error', description: 'No se pudo guardar el evento.', variant: 'destructive', duration: 2000 });
     }
   };
 
@@ -118,10 +126,10 @@ const CalendarManager: React.FC = () => {
     try {
       await calendarApi.deleteCalendarEvent(eventId);
       setEvents(events.filter(e => e.id !== eventId));
-      toast({ title: 'Éxito', description: 'Evento eliminado correctamente.' });
+      toast({ title: 'Éxito', description: 'Evento eliminado correctamente.', duration: 2000 });
     } catch (error) {
       console.error('Error deleting event:', error);
-      toast({ title: 'Error', description: 'No se pudo eliminar el evento.', variant: 'destructive' });
+      toast({ title: 'Error', description: 'No se pudo eliminar el evento.', variant: 'destructive', duration: 2000 });
     }
   };
 
@@ -131,10 +139,10 @@ const CalendarManager: React.FC = () => {
         events,
         totalWeeks: events.length,
       });
-      toast({ title: 'Éxito', description: 'Calendario guardado correctamente.' });
+      toast({ title: 'Éxito', description: 'Calendario guardado correctamente.', duration: 2000 });
     } catch (error) {
       console.error('Error saving calendar:', error);
-      toast({ title: 'Error', description: 'No se pudo guardar el calendario.', variant: 'destructive' });
+      toast({ title: 'Error', description: 'No se pudo guardar el calendario.', variant: 'destructive', duration: 2000 });
     }
   };
 
@@ -153,7 +161,7 @@ const CalendarManager: React.FC = () => {
       <Card className="bg-[#141419] border-[rgba(244,242,236,0.08)]">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg font-serif text-[#F4F2EC] flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-[#C7A36D]" />
+            <CalendarIcon className="w-5 h-5 text-[#C7A36D]" />
             Gestión del Calendario
           </CardTitle>
           <Button
@@ -193,7 +201,7 @@ const CalendarManager: React.FC = () => {
                           </span>
                           <span className="text-xs text-[#B8B4AA]">•</span>
                           <span className="text-sm text-[#B8B4AA] flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
+                            <CalendarIcon className="w-3 h-3" />
                             {event.date}
                           </span>
                         </div>
@@ -251,10 +259,11 @@ const CalendarManager: React.FC = () => {
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 py-4">
             <div>
-              <Label className="text-[#F4F2EC]">Semana *</Label>
+              <Label htmlFor="week" className="text-[#F4F2EC]">Semana *</Label>
               <Input
+                id="week"
                 value={formData.week}
                 onChange={(e) => setFormData({ ...formData, week: e.target.value })}
                 placeholder="Ej: Semana 1"
@@ -263,18 +272,37 @@ const CalendarManager: React.FC = () => {
             </div>
 
             <div>
-              <Label className="text-[#F4F2EC]">Fecha *</Label>
-              <Input
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                placeholder="Ej: Lunes 06 Oct"
-                className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]"
-              />
+              <Label htmlFor="date" className="text-[#F4F2EC]">Fecha *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]",
+                      !formData.date && "text-[#B8B4AA]"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.date ? format(new Date(formData.date), "PPP", { locale: es }) : <span className="text-[#B8B4AA]">Selecciona una fecha</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-[#141419] border-[rgba(244,242,236,0.08)]">
+                  <Calendar
+                    mode="single"
+                    selected={formData.date ? new Date(formData.date) : undefined}
+                    onSelect={(date) => setFormData({ ...formData, date: date ? format(date, 'yyyy-MM-dd') : '' })}
+                    initialFocus
+                    locale={es}
+                    className="text-[#F4F2EC]"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div>
-              <Label className="text-[#F4F2EC]">Actividad *</Label>
+              <Label htmlFor="activity" className="text-[#F4F2EC]">Actividad *</Label>
               <Input
+                id="activity"
                 value={formData.activity}
                 onChange={(e) => setFormData({ ...formData, activity: e.target.value })}
                 placeholder="Ej: Encuentro virtual"
@@ -286,8 +314,9 @@ const CalendarManager: React.FC = () => {
             </div>
 
             <div>
-              <Label className="text-[#F4F2EC]">Módulo (opcional)</Label>
+              <Label htmlFor="module" className="text-[#F4F2EC]">Módulo (opcional)</Label>
               <select
+                id="module"
                 value={formData.module || ''}
                 onChange={(e) => setFormData({ ...formData, module: e.target.value || null })}
                 className="w-full px-3 py-2 bg-[rgba(244,242,236,0.03)] border border-[rgba(244,242,236,0.08)] text-[#F4F2EC] rounded-md"
@@ -299,6 +328,21 @@ const CalendarManager: React.FC = () => {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <Label htmlFor="orden" className="text-[#F4F2EC]">Orden</Label>
+              <Input
+                id="orden"
+                type="number"
+                value={formData.orden || ''}
+                onChange={(e) => setFormData({ ...formData, orden: Number(e.target.value) })}
+                placeholder="Ej: 1"
+                className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]"
+              />
+              <p className="text-xs text-[#B8B4AA] mt-1">
+                Define el orden en que aparecerá el evento en el calendario.
+              </p>
             </div>
           </div>
 

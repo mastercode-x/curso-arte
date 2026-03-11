@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import * as moduleApi from '../services/moduleApi';
 
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
 interface PublicModule {
   id: string;
   titulo: string;
@@ -47,20 +53,30 @@ const Navigation = () => {
     }
   };
 
-  const scrollToModule = (moduleId: string) => {
-    const element = document.getElementById(`modulo-${moduleId}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      setActiveSection(`modulo-${moduleId}`);
-    } else {
-      // Fallback: scroll al primer módulo
-      const firstModule = document.getElementById('modulos');
-      if (firstModule) {
-        firstModule.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-    setShowModulesDropdown(false);
-  };
+const scrollToModule = (moduleId: string) => {
+  setShowModulesDropdown(false);
+  setActiveSection(`modulo-${moduleId}`);
+  
+  const element = document.getElementById(`modulo-${moduleId}`);
+  if (!element) return;
+
+  // Buscar el ScrollTrigger asociado a este elemento
+  const trigger = ScrollTrigger.getAll().find(
+    st => st.trigger === element || st.vars?.trigger === element
+  );
+
+  if (trigger) {
+    // Scrollear al start del pin usando GSAP
+    gsap.to(window, {
+      scrollTo: trigger.start,
+      duration: 0.8,
+      ease: 'power2.inOut'
+    });
+  } else {
+    // Fallback
+    element.scrollIntoView({ behavior: 'smooth' });
+  }
+};
 
   const navItems = [
     { id: 'curso', label: 'Curso' },

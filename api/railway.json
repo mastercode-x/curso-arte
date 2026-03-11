@@ -1,0 +1,9 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "buildCommand": "npm install && npx prisma generate && tsc"
+  },
+  "deploy": {
+    "startCommand": "npx prisma migrate deploy && node dist/server.js"
+  }
+}

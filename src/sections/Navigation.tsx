@@ -50,23 +50,20 @@ const Navigation = () => {
     }
   };
 
-  const scrollToModule = (moduleId: string) => {
-    setShowModulesDropdown(false);
-    setActiveSection(`modulo-${moduleId}`);
+ const scrollToModule = (moduleId: string) => {
+  setShowModulesDropdown(false);
+  setActiveSection(`modulo-${moduleId}`);
 
-    const element = document.getElementById(`modulo-${moduleId}`);
-    if (!element) return;
+  const element = document.getElementById(`modulo-${moduleId}`);
+  if (!element) {
+    // fallback: ir al primer módulo
+    const first = document.getElementById('modulos');
+    if (first) window.scrollTo({ top: first.offsetTop, behavior: 'smooth' });
+    return;
+  }
 
-    // Buscar el ScrollTrigger del pin asociado a este elemento
-    const trigger = ScrollTrigger.getAll().find(st => st.trigger === element);
-
-    if (trigger) {
-      window.scrollTo({ top: trigger.start, behavior: 'smooth' });
-    } else {
-      const rect = element.getBoundingClientRect();
-      window.scrollTo({ top: window.scrollY + rect.top, behavior: 'smooth' });
-    }
-  };
+  window.scrollTo({ top: element.offsetTop, behavior: 'smooth' });
+};
 
   const navItems = [
     { id: 'curso', label: 'Curso' },

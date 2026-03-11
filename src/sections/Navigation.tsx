@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import * as moduleApi from '../services/moduleApi';
-
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import * as moduleApi from '../services/moduleApi';
 
-gsap.registerPlugin(ScrollTrigger); // ← sacar ScrollToPlugin
+gsap.registerPlugin(ScrollTrigger);
 
 interface PublicModule {
   id: string;
@@ -52,23 +51,23 @@ const Navigation = () => {
     }
   };
 
-const scrollToModule = (moduleId: string) => {
-  setShowModulesDropdown(false);
-  setActiveSection(`modulo-${moduleId}`);
-  
-  const element = document.getElementById(`modulo-${moduleId}`);
-  if (!element) return;
+  const scrollToModule = (moduleId: string) => {
+    setShowModulesDropdown(false);
+    setActiveSection(`modulo-${moduleId}`);
 
-  // Obtener la posición real considerando el pin de GSAP
-  const trigger = ScrollTrigger.getAll().find(st => st.trigger === element);
-  
-  if (trigger) {
-    window.scrollTo({ top: trigger.start, behavior: 'smooth' });
-  } else {
-    const rect = element.getBoundingClientRect();
-    window.scrollTo({ top: window.scrollY + rect.top, behavior: 'smooth' });
-  }
-};
+    const element = document.getElementById(`modulo-${moduleId}`);
+    if (!element) return;
+
+    // Buscar el ScrollTrigger del pin asociado a este elemento
+    const trigger = ScrollTrigger.getAll().find(st => st.trigger === element);
+
+    if (trigger) {
+      window.scrollTo({ top: trigger.start, behavior: 'smooth' });
+    } else {
+      const rect = element.getBoundingClientRect();
+      window.scrollTo({ top: window.scrollY + rect.top, behavior: 'smooth' });
+    }
+  };
 
   const navItems = [
     { id: 'curso', label: 'Curso' },
@@ -108,7 +107,7 @@ const scrollToModule = (moduleId: string) => {
               </button>
             </li>
           ))}
-          
+
           {/* Modules Dropdown */}
           <li className="relative">
             <button
@@ -120,21 +119,20 @@ const scrollToModule = (moduleId: string) => {
               }`}
             >
               Módulos
-              <svg 
-                className={`w-3 h-3 transition-transform duration-200 ${showModulesDropdown ? 'rotate-180' : ''}`} 
-                fill="none" 
-                viewBox="0 0 24 24" 
+              <svg
+                className={`w-3 h-3 transition-transform duration-200 ${showModulesDropdown ? 'rotate-180' : ''}`}
+                fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            
+
             {/* Dropdown Menu */}
             {showModulesDropdown && (
               <div className="absolute top-full right-0 mt-2 bg-[#1a1a1f]/95 backdrop-blur-md border border-[rgba(199,163,109,0.3)] rounded-lg shadow-xl min-w-[220px] py-2 overflow-hidden">
                 {loadingModules ? (
-                  // Skeleton loading
                   <>
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="px-4 py-2.5">
@@ -143,12 +141,10 @@ const scrollToModule = (moduleId: string) => {
                     ))}
                   </>
                 ) : modules.length === 0 ? (
-                  // Estado vacío
                   <div className="px-4 py-3 text-center">
                     <span className="text-xs text-[#B8B4AA] italic">Próximamente</span>
                   </div>
                 ) : (
-                  // Lista de módulos
                   modules.map((module) => (
                     <button
                       key={module.id}
@@ -184,8 +180,8 @@ const scrollToModule = (moduleId: string) => {
 
       {/* Click outside to close dropdown */}
       {showModulesDropdown && (
-        <div 
-          className="fixed inset-0 z-[99]" 
+        <div
+          className="fixed inset-0 z-[99]"
           onClick={() => setShowModulesDropdown(false)}
         />
       )}

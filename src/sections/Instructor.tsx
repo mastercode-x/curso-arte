@@ -1,9 +1,8 @@
 import { useRef, useLayoutEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
 import { Instagram, ExternalLink, Mail, Youtube, TrendingUp } from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
+import { gsap, ScrollTrigger } from '../utils/gsap';
 
 const Instructor = ({ config }: { config?: any }) => {
   const sectionRef = useRef<HTMLDivElement>(null);

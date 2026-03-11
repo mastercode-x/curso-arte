@@ -1,9 +1,8 @@
 import { useRef, useLayoutEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
 import { Video, BookOpen, Clock, Library } from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
+import { gsap, ScrollTrigger } from '../utils/gsap';
 
 const CourseOverview = ({ config }: { config?: any }) => {
   const sectionRef = useRef<HTMLDivElement>(null);

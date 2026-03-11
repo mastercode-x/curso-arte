@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
 import * as moduleApi from '../services/moduleApi';
 
-gsap.registerPlugin(ScrollTrigger);
+import { gsap, ScrollTrigger } from '../utils/gsap';
 
 interface PublicModule {
   id: string;

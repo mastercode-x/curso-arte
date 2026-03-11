@@ -1,9 +1,8 @@
 import { useRef, useLayoutEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
 import { CalendarDays, MapPin, Clock, Users, Sparkles } from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
+import { gsap, ScrollTrigger } from '../utils/gsap';
 
 const Calendar = () => {
   const sectionRef = useRef<HTMLDivElement>(null);

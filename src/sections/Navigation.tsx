@@ -261,20 +261,26 @@ const Navigation = memo(() => {
   };
 
   const scrollToModule = (moduleId: string) => {
-    setShowModulesDropdown(false);
-    setMobileMenuOpen(false);
-    setActiveSection(`modulo-${moduleId}`);
+  setShowModulesDropdown(false);
+  setMobileMenuOpen(false);
+  setActiveSection(`modulo-${moduleId}`);
 
+  setTimeout(() => {
     const element = document.getElementById(`modulo-${moduleId}`);
     if (!element) {
-      // fallback: ir al primer módulo
       const first = document.getElementById('modulos');
       if (first) window.scrollTo({ top: first.offsetTop, behavior: 'smooth' });
       return;
     }
 
-    window.scrollTo({ top: element.offsetTop, behavior: 'smooth' });
-  };
+    // GSAP envuelve el elemento en un pin-spacer — apuntamos a ese wrapper
+    const pinSpacer = element.closest('[data-pin-spacer]') as HTMLElement;
+    const target = pinSpacer || element;
+    const offsetTop = target.getBoundingClientRect().top + window.scrollY;
+
+    window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+  }, 100); // pequeño delay para que el menú cierre antes de scrollear
+};
 
   const navItems = [
     { id: 'curso', label: 'Curso' },

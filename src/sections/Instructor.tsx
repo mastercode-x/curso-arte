@@ -144,7 +144,7 @@ const Instructor = ({ config }: { config?: any }) => {
               className="mt-4 inline-flex items-center gap-2 text-xs sm:text-sm text-[#B8B4AA] hover:text-[#C7A36D] transition-colors duration-300"
             >
               <Mail className="w-4 h-4" />
-              <span className="truncate">¿Preguntas? Escribinos</span>
+              <span className="truncate">¿Preguntas? Escribinos francisco@ernestoengel.com</span>
             </a>
 
             {/* Divider */}
@@ -159,7 +159,7 @@ const Instructor = ({ config }: { config?: any }) => {
                 {config?.bioProfesor?.split('\n')[0] || 'Ernesto Engel'}
               </h3>
               <p className="mt-3 text-sm text-[#B8B4AA] leading-relaxed max-w-md">
-                {config?.bioProfesor || 'Artista visual y docente. Su trabajo explora el paisaje, la memoria y la pintura como acto de atención.'}
+                {/* config?.bioProfesor || */ 'Artista visual y docente. Su trabajo explora el paisaje, la memoria y la pintura como acto de atención.'}
               </p>
 
               {/* Social Links */}

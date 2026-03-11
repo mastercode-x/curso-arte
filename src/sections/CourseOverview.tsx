@@ -1,68 +1,19 @@
-import { useEffect, useRef, useLayoutEffect } from 'react';
+import { useRef, useLayoutEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ChevronDown } from 'lucide-react';
+import { Video, BookOpen, Clock, Library } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const Hero = ({ config }: { config?: any }) => {
+const CourseOverview = ({ config }: { config?: any }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
-  const titleLine1Ref = useRef<HTMLHeadingElement>(null);
-  const titleLine2Ref = useRef<HTMLHeadingElement>(null);
-  const subheadRef = useRef<HTMLParagraphElement>(null);
-  const ctaRef = useRef<HTMLButtonElement>(null);
-  const scrollLabelRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const bodyRef = useRef<HTMLParagraphElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const cardTitleRef = useRef<HTMLHeadingElement>(null);
+  const bulletsRef = useRef<HTMLUListElement>(null);
 
-  // Auto-play entrance animation on mount
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
-
-      // Background entrance
-      tl.fromTo(
-        bgRef.current,
-        { opacity: 0, scale: 1.08 },
-        { opacity: 1, scale: 1, duration: 1.1 }
-      );
-
-      // Title lines entrance
-      tl.fromTo(
-        [titleLine1Ref.current, titleLine2Ref.current],
-        { y: 40, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.9, stagger: 0.12 },
-        '-=0.6'
-      );
-
-      // Subheadline entrance
-      tl.fromTo(
-        subheadRef.current,
-        { y: 24, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.7 },
-        '-=0.4'
-      );
-
-      // CTA entrance
-      tl.fromTo(
-        ctaRef.current,
-        { y: 18, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.6 },
-        '-=0.3'
-      );
-
-      // Scroll label entrance
-      tl.fromTo(
-        scrollLabelRef.current,
-        { opacity: 0 },
-        { opacity: 1, duration: 0.5 },
-        '-=0.2'
-      );
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  // Scroll-driven exit animation
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const scrollTl = gsap.timeline({
@@ -72,136 +23,178 @@ const Hero = ({ config }: { config?: any }) => {
           end: '+=130%',
           pin: true,
           scrub: 0.5,
-          onLeaveBack: () => {
-            // Reset all elements when scrolling back to top
-            gsap.set([titleLine1Ref.current, titleLine2Ref.current, subheadRef.current, ctaRef.current], {
-              opacity: 1,
-              x: 0,
-              y: 0,
-            });
-            gsap.set(bgRef.current, { scale: 1 });
-          },
         },
       });
 
-      // ENTRANCE (0-30%): Hold at fully visible (entrance handled by load animation)
-      // SETTLE (30-70%): Static
-      // EXIT (70-100%): Elements exit
-
-      // Title group exit
-      scrollTl.fromTo(
-        [titleLine1Ref.current, titleLine2Ref.current],
-        { x: 0, opacity: 1 },
-        { x: '-18vw', opacity: 0, ease: 'power2.in' },
-        0.7
-      );
-
-      // Subheadline + CTA exit
-      scrollTl.fromTo(
-        [subheadRef.current, ctaRef.current],
-        { y: 0, opacity: 1 },
-        { y: '10vh', opacity: 0, ease: 'power2.in' },
-        0.7
-      );
-
-      // Background scale
+      // ENTRANCE (0-30%)
+      // Background entrance
       scrollTl.fromTo(
         bgRef.current,
-        { scale: 1 },
-        { scale: 1.06, ease: 'none' },
+        { scale: 1.1, opacity: 0.6 },
+        { scale: 1, opacity: 1, ease: 'none' },
+        0
+      );
+
+      // Headline entrance
+      scrollTl.fromTo(
+        headlineRef.current,
+        { x: '-50vw', opacity: 0 },
+        { x: 0, opacity: 1, ease: 'power2.out' },
+        0
+      );
+
+      // Body entrance
+      scrollTl.fromTo(
+        bodyRef.current,
+        { y: '10vh', opacity: 0 },
+        { y: 0, opacity: 1, ease: 'power2.out' },
+        0.08
+      );
+
+      // Card entrance
+      scrollTl.fromTo(
+        cardRef.current,
+        { x: '60vw', opacity: 0 },
+        { x: 0, opacity: 1, ease: 'power2.out' },
+        0.1
+      );
+
+      // Card title + bullets entrance
+      scrollTl.fromTo(
+        cardTitleRef.current,
+        { y: 18, opacity: 0 },
+        { y: 0, opacity: 1, ease: 'power2.out' },
+        0.14
+      );
+
+      if (bulletsRef.current) {
+        const bullets = bulletsRef.current.querySelectorAll('li');
+        scrollTl.fromTo(
+          bullets,
+          { y: 18, opacity: 0 },
+          { y: 0, opacity: 1, stagger: 0.02, ease: 'power2.out' },
+          0.16
+        );
+      }
+
+      // SETTLE (30-70%): Static - no animations
+
+      // EXIT (70-100%)
+      scrollTl.fromTo(
+        headlineRef.current,
+        { x: 0, opacity: 1 },
+        { x: '-12vw', opacity: 0, ease: 'power2.in' },
         0.7
       );
 
-      // Scroll label fade
       scrollTl.fromTo(
-        scrollLabelRef.current,
-        { opacity: 1 },
-        { opacity: 0 },
-        0.75
+        bodyRef.current,
+        { y: 0, opacity: 1 },
+        { y: '6vh', opacity: 0, ease: 'power2.in' },
+        0.7
+      );
+
+      scrollTl.fromTo(
+        cardRef.current,
+        { x: 0, opacity: 1 },
+        { x: '18vw', opacity: 0, ease: 'power2.in' },
+        0.7
+      );
+
+      scrollTl.fromTo(
+        bgRef.current,
+        { scale: 1, opacity: 1 },
+        { scale: 1.05, opacity: 0, ease: 'power2.in' },
+        0.7
       );
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
-  const scrollToCourse = () => {
-    const element = document.getElementById('curso');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const features = [
+    { icon: Video, text: 'Video de apertura (umbral)' },
+    { icon: BookOpen, text: 'Consignas y material pedagógico' },
+    { icon: Clock, text: 'Experiencia individual / tiempo de proceso' },
+    { icon: Library, text: 'Encuentro virtual de cierre' },
+  ];
 
   return (
     <section
       ref={sectionRef}
-      id="hero"
-      className="section-pinned z-10"
+      id="curso"
+      className="section-pinned z-20"
     >
       {/* Background Image */}
       <div
         ref={bgRef}
         className="absolute inset-0 w-full h-full"
-        style={{ opacity: 0 }}
+        style={{ opacity: 0.6, transform: 'scale(1.1)' }}
       >
         <img
-          src="/images/hero_bg.jpg"
-          alt="Artist studio"
+          src="/images/overview_bg.jpg"
+          alt="Artist sketching"
           className="w-full h-full object-cover"
         />
-        {/* Subtle dark overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0B0D]/70 via-[#0B0B0D]/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0B0D]/80 via-[#0B0B0D]/50 to-[#0B0B0D]/30" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-[6vw]">
-        {/* Title */}
-        <div className="max-w-full sm:max-w-[80vw] lg:max-w-[52vw]">
-          <h1
-            ref={titleLine1Ref}
-            className="font-serif text-[14vw] sm:text-[12vw] md:text-[8vw] lg:text-[96px] font-medium text-[#F4F2EC] leading-[0.95] tracking-[-0.02em]"
-            style={{ opacity: 0 }}
+      <div className="relative z-10 h-full flex flex-col lg:flex-row items-center justify-center lg:justify-start px-6 sm:px-[6vw] py-20 lg:py-0">
+        {/* Left Text Block */}
+        <div className="w-full lg:w-[40vw] mb-8 lg:mb-0">
+          <h2
+            ref={headlineRef}
+            className="font-serif text-[8vw] sm:text-[6vw] md:text-[5vw] lg:text-[56px] font-medium text-[#F4F2EC] leading-[1.05] tracking-[-0.02em]"
+            style={{ opacity: 0, transform: 'translateX(-50vw)' }}
           >
-            {config?.nombreCurso || 'Poética de la mirada'}
-          </h1>
+            Ocho módulos.
+            <br />
+            Un encuentro en vivo cada dos semanas.
+          </h2>
+
+          <p
+            ref={bodyRef}
+            className="mt-4 sm:mt-6 md:mt-8 text-sm sm:text-base md:text-lg text-[#B8B4AA] leading-relaxed max-w-full lg:max-w-[32vw]"
+            style={{ opacity: 0, transform: 'translateY(10vh)' }}
+          >
+            Cada módulo contará con clases grabadas, material pedagógico complementario, encuentros en vivo con espacio para revisión de ejercicios.
+          </p>
         </div>
 
-        {/* Subheadline */}
-        <p
-          ref={subheadRef}
-          className="mt-6 sm:mt-8 md:mt-12 text-sm sm:text-base md:text-lg text-[#B8B4AA] max-w-full sm:max-w-[50vw] lg:max-w-[34vw] leading-relaxed"
-          style={{ opacity: 0 }}
+        {/* Right Floating Card */}
+        <div
+          ref={cardRef}
+          className="relative lg:absolute lg:right-[6vw] lg:top-[22vh] w-full sm:w-[80vw] lg:w-[34vw] min-h-auto lg:min-h-[56vh] bg-[rgba(11,11,13,0.72)] backdrop-blur-md border border-[rgba(244,242,236,0.08)] rounded-lg p-5 sm:p-7 md:p-8"
+          style={{ opacity: 0, transform: 'translateX(60vw)' }}
         >
-          {config?.descripcionCurso || 'Un curso para aprender a ver antes de pintar. Ocho módulos, encuentros virtuales y tiempo de decantación.'}
-        </p>
+          {/* Accent line */}
+          <div className="w-12 h-0.5 bg-[#C7A36D] mb-4 sm:mb-6" />
 
-        {/* CTA Button */}
-        <button
-          ref={ctaRef}
-          onClick={scrollToCourse}
-          className="mt-6 sm:mt-8 md:mt-10 px-6 sm:px-8 py-3 sm:py-4 bg-[#C7A36D] text-[#0B0B0D] font-mono text-xs sm:text-sm uppercase tracking-[0.14em] font-medium hover:bg-[#d4b07a] transition-colors duration-300 w-fit"
-          style={{ opacity: 0 }}
-        >
-          Ver el programa
-        </button>
-      </div>
+          <h3
+            ref={cardTitleRef}
+            className="font-serif text-xl sm:text-2xl md:text-3xl font-medium text-[#F4F2EC] mb-6 sm:mb-8"
+            style={{ opacity: 0 }}
+          >
+            Estructura del curso
+          </h3>
 
-      {/* Scroll Label */}
-      <div
-        ref={scrollLabelRef}
-        className="absolute bottom-[4vh] right-[4vw] flex flex-col items-center gap-2"
-        style={{ opacity: 0 }}
-      >
-        <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.14em] text-[#B8B4AA]">
-          Scroll
-        </span>
-        <ChevronDown className="w-4 h-4 text-[#B8B4AA] animate-bounce" />
+          <ul ref={bulletsRef} className="space-y-4 sm:space-y-5">
+            {features.map((feature, index) => (
+              <li
+                key={index}
+                className="flex items-center gap-3 sm:gap-4 text-[#B8B4AA]"
+                style={{ opacity: 0 }}
+              >
+                <feature.icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#C7A36D] flex-shrink-0" />
+                <span className="text-sm sm:text-base">{feature.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );
 };
 
-export default Hero;
-
-
-
-// hol
+export default CourseOverview;

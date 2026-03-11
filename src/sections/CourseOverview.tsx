@@ -148,9 +148,9 @@ const CourseOverview = ({ config }: { config?: any }) => {
             className="font-serif text-[6vw] md:text-[5vw] lg:text-[56px] font-medium text-[#F4F2EC] leading-[1.05] tracking-[-0.02em]"
             style={{ opacity: 0, transform: 'translateX(-50vw)' }}
           >
-            'Ocho módulos.'
+            Ocho módulos.
             <br />
-            'Un encuentro en vivo cada dos semanas.'
+            Un encuentro en vivo cada dos semanas.
           </h2>
 
           <p
@@ -158,7 +158,7 @@ const CourseOverview = ({ config }: { config?: any }) => {
             className="mt-6 md:mt-8 text-base md:text-lg text-[#B8B4AA] leading-relaxed max-w-[32vw]"
             style={{ opacity: 0, transform: 'translateY(10vh)' }}
           >
-            'Cada módulo contará con clases grabadas, material pedagógico complementario, encuentros en vivo con espacio para revisión de ejercicios.'
+            Cada módulo contará con clases grabadas, material pedagógico complementario, encuentros en vivo con espacio para revisión de ejercicios.
           </p>
         </div>
 

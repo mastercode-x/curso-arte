@@ -22,7 +22,6 @@ const ModuleSection = memo(({ badge, title, description, image, zIndex, moduleId
   const bodyRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const contextRef = useRef<gsap.Context | null>(null);
-  const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
 
   useLayoutEffect(() => {
     // Asegurar que tenemos referencias válidas
@@ -31,6 +30,8 @@ const ModuleSection = memo(({ badge, title, description, image, zIndex, moduleId
     }
 
     // Crear contexto de GSAP para mejor cleanup
+    // El contexto se vincula al sectionRef para que todos los tweens y ScrollTriggers
+    // creados dentro sean revertidos cuando el componente se desmonta
     contextRef.current = gsap.context(() => {
       const scrollTl = gsap.timeline({
         scrollTrigger: {
@@ -41,13 +42,13 @@ const ModuleSection = memo(({ badge, title, description, image, zIndex, moduleId
           scrub: 0.5,
           // Importante: invalidateOnRefresh previene conflictos cuando React re-renderiza
           invalidateOnRefresh: true,
+          // Asegurar que el pin spacer se limpia correctamente
+          onKill: () => {
+            // Esto se ejecuta cuando el ScrollTrigger es matado
+            // GSAP se encargará de limpiar los pin spacers automáticamente
+          },
         },
       });
-
-      // Guardar referencia al ScrollTrigger para debugging
-      if (scrollTl.scrollTrigger) {
-        scrollTriggerRef.current = scrollTl.scrollTrigger;
-      }
 
       // ENTRANCE (0-30%)
       // Background entrance
@@ -130,12 +131,12 @@ const ModuleSection = memo(({ badge, title, description, image, zIndex, moduleId
     }, sectionRef);
 
     return () => {
-      // Cleanup: revertir el contexto de GSAP (esto mata todos los tweens y ScrollTriggers dentro)
+      // Cleanup: revertir el contexto de GSAP
+      // Esto mata todos los tweens, ScrollTriggers y limpia los pin spacers
       if (contextRef.current) {
         contextRef.current.revert();
         contextRef.current = null;
       }
-      scrollTriggerRef.current = null;
     };
   }, []);
 

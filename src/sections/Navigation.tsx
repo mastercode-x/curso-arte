@@ -1,4 +1,5 @@
 import { useEffect, useState, memo } from 'react';
+import { createPortal } from 'react-dom';
 import { Menu, X } from 'lucide-react';
 
 import * as moduleApi from '../services/moduleApi';
@@ -9,6 +10,206 @@ interface PublicModule {
   titulo: string;
   orden: number;
 }
+
+// Componente para el dropdown de módulos en desktop
+const ModulesDropdownPortal = memo(({
+  isOpen,
+  modules,
+  loading,
+  onClose,
+  onSelectModule,
+}: {
+  isOpen: boolean;
+  modules: PublicModule[];
+  loading: boolean;
+  onClose: () => void;
+  onSelectModule: (moduleId: string) => void;
+}) => {
+  if (!isOpen) return null;
+
+  return createPortal(
+    <>
+      {/* Click outside overlay para cerrar el dropdown */}
+      <div
+        className="fixed inset-0 z-[99]"
+        onClick={onClose}
+      />
+      
+      {/* Dropdown menu */}
+      <div className="fixed z-[100] bg-[#1a1a1f]/95 backdrop-blur-md border border-[rgba(199,163,109,0.3)] rounded-lg shadow-xl min-w-[220px] py-2 overflow-hidden"
+        style={{
+          top: 'calc(4vh + 2rem)',
+          right: '4vw',
+        }}
+      >
+        {loading ? (
+          <>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="px-4 py-2.5">
+                <div className="h-3 bg-[rgba(244,242,236,0.1)] rounded animate-pulse w-full"></div>
+              </div>
+            ))}
+          </>
+        ) : modules.length === 0 ? (
+          <div className="px-4 py-3 text-center">
+            <span className="text-xs text-[#B8B4AA] italic">Próximamente</span>
+          </div>
+        ) : (
+          modules.map((module) => (
+            <button
+              key={module.id}
+              onClick={() => {
+                onSelectModule(module.id);
+                onClose();
+              }}
+              className="w-full px-4 py-2.5 text-left transition-colors duration-200 hover:bg-[rgba(199,163,109,0.1)] group"
+            >
+              <span className="font-mono text-[10px] text-[#C7A36D]/60 uppercase tracking-[0.12em]">
+                {String(module.orden).padStart(2, '0')}
+              </span>
+              <span className="block text-xs text-[#B8B4AA] group-hover:text-[#F4F2EC] transition-colors duration-200 mt-0.5">
+                {module.titulo}
+              </span>
+            </button>
+          ))
+        )}
+      </div>
+    </>,
+    document.body
+  );
+});
+
+ModulesDropdownPortal.displayName = 'ModulesDropdownPortal';
+
+// Componente para el menú móvil
+const MobileMenuPortal = memo(({
+  isOpen,
+  modules,
+  loading,
+  activeSection,
+  onClose,
+  onSelectSection,
+  onSelectModule,
+  showModulesDropdown,
+  onToggleModulesDropdown,
+}: {
+  isOpen: boolean;
+  modules: PublicModule[];
+  loading: boolean;
+  activeSection: string;
+  onClose: () => void;
+  onSelectSection: (id: string) => void;
+  onSelectModule: (moduleId: string) => void;
+  showModulesDropdown: boolean;
+  onToggleModulesDropdown: () => void;
+}) => {
+  if (!isOpen) return null;
+
+  const navItems = [
+    { id: 'curso', label: 'Curso' },
+    { id: 'calendario', label: 'Calendario' },
+    { id: 'inscripcion', label: 'Inscripción' },
+  ];
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100] lg:hidden">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      
+      {/* Menu Content */}
+      <div className="absolute top-0 right-0 w-[80vw] max-w-[300px] h-full bg-[#141419] border-l border-[rgba(244,242,236,0.08)] p-6 pt-20 overflow-y-auto">
+        <ul className="space-y-6">
+          {navItems.map((item) => (
+            <li key={item.id}>
+              <button
+                onClick={() => onSelectSection(item.id)}
+                className={`font-mono text-sm uppercase tracking-[0.14em] transition-colors duration-300 ${
+                  activeSection === item.id
+                    ? 'text-[#C7A36D]'
+                    : 'text-[#B8B4AA] hover:text-[#F4F2EC]'
+                }`}
+              >
+                {item.label}
+              </button>
+            </li>
+          ))}
+
+          {/* Mobile Modules Section */}
+          <li>
+            <button
+              onClick={onToggleModulesDropdown}
+              className={`font-mono text-sm uppercase tracking-[0.14em] transition-colors duration-300 flex items-center gap-2 ${
+                activeSection.startsWith('modulo')
+                  ? 'text-[#C7A36D]'
+                  : 'text-[#B8B4AA] hover:text-[#F4F2EC]'
+              }`}
+            >
+              Módulos
+              <svg
+                className={`w-3 h-3 transition-transform duration-200 ${showModulesDropdown ? 'rotate-180' : ''}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Mobile Modules List */}
+            {showModulesDropdown && (
+              <div className="mt-3 ml-4 space-y-2 border-l border-[rgba(199,163,109,0.3)] pl-4">
+                {loading ? (
+                  <>
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="py-2">
+                        <div className="h-3 bg-[rgba(244,242,236,0.1)] rounded animate-pulse w-full"></div>
+                      </div>
+                    ))}
+                  </>
+                ) : modules.length === 0 ? (
+                  <span className="text-xs text-[#B8B4AA] italic">Próximamente</span>
+                ) : (
+                  modules.map((module) => (
+                    <button
+                      key={module.id}
+                      onClick={() => onSelectModule(module.id)}
+                      className="block w-full text-left py-2"
+                    >
+                      <span className="font-mono text-[10px] text-[#C7A36D]/60 uppercase tracking-[0.12em]">
+                        {String(module.orden).padStart(2, '0')}
+                      </span>
+                      <span className="block text-sm text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors duration-200">
+                        {module.titulo}
+                      </span>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+          </li>
+
+          {/* Mobile Acceder Button */}
+          <li className="pt-4 border-t border-[rgba(244,242,236,0.08)]">
+            <a
+              href="https://curso2-nine.vercel.app/#/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block font-mono text-sm uppercase tracking-[0.14em] px-6 py-3 border border-[#C7A36D] text-[#C7A36D] hover:bg-[#C7A36D] hover:text-[#0B0B0D] transition-all duration-300 rounded-sm"
+            >
+              Acceder
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>,
+    document.body
+  );
+});
+
+MobileMenuPortal.displayName = 'MobileMenuPortal';
 
 const Navigation = memo(() => {
   const [isVisible, setIsVisible] = useState(false);
@@ -132,7 +333,7 @@ const Navigation = memo(() => {
             </li>
           ))}
 
-          {/* Modules Dropdown */}
+          {/* Modules Dropdown Button */}
           <li className="relative">
             <button
               onClick={() => setShowModulesDropdown(!showModulesDropdown)}
@@ -152,40 +353,6 @@ const Navigation = memo(() => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-
-            {/* Dropdown Menu */}
-            {showModulesDropdown && (
-              <div className="absolute top-full right-0 mt-2 bg-[#1a1a1f]/95 backdrop-blur-md border border-[rgba(199,163,109,0.3)] rounded-lg shadow-xl min-w-[220px] py-2 overflow-hidden">
-                {loadingModules ? (
-                  <>
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="px-4 py-2.5">
-                        <div className="h-3 bg-[rgba(244,242,236,0.1)] rounded animate-pulse w-full"></div>
-                      </div>
-                    ))}
-                  </>
-                ) : modules.length === 0 ? (
-                  <div className="px-4 py-3 text-center">
-                    <span className="text-xs text-[#B8B4AA] italic">Próximamente</span>
-                  </div>
-                ) : (
-                  modules.map((module) => (
-                    <button
-                      key={module.id}
-                      onClick={() => scrollToModule(module.id)}
-                      className="w-full px-4 py-2.5 text-left transition-colors duration-200 hover:bg-[rgba(199,163,109,0.1)] group"
-                    >
-                      <span className="font-mono text-[10px] text-[#C7A36D]/60 uppercase tracking-[0.12em]">
-                        {String(module.orden).padStart(2, '0')}
-                      </span>
-                      <span className="block text-xs text-[#B8B4AA] group-hover:text-[#F4F2EC] transition-colors duration-200 mt-0.5">
-                        {module.titulo}
-                      </span>
-                    </button>
-                  ))
-                )}
-              </div>
-            )}
           </li>
 
           {/* Botón Acceder */}
@@ -202,110 +369,26 @@ const Navigation = memo(() => {
         </ul>
       </nav>
 
-      {/* Mobile Navigation Menu */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[100] lg:hidden">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          
-          {/* Menu Content */}
-          <div className="absolute top-0 right-0 w-[80vw] max-w-[300px] h-full bg-[#141419] border-l border-[rgba(244,242,236,0.08)] p-6 pt-20">
-            <ul className="space-y-6">
-              {navItems.map((item) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() => scrollToSection(item.id)}
-                    className={`font-mono text-sm uppercase tracking-[0.14em] transition-colors duration-300 ${
-                      activeSection === item.id
-                        ? 'text-[#C7A36D]'
-                        : 'text-[#B8B4AA] hover:text-[#F4F2EC]'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                </li>
-              ))}
+      {/* Portals - renderizados fuera del árbol DOM de LandingPage */}
+      <ModulesDropdownPortal
+        isOpen={showModulesDropdown && !mobileMenuOpen}
+        modules={modules}
+        loading={loadingModules}
+        onClose={() => setShowModulesDropdown(false)}
+        onSelectModule={scrollToModule}
+      />
 
-              {/* Mobile Modules Section */}
-              <li>
-                <button
-                  onClick={() => setShowModulesDropdown(!showModulesDropdown)}
-                  className={`font-mono text-sm uppercase tracking-[0.14em] transition-colors duration-300 flex items-center gap-2 ${
-                    activeSection.startsWith('modulo')
-                      ? 'text-[#C7A36D]'
-                      : 'text-[#B8B4AA] hover:text-[#F4F2EC]'
-                  }`}
-                >
-                  Módulos
-                  <svg
-                    className={`w-3 h-3 transition-transform duration-200 ${showModulesDropdown ? 'rotate-180' : ''}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {/* Mobile Modules List */}
-                {showModulesDropdown && (
-                  <div className="mt-3 ml-4 space-y-2 border-l border-[rgba(199,163,109,0.3)] pl-4">
-                    {loadingModules ? (
-                      <>
-                        {[1, 2, 3].map((i) => (
-                          <div key={i} className="py-2">
-                            <div className="h-3 bg-[rgba(244,242,236,0.1)] rounded animate-pulse w-full"></div>
-                          </div>
-                        ))}
-                      </>
-                    ) : modules.length === 0 ? (
-                      <span className="text-xs text-[#B8B4AA] italic">Próximamente</span>
-                    ) : (
-                      modules.map((module) => (
-                        <button
-                          key={module.id}
-                          onClick={() => scrollToModule(module.id)}
-                          className="block w-full text-left py-2"
-                        >
-                          <span className="font-mono text-[10px] text-[#C7A36D]/60 uppercase tracking-[0.12em]">
-                            {String(module.orden).padStart(2, '0')}
-                          </span>
-                          <span className="block text-sm text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors duration-200">
-                            {module.titulo}
-                          </span>
-                        </button>
-                      ))
-                    )}
-                  </div>
-                )}
-              </li>
-
-              {/* Mobile Acceder Button */}
-              <li className="pt-4 border-t border-[rgba(244,242,236,0.08)]">
-                <a
-                  href="https://curso2-nine.vercel.app/#/login"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block font-mono text-sm uppercase tracking-[0.14em] px-6 py-3 border border-[#C7A36D] text-[#C7A36D] hover:bg-[#C7A36D] hover:text-[#0B0B0D] transition-all duration-300 rounded-sm"
-                >
-                  Acceder
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      )}
-
-      {/* Click outside to close dropdown */}
-      {showModulesDropdown && !mobileMenuOpen && (
-        <div
-          className="fixed inset-0 z-[99] hidden lg:block"
-          onClick={() => setShowModulesDropdown(false)}
-        />
-      )}
+      <MobileMenuPortal
+        isOpen={mobileMenuOpen}
+        modules={modules}
+        loading={loadingModules}
+        activeSection={activeSection}
+        onClose={() => setMobileMenuOpen(false)}
+        onSelectSection={scrollToSection}
+        onSelectModule={scrollToModule}
+        showModulesDropdown={showModulesDropdown}
+        onToggleModulesDropdown={() => setShowModulesDropdown(!showModulesDropdown)}
+      />
     </>
   );
 });

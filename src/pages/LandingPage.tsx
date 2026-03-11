@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Hero from '../sections/Hero';
@@ -7,6 +7,7 @@ import ModuleSection from '../sections/ModuleSection';
 import Calendar from '../sections/Calendar';
 import Instructor from '../sections/Instructor';
 import Navigation from '../sections/Navigation';
+import { NavigationProvider } from '../contexts/NavigationContext';
 import * as moduleApi from '../services/moduleApi';
 import * as adminApi from '../services/adminApi';
 
@@ -82,7 +83,7 @@ const EmptyModulesState = () => {
   );
 };
 
-const LandingPage: React.FC = () => {
+const LandingPageContent: React.FC = () => {
   const mainRef = useRef<HTMLDivElement>(null);
   const [modules, setModules] = useState<any[]>([]);
   const [config, setConfig] = useState<any>(null);
@@ -106,7 +107,19 @@ const LandingPage: React.FC = () => {
     fetchData();
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (loading) return;
+
+    // Pequeño delay para asegurar que el DOM está completamente renderizado
+    const timer = setTimeout(() => {
+      // Refrescar ScrollTrigger después de que todo esté montado
+      ScrollTrigger.refresh();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [loading, modules.length]);
+
+  useLayoutEffect(() => {
     if (loading) return;
 
     // Global snap for pinned sections
@@ -152,9 +165,10 @@ const LandingPage: React.FC = () => {
 
     return () => {
       clearTimeout(timer);
-      ScrollTrigger.getAll().forEach(st => st.kill());
+      // NO matar todos los ScrollTriggers aquí - dejar que ModuleSection los maneje
+      // ScrollTrigger.getAll().forEach(st => st.kill());
     };
-  }, [loading, modules]);
+  }, [loading, modules.length]);
 
   if (loading) {
     return (
@@ -202,6 +216,14 @@ const LandingPage: React.FC = () => {
       {/* Instructor & Enrollment */}
       <Instructor config={config} />
     </div>
+  );
+};
+
+const LandingPage: React.FC = () => {
+  return (
+    <NavigationProvider>
+      <LandingPageContent />
+    </NavigationProvider>
   );
 };
 

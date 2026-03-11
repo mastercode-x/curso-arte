@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { Menu, X } from 'lucide-react';
 
 import * as moduleApi from '../services/moduleApi';
-
-import { gsap, ScrollTrigger } from '../utils/gsap';
+import { useNavigation } from '../contexts/NavigationContext';
 
 interface PublicModule {
   id: string;
@@ -11,13 +10,19 @@ interface PublicModule {
   orden: number;
 }
 
-const Navigation = () => {
+const Navigation = memo(() => {
   const [isVisible, setIsVisible] = useState(false);
-  const [activeSection, setActiveSection] = useState('');
-  const [showModulesDropdown, setShowModulesDropdown] = useState(false);
   const [modules, setModules] = useState<PublicModule[]>([]);
   const [loadingModules, setLoadingModules] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const {
+    showModulesDropdown,
+    setShowModulesDropdown,
+    mobileMenuOpen,
+    setMobileMenuOpen,
+    activeSection,
+    setActiveSection,
+  } = useNavigation();
 
   // Cargar módulos públicos desde la API
   useEffect(() => {
@@ -50,6 +55,7 @@ const Navigation = () => {
       element.scrollIntoView({ behavior: 'smooth' });
       setActiveSection(id);
       setMobileMenuOpen(false);
+      setShowModulesDropdown(false);
     }
   };
 
@@ -302,6 +308,8 @@ const Navigation = () => {
       )}
     </>
   );
-};
+});
+
+Navigation.displayName = 'Navigation';
 
 export default Navigation;

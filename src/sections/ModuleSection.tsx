@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect } from 'react';
+import { useRef, useLayoutEffect, memo } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -14,16 +14,24 @@ interface ModuleSectionProps {
   duration?: string;
 }
 
-const ModuleSection = ({ badge, title, description, image, zIndex, moduleId, duration }: ModuleSectionProps) => {
+const ModuleSection = memo(({ badge, title, description, image, zIndex, moduleId, duration }: ModuleSectionProps) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLSpanElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const bodyRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  const contextRef = useRef<gsap.Context | null>(null);
+  const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
 
   useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
+    // Asegurar que tenemos referencias válidas
+    if (!sectionRef.current || !bgRef.current || !badgeRef.current || !headlineRef.current || !bodyRef.current) {
+      return;
+    }
+
+    // Crear contexto de GSAP para mejor cleanup
+    contextRef.current = gsap.context(() => {
       const scrollTl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -31,8 +39,15 @@ const ModuleSection = ({ badge, title, description, image, zIndex, moduleId, dur
           end: '+=120%',
           pin: true,
           scrub: 0.5,
+          // Importante: invalidateOnRefresh previene conflictos cuando React re-renderiza
+          invalidateOnRefresh: true,
         },
       });
+
+      // Guardar referencia al ScrollTrigger para debugging
+      if (scrollTl.scrollTrigger) {
+        scrollTriggerRef.current = scrollTl.scrollTrigger;
+      }
 
       // ENTRANCE (0-30%)
       // Background entrance
@@ -114,7 +129,14 @@ const ModuleSection = ({ badge, title, description, image, zIndex, moduleId, dur
       );
     }, sectionRef);
 
-    return () => ctx.revert();
+    return () => {
+      // Cleanup: revertir el contexto de GSAP (esto mata todos los tweens y ScrollTriggers dentro)
+      if (contextRef.current) {
+        contextRef.current.revert();
+        contextRef.current = null;
+      }
+      scrollTriggerRef.current = null;
+    };
   }, []);
 
   return (
@@ -134,6 +156,7 @@ const ModuleSection = ({ badge, title, description, image, zIndex, moduleId, dur
           src={image}
           alt={title}
           className="w-full h-full object-cover"
+          loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0B0B0D]/85 via-[#0B0B0D]/50 to-transparent" />
       </div>
@@ -196,9 +219,8 @@ const ModuleSection = ({ badge, title, description, image, zIndex, moduleId, dur
       </div>
     </section>
   );
-};
+});
+
+ModuleSection.displayName = 'ModuleSection';
 
 export default ModuleSection;
-
-
-// hol

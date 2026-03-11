@@ -17,6 +17,7 @@ import applicationRoutes from './routes/applications';
 import adminRoutes from './routes/admin';
 import webhookRoutes from './routes/webhooks';
 import dashboardRoutes from './routes/dashboard';
+import calendarRoutes from './routes/calendar';
 
 dotenv.config();
 
@@ -81,6 +82,7 @@ app.use('/api/modules', moduleRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin/calendar', calendarRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 

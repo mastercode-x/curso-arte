@@ -1,8 +1,9 @@
 import { useRef, useLayoutEffect } from 'react';
-
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Instagram, ExternalLink, Mail, Youtube, TrendingUp } from 'lucide-react';
 
-import { gsap, ScrollTrigger } from '../utils/gsap';
+gsap.registerPlugin(ScrollTrigger);
 
 const Instructor = ({ config }: { config?: any }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -122,7 +123,7 @@ const Instructor = ({ config }: { config?: any }) => {
                 rel="noopener noreferrer"
                 className="px-8 py-4 bg-[#C7A36D] text-[#0B0B0D] font-mono text-sm uppercase tracking-[0.14em] font-medium hover:bg-[#d4b07a] transition-colors duration-300 flex items-center justify-center gap-2"
               >
-                Completar el formulario
+                Formulario de admisión — Poética de la Mirada
                 <ExternalLink className="w-4 h-4" />
               </a>
             </div>

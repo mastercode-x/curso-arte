@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Hero from '../sections/Hero';
 import CourseOverview from '../sections/CourseOverview';
 import ModuleSection from '../sections/ModuleSection';
@@ -10,7 +11,7 @@ import * as moduleApi from '../services/moduleApi';
 import * as adminApi from '../services/adminApi';
 
 // Registrar el plugin de GSAP
-import { gsap, ScrollTrigger } from '../utils/gsap';
+gsap.registerPlugin(ScrollTrigger);
 
 // Skeleton component for module loading
 const ModuleSkeleton = ({ index }: { index: number }) => {

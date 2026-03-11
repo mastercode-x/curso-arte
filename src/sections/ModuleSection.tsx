@@ -1,7 +1,8 @@
 import { useRef, useLayoutEffect } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-
-import { gsap, ScrollTrigger } from '../utils/gsap';
+gsap.registerPlugin(ScrollTrigger);
 
 interface ModuleSectionProps {
   badge: string;

@@ -15,12 +15,19 @@ import * as paymentApi from '../services/paymentApi';
 import * as moduleApi from '../services/moduleApi';
 import * as adminApi from '../services/adminApi';
 import * as dashboardApi from '../services/dashboardApi';
+import CalendarManager from '../components/admin/CalendarManager';
+import SettingsManager from '../components/admin/SettingsManager';
+import ModulesManager from '../components/admin/ModulesManager';
+import ApplicationsManager from '../components/admin/ApplicationsManager';
+import StudentsManager from '../components/admin/StudentsManager';
+import PaymentsManager from '../components/admin/PaymentsManager';
 
 const SECTIONS = [
   { id: 'overview', icon: LayoutDashboard, label: 'Dashboard' },
   { id: 'solicitudes', icon: UserCheck, label: 'Solicitudes' },
   { id: 'estudiantes', icon: Users, label: 'Estudiantes' },
   { id: 'modulos', icon: BookOpen, label: 'Módulos' },
+  { id: 'calendario', icon: Calendar, label: 'Calendario' },
   { id: 'pagos', icon: CreditCard, label: 'Pagos' },
   { id: 'configuracion', icon: Settings, label: 'Configuración' },
 ];
@@ -156,6 +163,7 @@ export default function ProfessorDashboard() {
           {section === 'solicitudes' && <SolicitudesSection />}
           {section === 'estudiantes' && <EstudiantesSection />}
           {section === 'modulos' && <ModulosSection />}
+          {section === 'calendario' && <CalendarSection />}
           {section === 'pagos' && <PagosSection />}
           {section === 'configuracion' && <ConfiguracionSection />}
         </div>
@@ -1045,6 +1053,11 @@ function PagosSection() {
       </div>
     </div>
   );
+}
+
+// ── CALENDARIO ──────────────────────────────────────────────────
+function CalendarSection() {
+  return <CalendarManager />;
 }
 
 // ── CONFIGURACIÓN ────────────────────────────────────────────────

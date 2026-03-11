@@ -73,13 +73,19 @@ const Navigation = () => {
 
   return (
     <>
-      {/* Wordmark - always visible */}
+      {/* Logo - always visible */}
       <div className={`fixed top-[4vh] left-[4vw] z-[100] max-w-[30vw] md:max-w-full transition-opacity duration-500 ${
         isVisible ? 'opacity-50' : 'opacity-100'
       }`}>
-        <span className="font-serif text-base md:text-lg lg:text-xl text-[#F4F2EC] tracking-tight leading-tight break-words">
-          Poética de la Mirada
-        </span>
+        <img 
+          src="/images/logo.svg" 
+          alt="Poética de la Mirada" 
+          className="h-8 md:h-10 w-auto object-contain"
+          onError={(e) => {
+            // Fallback si el logo no existe
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
+        />
       </div>
 
       {/* Navigation - appears after hero */}

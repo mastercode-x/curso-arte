@@ -1,8 +1,9 @@
 import { useRef, useLayoutEffect } from 'react';
-
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Video, BookOpen, Clock, Library } from 'lucide-react';
 
-import { gsap, ScrollTrigger } from '../utils/gsap';
+gsap.registerPlugin(ScrollTrigger);
 
 const CourseOverview = ({ config }: { config?: any }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -112,10 +113,10 @@ const CourseOverview = ({ config }: { config?: any }) => {
   }, []);
 
   const features = [
-    { icon: Video, text: '1 encuentro virtual por semana' },
-    { icon: BookOpen, text: 'Ejercicios prácticos con feedback' },
-    { icon: Clock, text: 'Tiempo de decantación entre sesiones' },
-    { icon: Library, text: 'Material de lectura y referencias' },
+    { icon: Video, text: 'Video de apertura (umbral)' },
+    { icon: BookOpen, text: 'Consignas y material pedagógico' },
+    { icon: Clock, text: 'Experiencia individual / tiempo de proceso' },
+    { icon: Library, text: 'Encuentro virtual de cierre' },
   ];
 
   return (
@@ -149,7 +150,7 @@ const CourseOverview = ({ config }: { config?: any }) => {
           >
             {config?.nombreCurso || 'Ocho módulos.'}
             <br />
-            {!config?.nombreCurso && 'Un encuentro por semana.'}
+            {!config?.nombreCurso && 'Un encuentro en vivo cada dos semanas.'}
           </h2>
 
           <p
@@ -157,7 +158,7 @@ const CourseOverview = ({ config }: { config?: any }) => {
             className="mt-6 md:mt-8 text-base md:text-lg text-[#B8B4AA] leading-relaxed max-w-[32vw]"
             style={{ opacity: 0, transform: 'translateY(10vh)' }}
           >
-            {config?.descripcionCurso || 'Cada módulo combina teoría, práctica guiada y tiempo de decantación. Los encuentros son virtuales, en vivo, con espacio para preguntas y revisión de ejercicios.'}
+            {config?.descripcionCurso || 'Cada módulo contará con clases grabadas, material pedagógico complementario, encuentros en vivo con espacio para revisión de ejercicios.'}
           </p>
         </div>
 

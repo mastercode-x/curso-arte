@@ -59,6 +59,7 @@ model Profesor {
   // Relaciones
   user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   configuracion ConfiguracionProfesor?
+  calendarEvents CalendarEvent[]
 
   @@map("profesores")
 }
@@ -217,4 +218,22 @@ enum EstadoPagoTransaccion {
   completado
   fallido
   reembolsado
+}
+
+model CalendarEvent {
+  id        String   @id @default(uuid())
+  profesorId String   @map("profesor_id")
+  week      String
+  date      String
+  activity  String
+  module    String?
+  orden     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relaciones
+  profesor  Profesor @relation(fields: [profesorId], references: [id], onDelete: Cascade)
+
+  @@index([profesorId])
+  @@map("calendar_events")
 }

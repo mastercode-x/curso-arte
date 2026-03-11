@@ -126,6 +126,16 @@ const Instructor = ({ config }: { config?: any }) => {
                 <span className="truncate">Formulario de admisión</span>
                 <ExternalLink className="w-4 h-4 flex-shrink-0" />
               </a>
+              {config?.whatsappNumero && (
+                <a
+                  href={`https://wa.me/${config.whatsappNumero.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 sm:px-8 py-3 sm:py-4 border border-[#C7A36D] text-[#C7A36D] font-mono text-xs sm:text-sm uppercase tracking-[0.14em] font-medium hover:bg-[#C7A36D] hover:text-[#0B0B0D] transition-colors duration-300 flex items-center justify-center gap-2"
+                >
+                  <span>WhatsApp</span>
+                </a>
+              )}
             </div>
 
             {/* Contact link */}

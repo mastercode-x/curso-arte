@@ -1113,28 +1113,26 @@ function ConfiguracionSection() {
         {
           title: "Información del curso",
           fields: [
-            { key: "nombre_curso", label: "Nombre del curso", type: "text" },
-            { key: "descripcion_curso", label: "Descripción", type: "textarea" },
-            { key: "precio_curso", label: "Precio (USD)", type: "number" },
-            { key: "cupos_totales", label: "Cupos totales", type: "number" },
-            { key: "fecha_inicio", label: "Fecha de inicio", type: "text" },
+            { key: "nombreCurso", label: "Nombre del curso", type: "text" },
+            { key: "descripcionCurso", label: "Descripción", type: "textarea" },
+            { key: "precioCurso", label: "Precio", type: "number" },
+            { key: "moneda", label: "Moneda (USD, ARS, etc.)", type: "text" },
+            { key: "pais", label: "País", type: "text" },
           ]
         },
         {
           title: "Perfil del profesor",
           fields: [
-            { key: "nombre_profesor", label: "Nombre", type: "text" },
-            { key: "bio_profesor", label: "Bio", type: "textarea" },
-            { key: "email_contacto", label: "Email de contacto", type: "email" },
-            { key: "whatsapp_numero", label: "WhatsApp", type: "text" },
-            { key: "instagram_url", label: "Instagram URL", type: "url" },
+            { key: "bioProfesor", label: "Bio y Nombre del Profesor", type: "textarea" },
+            { key: "fotoProfesorUrl", label: "URL de Foto del Profesor", type: "url" },
+            { key: "emailContacto", label: "Email de contacto", type: "email" },
+            { key: "whatsappNumero", label: "WhatsApp (con código de país)", type: "text" },
           ]
         },
         {
           title: "Links importantes",
           fields: [
-            { key: "link_formulario", label: "Link del formulario Google", type: "url" },
-            { key: "link_pago", label: "Link de pago (Stripe/MP)", type: "url" },
+            { key: "googleFormUrl", label: "Link del formulario Google", type: "url" },
           ]
         },
       ].map(({ title, fields }: any) => (

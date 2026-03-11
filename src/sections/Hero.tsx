@@ -161,17 +161,8 @@ const Hero = ({ config }: { config?: any }) => {
             className="font-serif text-[14vw] sm:text-[12vw] md:text-[8vw] lg:text-[96px] font-medium text-[#F4F2EC] leading-[0.95] tracking-[-0.02em]"
             style={{ opacity: 0 }}
           >
-            {config?.nombreCurso || 'Poética'}
+            {config?.nombreCurso || 'Poética de la mirada'}
           </h1>
-          {!config?.nombreCurso && (
-            <h1
-              ref={titleLine2Ref}
-              className="font-serif text-[14vw] sm:text-[12vw] md:text-[8vw] lg:text-[96px] font-medium text-[#F4F2EC] leading-[0.95] tracking-[-0.02em] mt-2"
-              style={{ opacity: 0 }}
-            >
-              de la mirada
-            </h1>
-          )}
         </div>
 
         {/* Subheadline */}

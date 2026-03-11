@@ -10,10 +10,11 @@ interface ModuleSectionProps {
   description: string;
   image: string;
   zIndex: number;
-  moduleId?: number;  // ← Add this line
+  moduleId?: string;
+  duration?: string;
 }
 
-const ModuleSection = ({ badge, title, description, image, zIndex }: ModuleSectionProps) => {
+const ModuleSection = ({ badge, title, description, image, zIndex, moduleId, duration }: ModuleSectionProps) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLSpanElement>(null);
@@ -119,7 +120,7 @@ const ModuleSection = ({ badge, title, description, image, zIndex }: ModuleSecti
   return (
     <section
       ref={sectionRef}
-      id="modulos"
+      id={moduleId ? `modulo-${moduleId}` : 'modulos'}
       className="section-pinned"
       style={{ zIndex }}
     >
@@ -166,12 +167,32 @@ const ModuleSection = ({ badge, title, description, image, zIndex }: ModuleSecti
           {description}
         </p>
 
-        {/* CTA Button - Removed */}
-        <div
-          ref={ctaRef}
-          className="mt-8 md:mt-10"
-          style={{ opacity: 0, transform: 'translateY(5vh)' }}
-        ></div>
+        {/* Duration badge */}
+        {duration && (
+          <div
+            ref={ctaRef}
+            className="mt-8 md:mt-10"
+            style={{ opacity: 0, transform: 'translateY(5vh)' }}
+          >
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-[rgba(199,163,109,0.1)] border border-[rgba(199,163,109,0.2)] rounded-sm">
+              <svg className="w-4 h-4 text-[#C7A36D]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="font-mono text-xs uppercase tracking-[0.08em] text-[#C7A36D]">
+                {duration}
+              </span>
+            </span>
+          </div>
+        )}
+
+        {/* Spacer if no duration */}
+        {!duration && (
+          <div
+            ref={ctaRef}
+            className="mt-8 md:mt-10"
+            style={{ opacity: 0, transform: 'translateY(5vh)' }}
+          ></div>
+        )}
       </div>
     </section>
   );

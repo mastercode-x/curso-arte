@@ -178,7 +178,7 @@ const Calendar = () => {
             Encuentros y calendario
           </h2>
           <p className="mt-3 sm:mt-4 text-sm sm:text-base md:text-lg text-[#B8B4AA] max-w-full sm:max-w-[70vw] lg:max-w-[50vw]">
-            Una sesión por semana, con tiempo para practicar entre encuentros. 
+            Una sesión cada dos semanas, con tiempo para practicar entre encuentros. 
             Cada módulo incluye un encuentro virtual en vivo y una semana de decantación.
           </p>
         </div>

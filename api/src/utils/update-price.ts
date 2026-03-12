@@ -12,7 +12,7 @@ async function main() {
 
   const updated = await prisma.configuracionProfesor.update({
     where: { id: config.id },
-    data: { precioCurso: 100 } // Cambiá este valor
+    data: { precioCurso: 50 } // Cambiá este valor
   });
 
   console.log(`✅ Precio actualizado a: ${updated.precioCurso} ${updated.moneda}`);

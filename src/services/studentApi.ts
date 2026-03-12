@@ -101,3 +101,11 @@ export const getMyProgress = async () => {
   const response = await api.get('/students/me/progress');
   return response.data;
 };
+
+
+
+// Eliminar estudiante (profesor)
+export const deleteStudent = async (id: string) => {
+  const response = await api.delete(`/students/${id}`);
+  return response.data;
+};

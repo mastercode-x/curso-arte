@@ -524,14 +524,17 @@ function EstudiantesSection() {
                     </div>
                   </td>
                   <td className="px-5 py-4">
-                    <div className="flex items-center gap-1">
-                      <button onClick={() => window.location.href = createPageUrl(`#/estudiantedetalle?id=${e.id}`)} className="p-1.5 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors" title="Ver detalle">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => toggleActivo(e.id)} className={`p-1.5 transition-colors ${e.activo !== false ? 'text-[#B8B4AA] hover:text-yellow-400' : 'text-yellow-400 hover:text-[#B8B4AA]'}`} title={e.activo !== false ? 'Desactivar' : 'Activar'}>
-                        <XCircle className="w-4 h-4" />
-                      </button>
-                    </div>
+                <div className="flex items-center gap-1">
+  <button onClick={() => window.location.href = createPageUrl(`#/estudiantedetalle?id=${e.id}`)} className="p-1.5 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors" title="Ver detalle">
+    <Eye className="w-4 h-4" />
+  </button>
+  <button onClick={() => toggleActivo(e.id)} className={`p-1.5 transition-colors ${e.activo !== false ? 'text-[#B8B4AA] hover:text-yellow-400' : 'text-yellow-400 hover:text-[#B8B4AA]'}`} title={e.activo !== false ? 'Desactivar' : 'Activar'}>
+    <XCircle className="w-4 h-4" />
+  </button>
+  <button onClick={() => handleDelete(e.id)} className="p-1.5 text-[#B8B4AA] hover:text-red-400 transition-colors" title="Eliminar estudiante">
+    <Trash2 className="w-4 h-4" />
+  </button>
+</div>
                   </td>
                 </tr>
               ))}
@@ -1193,3 +1196,20 @@ function StatusBadge({ estado }: any) {
     </span>
   );
 }
+
+
+
+
+
+
+
+const handleDelete = async (id: string) => {
+  if (!confirm('¿Estás seguro de eliminar este estudiante? Esta acción no se puede deshacer.')) return;
+  try {
+    await studentApi.deleteStudent(id);
+    toast.success('Estudiante eliminado');
+    loadEstudiantes();
+  } catch (error) {
+    toast.error('Error eliminando estudiante');
+  }
+};

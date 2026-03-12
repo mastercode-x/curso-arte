@@ -256,19 +256,7 @@ const Calendar = () => {
         </div>
 
         {/* CTA */}
-        <div ref={ctaRef} className="mt-8 sm:mt-12 md:mt-16 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6" style={{ opacity: 0 }}>
-          <button className="px-6 sm:px-8 py-3 sm:py-4 bg-[#C7A36D] text-[#0B0B0D] font-mono text-xs sm:text-sm uppercase tracking-[0.14em] font-medium hover:bg-[#d4b07a] transition-colors duration-300">
-            Reservar mi lugar
-          </button>
-          <div className="flex flex-col gap-1">
-            <span className="text-sm text-[#B8B4AA]">
-              Cupos limitados a x participantes.
-            </span>
-            <span className="text-xs text-[#B8B4AA]/70">
-              Se abona al inscribirse • Inicio: 6 de Octubre 2026
-            </span>
-          </div>
-        </div>
+   
       </div>
     </section>
   );

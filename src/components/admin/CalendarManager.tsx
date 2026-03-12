@@ -232,7 +232,7 @@ const CalendarManager: React.FC = () => {
 
       {/* Dialog para crear/editar evento */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-[#141419] border-[rgba(244,242,236,0.08)] max-w-md p-6">
+        <DialogContent className="bg-[#141419] border-[rgba(244,242,236,0.08)] max-w-md p-6 max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-4">
             <DialogTitle className="text-xl font-serif text-[#F4F2EC]">
               {editingEvent ? 'Editar evento' : 'Crear nuevo evento'}

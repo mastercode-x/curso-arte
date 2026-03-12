@@ -156,10 +156,10 @@ const Instructor = ({ config }: { config?: any }) => {
                 Autor del curso
               </span>
               <h3 className="mt-2 font-serif text-xl sm:text-2xl md:text-3xl font-medium text-[#F4F2EC]">
-                {config?.bioProfesor?.split('\n')[0] || 'Ernesto Engel'}
+                Ernesto Engel
               </h3>
               <p className="mt-3 text-sm text-[#B8B4AA] leading-relaxed max-w-md">
-                {/* config?.bioProfesor || */ 'Artista visual y docente. Su trabajo explora el paisaje, la memoria y la pintura como acto de atención.'}
+                {config?.bioProfesor || 'Artista visual y docente. Su trabajo explora el paisaje, la memoria y la pintura como acto de atención.'}
               </p>
 
               {/* Social Links */}

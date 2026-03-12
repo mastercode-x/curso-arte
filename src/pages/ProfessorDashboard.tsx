@@ -1088,17 +1088,19 @@ function ConfiguracionSection() {
     loadConfig();
   }, []);
 
-  const loadConfig = async () => {
-    try {
-      setIsLoading(true);
-      const data = await adminApi.getConfig();
-      setConfig(data);
-    } catch (error) {
-      toast.error('Error cargando configuración');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const loadConfig = async () => {
+  try {
+    setIsLoading(true);
+    const data = await adminApi.getConfig();
+    // El backend devuelve { profesorId, configuracion }
+    // Solo necesitamos la configuración
+    setConfig(data.configuracion || {});
+  } catch (error) {
+    toast.error('Error cargando configuración');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const save = async () => {
     try {
@@ -1141,7 +1143,7 @@ function ConfiguracionSection() {
         {
           title: "Perfil del profesor",
           fields: [
-            { key: "bioProfesor", label: "Bio y Nombre del Profesor", type: "textarea" },
+            { key: "bioProfesor", label: "Bio del Profesor", type: "textarea" },
             { key: "fotoProfesorUrl", label: "URL de Foto del Profesor", type: "url" },
             { key: "emailContacto", label: "Email de contacto", type: "email" },
             { key: "whatsappNumero", label: "WhatsApp (con código de país)", type: "text" },

@@ -65,7 +65,7 @@ const PaymentsManager: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:space-y-8">
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <Card className="bg-[#141419] border-[rgba(244,242,236,0.08)]">

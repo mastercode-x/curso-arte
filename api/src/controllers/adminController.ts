@@ -77,7 +77,12 @@ export const getConfig = asyncHandler(async (req: Request, res: Response) => {
   
   const profesor = await prisma.profesor.findFirst({
     where,
-    include: { configuracion: true }
+    include: { 
+      configuracion: true,
+      user: {
+        select: { nombre: true, email: true }
+      }
+    }
   });
 
   if (!profesor) {
@@ -85,19 +90,28 @@ export const getConfig = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
+  // Combinar configuración con nombre del profesor
+  const configuracion = profesor.configuracion || {
+    nombreCurso: 'Poética de la Mirada',
+    descripcionCurso: '',
+    precioCurso: 100,
+    moneda: 'USD',
+    bioProfesor: '',
+    emailContacto: '',
+    whatsappNumero: '',
+    notificarEmail: true,
+    notificarWhatsApp: false
+  };
+
+  // Agregar el nombre del profesor desde el modelo User
+  const configConNombre = {
+    ...configuracion,
+    nombreProfesor: profesor.user?.nombre || ''
+  };
+
   res.json({
     profesorId: profesor.id,
-    configuracion: profesor.configuracion || {
-      nombreCurso: 'Poética de la Mirada',
-      descripcionCurso: '',
-      precioCurso: 100,
-      moneda: 'USD',
-      bioProfesor: '',
-      emailContacto: '',
-      whatsappNumero: '',
-      notificarEmail: true,
-      notificarWhatsApp: false
-    }
+    configuracion: configConNombre
   });
 });
 

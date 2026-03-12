@@ -1,244 +1,213 @@
-import React, { useState } from 'react';
-import { Search, Filter, Eye } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Save, CreditCard, Mail, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
-import { useStudents, useStudentDetail } from '@/hooks/useStudents';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import * as adminApi from '@/services/adminApi';
+import { useToast } from '@/hooks/use-toast';
 
-const StudentsManager: React.FC = () => {
-  const [search, setSearch] = useState('');
-  const [estado, setEstado] = useState<string>('todos');
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
-
-  const { students, isLoading, pagination } = useStudents({
-    search: search || undefined,
-    estado: estado === 'todos' ? undefined : estado,
-    page: 1,
-    limit: 20
+const SettingsManager: React.FC = () => {
+  const [config, setConfig] = useState({
+    nombreCurso: 'Poética de la Mirada',
+    descripcionCurso: '',
+    precioCurso: 100,
+    moneda: 'ARS',
+    nombreProfesor: '',  // Nombre del profesor (separado de la bio)
+    bioProfesor: '',     // Solo la biografía
+    fotoProfesorUrl: '',
+    googleFormUrl: '',
+    emailContacto: '',
+    whatsappNumero: '',
+    notificarEmail: true,
+    notificarWhatsApp: false
   });
+  const [mpKeys, setMpKeys] = useState({
+    mpAccessToken: '',
+    mpPublicKey: '',
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const { student: selectedStudent } = useStudentDetail(selectedStudentId || '');
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const response = await adminApi.getConfig();
+        // El backend devuelve { profesorId, configuracion: {...} }
+        // Extraemos configuracion que ahora incluye nombreProfesor
+        const data = response.configuracion;
+        if (data) {
+          setConfig(prev => ({ ...prev, ...data }));
+        }
+      } catch (error) {
+        console.error('Error cargando configuración:', error);
+      }
+    };
+    loadConfig();
+  }, []);
 
-  const getStatusBadge = (estadoPago: string) => {
-    switch (estadoPago) {
-      case 'pagado':
-        return <Badge className="bg-green-500/20 text-green-500">Pagado</Badge>;
-      case 'cancelado':
-        return <Badge className="bg-red-500/20 text-red-500">Cancelado</Badge>;
-      default:
-        return <Badge className="bg-yellow-500/20 text-yellow-500">Pendiente</Badge>;
+  const handleSaveGeneral = async () => {
+    setIsLoading(true);
+    try {
+      await adminApi.updateConfig(config);
+      toast({ title: 'Configuración guardada', description: 'Los cambios se han guardado exitosamente.' });
+    } catch (error) {
+      toast({ title: 'Error', description: 'No se pudo guardar la configuración.', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveMPKeys = async () => {
+    setIsLoading(true);
+    try {
+      await adminApi.setMPKeys(mpKeys.mpAccessToken, mpKeys.mpPublicKey);
+      toast({ title: 'Claves de Mercado Pago guardadas', description: 'Las claves se han configurado exitosamente.' });
+    } catch (error) {
+      toast({ title: 'Error', description: 'No se pudieron guardar las claves.', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="bg-[#141419] border-[rgba(244,242,236,0.08)]">
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <CardTitle className="text-lg font-serif text-[#F4F2EC]">
-              Estudiantes
-            </CardTitle>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8B4AA]" />
-                <Input
-                  placeholder="Buscar..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 w-full sm:w-64 bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]"
+    <div className="space-y-6 sm:space-y-8">
+      <Tabs defaultValue="general" className="w-full">
+        <TabsList className="bg-[#141419] border border-[rgba(244,242,236,0.08)]">
+          <TabsTrigger value="general" className="data-[state=active]:bg-[#C7A36D] data-[state=active]:text-[#0B0B0D]">General</TabsTrigger>
+          <TabsTrigger value="pagos" className="data-[state=active]:bg-[#C7A36D] data-[state=active]:text-[#0B0B0D]">Pagos</TabsTrigger>
+          <TabsTrigger value="notificaciones" className="data-[state=active]:bg-[#C7A36D] data-[state=active]:text-[#0B0B0D]">Notificaciones</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general" className="mt-6">
+          <Card className="bg-[#141419] border-[rgba(244,242,236,0.08)]">
+            <CardHeader><CardTitle className="text-lg font-serif text-[#F4F2EC]">Configuración general</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="text-[#F4F2EC]">Nombre del curso</Label>
+                <Input value={config.nombreCurso} onChange={(e) => setConfig({ ...config, nombreCurso: e.target.value })} className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
+              </div>
+              <div>
+                <Label className="text-[#F4F2EC]">Descripción del curso</Label>
+                <Textarea value={config.descripcionCurso} onChange={(e) => setConfig({ ...config, descripcionCurso: e.target.value })} className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" rows={3} />
+              </div>
+              
+              {/* Campos separados para nombre y bio del profesor */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-[#F4F2EC]">Nombre del profesor</Label>
+                  <Input 
+                    value={config.nombreProfesor} 
+                    onChange={(e) => setConfig({ ...config, nombreProfesor: e.target.value })} 
+                    placeholder="Ej: Ernesto Engel"
+                    className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" 
+                  />
+                </div>
+                <div>
+                  <Label className="text-[#F4F2EC]">URL Foto del profesor</Label>
+                  <Input 
+                    value={config.fotoProfesorUrl} 
+                    onChange={(e) => setConfig({ ...config, fotoProfesorUrl: e.target.value })} 
+                    placeholder="/images/instructor_portrait.jpg" 
+                    className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" 
+                  />
+                </div>
+              </div>
+              <div>
+                <Label className="text-[#F4F2EC]">Biografía del profesor</Label>
+                <Textarea 
+                  value={config.bioProfesor} 
+                  onChange={(e) => setConfig({ ...config, bioProfesor: e.target.value })} 
+                  placeholder="Breve descripción sobre el profesor..."
+                  className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" 
+                  rows={3} 
                 />
               </div>
-              <Select value={estado} onValueChange={setEstado}>
-                <SelectTrigger className="w-full sm:w-40 bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="pagado">Pagado</SelectItem>
-                  <SelectItem value="no_pagado">Pendiente</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8 text-[#B8B4AA]">Cargando...</div>
-          ) : students.length === 0 ? (
-            <div className="text-center py-8 text-[#B8B4AA]">No hay estudiantes</div>
-          ) : (
-            <>
-              {/* Vista de tabla en desktop */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[rgba(244,242,236,0.08)]">
-                      <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Nombre</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Email</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Estado</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Progreso</th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-[#B8B4AA]">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {students.map((student) => (
-                      <tr key={student.id} className="border-b border-[rgba(244,242,236,0.05)] hover:bg-[rgba(244,242,236,0.02)]">
-                        <td className="py-3 px-4 text-[#F4F2EC]">{student.nombre}</td>
-                        <td className="py-3 px-4 text-[#B8B4AA]">{student.email}</td>
-                        <td className="py-3 px-4">{getStatusBadge(student.estadoPago)}</td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <Progress value={student.progresoPromedio} className="w-20 h-2 bg-[rgba(244,242,236,0.08)]" />
-                            <span className="text-sm text-[#B8B4AA]">{student.progresoPromedio}%</span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setSelectedStudentId(student.id)}
-                            className="text-[#B8B4AA]"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-[#F4F2EC]">Precio del curso</Label>
+                  <Input type="number" value={config.precioCurso} onChange={(e) => setConfig({ ...config, precioCurso: Number(e.target.value) })} className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
+                </div>
+                <div>
+                  <Label className="text-[#F4F2EC]">Moneda</Label>
+                  <Input value={config.moneda} onChange={(e) => setConfig({ ...config, moneda: e.target.value })} className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
+                </div>
               </div>
-
-              {/* Vista de cards en mobile */}
-              <div className="md:hidden space-y-3">
-                {students.map((student) => (
-                  <div
-                    key={student.id}
-                    className="bg-[rgba(244,242,236,0.03)] border border-[rgba(244,242,236,0.08)] rounded-lg p-4 space-y-3"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-[#F4F2EC] font-medium">{student.nombre}</p>
-                        <p className="text-sm text-[#B8B4AA]">{student.email}</p>
-                      </div>
-                      {getStatusBadge(student.estadoPago)}
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-[#B8B4AA]">Progreso</span>
-                        <span className="text-[#F4F2EC]">{student.progresoPromedio}%</span>
-                      </div>
-                      <Progress value={student.progresoPromedio} className="h-2 bg-[rgba(244,242,236,0.08)]" />
-                    </div>
-                    <div className="pt-2 border-t border-[rgba(244,242,236,0.06)]">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setSelectedStudentId(student.id)}
-                        className="w-full border-[rgba(244,242,236,0.15)] text-[#B8B4AA]"
-                      >
-                        <Eye className="w-4 h-4 mr-2" /> Ver detalle
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+              <div>
+                <Label className="text-[#F4F2EC]">URL Formulario de Google</Label>
+                <Input value={config.googleFormUrl} onChange={(e) => setConfig({ ...config, googleFormUrl: e.target.value })} placeholder="https://docs.google.com/forms/..." className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
               </div>
-            </>
-          )}
-          <div className="mt-4 text-sm text-[#B8B4AA]">
-            Mostrando {students.length} de {pagination.total} estudiantes
-          </div>
-        </CardContent>
-      </Card>
+              <Button onClick={handleSaveGeneral} disabled={isLoading} className="bg-[#C7A36D] hover:bg-[#d4b07a] text-[#0B0B0D]">
+                <Save className="w-4 h-4 mr-2" />Guardar cambios
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Student Detail Dialog */}
-      <Dialog open={!!selectedStudent} onOpenChange={() => setSelectedStudentId(null)}>
-        <DialogContent className="bg-[#141419] border-[rgba(244,242,236,0.08)] text-[#F4F2EC] max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="font-serif">Detalle del estudiante</DialogTitle>
-          </DialogHeader>
-          {selectedStudent && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-[#B8B4AA]">Nombre</p>
-                  <p className="text-[#F4F2EC]">{selectedStudent.nombre}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-[#B8B4AA]">Email</p>
-                  <p className="text-[#F4F2EC]">{selectedStudent.email}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-[#B8B4AA]">Estado de pago</p>
-                  <div>{getStatusBadge(selectedStudent.estadoPago)}</div>
-                </div>
-                <div>
-                  <p className="text-sm text-[#B8B4AA]">Fecha de inscripción</p>
-                  <p className="text-[#F4F2EC]">
-                    {selectedStudent.fechaInscripcion
-                      ? new Date(selectedStudent.fechaInscripcion).toLocaleDateString('es-ES')
-                      : 'N/A'}
-                  </p>
-                </div>
-                {selectedStudent.telefono && (
+        <TabsContent value="pagos" className="mt-6">
+          <Card className="bg-[#141419] border-[rgba(244,242,236,0.08)]">
+            <CardHeader><CardTitle className="text-lg font-serif text-[#F4F2EC] flex items-center gap-2"><CreditCard className="w-5 h-5 text-[#C7A36D]" />Mercado Pago</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="text-[#F4F2EC]">Access Token</Label>
+                <Input type="password" value={mpKeys.mpAccessToken} onChange={(e) => setMpKeys({ ...mpKeys, mpAccessToken: e.target.value })} placeholder="APP_USR-..." className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
+              </div>
+              <div>
+                <Label className="text-[#F4F2EC]">Public Key</Label>
+                <Input value={mpKeys.mpPublicKey} onChange={(e) => setMpKeys({ ...mpKeys, mpPublicKey: e.target.value })} placeholder="APP_USR-..." className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
+              </div>
+              <Button onClick={handleSaveMPKeys} disabled={isLoading} className="bg-[#C7A36D] hover:bg-[#d4b07a] text-[#0B0B0D]">
+                <Save className="w-4 h-4 mr-2" />Guardar claves
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notificaciones" className="mt-6">
+          <Card className="bg-[#141419] border-[rgba(244,242,236,0.08)]">
+            <CardHeader><CardTitle className="text-lg font-serif text-[#F4F2EC]">Configuración de notificaciones</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="text-[#F4F2EC]">Email de contacto</Label>
+                <Input type="email" value={config.emailContacto} onChange={(e) => setConfig({ ...config, emailContacto: e.target.value })} className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
+              </div>
+              <div>
+                <Label className="text-[#F4F2EC]">Número de WhatsApp</Label>
+                <Input value={config.whatsappNumero} onChange={(e) => setConfig({ ...config, whatsappNumero: e.target.value })} placeholder="+1234567890" className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]" />
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-5 h-5 text-[#B8B4AA]" />
                   <div>
-                    <p className="text-sm text-[#B8B4AA]">Teléfono</p>
-                    <p className="text-[#F4F2EC]">{selectedStudent.telefono}</p>
+                    <p className="text-[#F4F2EC]">Notificaciones por email</p>
+                    <p className="text-sm text-[#B8B4AA]">Recibir notificaciones de nuevas solicitudes</p>
                   </div>
-                )}
-                {selectedStudent.pais && (
-                  <div>
-                    <p className="text-sm text-[#B8B4AA]">País</p>
-                    <p className="text-[#F4F2EC]">{selectedStudent.pais}</p>
-                  </div>
-                )}
+                </div>
+                <Switch checked={config.notificarEmail} onCheckedChange={(checked) => setConfig({ ...config, notificarEmail: checked })} />
               </div>
-
-              {selectedStudent.progreso && selectedStudent.progreso.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-medium text-[#F4F2EC] mb-3">Progreso en módulos</h3>
-                  <div className="space-y-3">
-                    {selectedStudent.progreso.map((p) => (
-                      <div key={p.moduloId}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-[#F4F2EC]">{p.titulo}</span>
-                          <span className="text-[#B8B4AA]">{p.completudPorcentaje}%</span>
-                        </div>
-                        <Progress value={p.completudPorcentaje} className="h-2 bg-[rgba(244,242,236,0.08)]" />
-                      </div>
-                    ))}
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-[#B8B4AA]" />
+                  <div>
+                    <p className="text-[#F4F2EC]">Notificaciones por WhatsApp</p>
+                    <p className="text-sm text-[#B8B4AA]">Recibir notificaciones por WhatsApp</p>
                   </div>
                 </div>
-              )}
-
-              {selectedStudent.pagos && selectedStudent.pagos.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-medium text-[#F4F2EC] mb-3">Historial de pagos</h3>
-                  <div className="space-y-2">
-                    {selectedStudent.pagos.map((pago) => (
-                      <div key={pago.id} className="flex justify-between p-3 rounded-lg bg-[rgba(244,242,236,0.03)]">
-                        <div>
-                          <p className="text-[#F4F2EC]">{pago.monto} {pago.moneda}</p>
-                          <p className="text-sm text-[#B8B4AA]">{pago.proveedor}</p>
-                        </div>
-                        <Badge className={pago.estado === 'completado' ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'}>
-                          {pago.estado}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+                <Switch checked={config.notificarWhatsApp} onCheckedChange={(checked) => setConfig({ ...config, notificarWhatsApp: checked })} />
+              </div>
+              <Button onClick={handleSaveGeneral} disabled={isLoading} className="bg-[#C7A36D] hover:bg-[#d4b07a] text-[#0B0B0D]">
+                <Save className="w-4 h-4 mr-2" />Guardar cambios
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
 
-export default StudentsManager;
+export default SettingsManager;

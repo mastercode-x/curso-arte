@@ -295,12 +295,20 @@ const Navigation = memo(() => {
         isVisible ? 'opacity-50' : 'opacity-100'
       }`}>
         <img 
-          src="public/images/logo.png" 
+          src="/images/logo.png" 
           alt="Poética de la Mirada" 
           className="h-6 sm:h-8 md:h-10 w-auto object-contain"
           onError={(e) => {
-            // Fallback si el logo no existe
-            (e.target as HTMLImageElement).style.display = 'none';
+            // Fallback: mostrar texto si el logo no carga
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            const parent = target.parentElement;
+            if (parent) {
+              const fallback = document.createElement('span');
+              fallback.className = 'font-serif text-lg sm:text-xl text-[#F4F2EC]';
+              fallback.textContent = 'Poética de la Mirada';
+              parent.appendChild(fallback);
+            }
           }}
         />
       </div>

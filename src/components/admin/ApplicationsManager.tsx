@@ -57,7 +57,7 @@ const ApplicationsManager: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:space-y-8">
       <Card className="bg-[#141419] border-[rgba(244,242,236,0.08)]">
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

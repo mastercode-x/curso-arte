@@ -11,13 +11,11 @@ import { useStudents, useStudentDetail } from '@/hooks/useStudents';
 
 const StudentsManager: React.FC = () => {
   const [search, setSearch] = useState('');
-  // ✅ Use 'todos' instead of '' — shadcn Select crashes with empty string values
   const [estado, setEstado] = useState<string>('todos');
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
   const { students, isLoading, pagination } = useStudents({
     search: search || undefined,
-    // ✅ Convert 'todos' back to undefined for the API call
     estado: estado === 'todos' ? undefined : estado,
     page: 1,
     limit: 20
@@ -44,23 +42,22 @@ const StudentsManager: React.FC = () => {
             <CardTitle className="text-lg font-serif text-[#F4F2EC]">
               Estudiantes
             </CardTitle>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8B4AA]" />
                 <Input
                   placeholder="Buscar..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 w-64 bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]"
+                  className="pl-10 w-full sm:w-64 bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]"
                 />
               </div>
               <Select value={estado} onValueChange={setEstado}>
-                <SelectTrigger className="w-40 bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]">
+                <SelectTrigger className="w-full sm:w-40 bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]">
                   <Filter className="w-4 h-4 mr-2" />
                   <SelectValue placeholder="Estado" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* ✅ All SelectItem values must be non-empty strings */}
                   <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="pagado">Pagado</SelectItem>
                   <SelectItem value="no_pagado">Pendiente</SelectItem>
@@ -75,44 +72,82 @@ const StudentsManager: React.FC = () => {
           ) : students.length === 0 ? (
             <div className="text-center py-8 text-[#B8B4AA]">No hay estudiantes</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-[rgba(244,242,236,0.08)]">
-                    <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Nombre</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Email</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Estado</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Progreso</th>
-                    <th className="text-right py-3 px-4 text-sm font-medium text-[#B8B4AA]">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((student) => (
-                    <tr key={student.id} className="border-b border-[rgba(244,242,236,0.05)] hover:bg-[rgba(244,242,236,0.02)]">
-                      <td className="py-3 px-4 text-[#F4F2EC]">{student.nombre}</td>
-                      <td className="py-3 px-4 text-[#B8B4AA]">{student.email}</td>
-                      <td className="py-3 px-4">{getStatusBadge(student.estadoPago)}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          <Progress value={student.progresoPromedio} className="w-20 h-2 bg-[rgba(244,242,236,0.08)]" />
-                          <span className="text-sm text-[#B8B4AA]">{student.progresoPromedio}%</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setSelectedStudentId(student.id)}
-                          className="text-[#B8B4AA]"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </td>
+            <>
+              {/* Vista de tabla en desktop */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[rgba(244,242,236,0.08)]">
+                      <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Nombre</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Email</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Estado</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Progreso</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-[#B8B4AA]">Acciones</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {students.map((student) => (
+                      <tr key={student.id} className="border-b border-[rgba(244,242,236,0.05)] hover:bg-[rgba(244,242,236,0.02)]">
+                        <td className="py-3 px-4 text-[#F4F2EC]">{student.nombre}</td>
+                        <td className="py-3 px-4 text-[#B8B4AA]">{student.email}</td>
+                        <td className="py-3 px-4">{getStatusBadge(student.estadoPago)}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            <Progress value={student.progresoPromedio} className="w-20 h-2 bg-[rgba(244,242,236,0.08)]" />
+                            <span className="text-sm text-[#B8B4AA]">{student.progresoPromedio}%</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setSelectedStudentId(student.id)}
+                            className="text-[#B8B4AA]"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Vista de cards en mobile */}
+              <div className="md:hidden space-y-3">
+                {students.map((student) => (
+                  <div
+                    key={student.id}
+                    className="bg-[rgba(244,242,236,0.03)] border border-[rgba(244,242,236,0.08)] rounded-lg p-4 space-y-3"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-[#F4F2EC] font-medium">{student.nombre}</p>
+                        <p className="text-sm text-[#B8B4AA]">{student.email}</p>
+                      </div>
+                      {getStatusBadge(student.estadoPago)}
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-[#B8B4AA]">Progreso</span>
+                        <span className="text-[#F4F2EC]">{student.progresoPromedio}%</span>
+                      </div>
+                      <Progress value={student.progresoPromedio} className="h-2 bg-[rgba(244,242,236,0.08)]" />
+                    </div>
+                    <div className="pt-2 border-t border-[rgba(244,242,236,0.06)]">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSelectedStudentId(student.id)}
+                        className="w-full border-[rgba(244,242,236,0.15)] text-[#B8B4AA]"
+                      >
+                        <Eye className="w-4 h-4 mr-2" /> Ver detalle
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
           <div className="mt-4 text-sm text-[#B8B4AA]">
             Mostrando {students.length} de {pagination.total} estudiantes
@@ -128,7 +163,7 @@ const StudentsManager: React.FC = () => {
           </DialogHeader>
           {selectedStudent && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-[#B8B4AA]">Nombre</p>
                   <p className="text-[#F4F2EC]">{selectedStudent.nombre}</p>

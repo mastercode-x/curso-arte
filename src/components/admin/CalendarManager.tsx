@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, Edit2, Calendar as CalendarIcon, MapPin, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Edit2, Calendar as CalendarIcon, MapPin, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -133,19 +133,6 @@ const CalendarManager: React.FC = () => {
     }
   };
 
-  const handleSaveCalendar = async () => {
-    try {
-      await calendarApi.updateCalendar({
-        events,
-        totalWeeks: events.length,
-      });
-      toast({ title: 'Éxito', description: 'Calendario guardado correctamente.', duration: 2000 });
-    } catch (error) {
-      console.error('Error saving calendar:', error);
-      toast({ title: 'Error', description: 'No se pudo guardar el calendario.', variant: 'destructive', duration: 2000 });
-    }
-  };
-
   const getActivityStyle = (activity: string) => {
     if (activity.includes('Encuentro')) {
       return 'bg-[rgba(199,163,109,0.15)] text-[#C7A36D] border-[rgba(199,163,109,0.3)]';
@@ -239,46 +226,39 @@ const CalendarManager: React.FC = () => {
             </div>
           )}
 
-          <Button
-            onClick={handleSaveCalendar}
-            disabled={isLoading || events.length === 0}
-            className="w-full bg-[#C7A36D] hover:bg-[#d4b07a] text-[#0B0B0D] mt-4"
-          >
-            <Save className="w-4 h-4 mr-2" />
-            Guardar calendario
-          </Button>
+
         </CardContent>
       </Card>
 
       {/* Dialog para crear/editar evento */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-[#141419] border-[rgba(244,242,236,0.08)] max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-serif text-[#F4F2EC]">
+        <DialogContent className="bg-[#141419] border-[rgba(244,242,236,0.08)] max-w-md p-6">
+          <DialogHeader className="pb-4">
+            <DialogTitle className="text-xl font-serif text-[#F4F2EC]">
               {editingEvent ? 'Editar evento' : 'Crear nuevo evento'}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="week" className="text-[#F4F2EC]">Semana *</Label>
+          <div className="space-y-6 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="week" className="text-[#F4F2EC] text-sm font-medium">Semana *</Label>
               <Input
                 id="week"
                 value={formData.week}
                 onChange={(e) => setFormData({ ...formData, week: e.target.value })}
                 placeholder="Ej: Semana 1"
-                className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]"
+                className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC] h-11"
               />
             </div>
 
-            <div>
-              <Label htmlFor="date" className="text-[#F4F2EC]">Fecha *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="date" className="text-[#F4F2EC] text-sm font-medium">Fecha *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "w-full justify-start text-left font-normal bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]",
+                      "w-full justify-start text-left font-normal bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC] h-11",
                       !formData.date && "text-[#B8B4AA]"
                     )}
                   >
@@ -299,27 +279,27 @@ const CalendarManager: React.FC = () => {
               </Popover>
             </div>
 
-            <div>
-              <Label htmlFor="activity" className="text-[#F4F2EC]">Actividad *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="activity" className="text-[#F4F2EC] text-sm font-medium">Actividad *</Label>
               <Input
                 id="activity"
                 value={formData.activity}
                 onChange={(e) => setFormData({ ...formData, activity: e.target.value })}
                 placeholder="Ej: Encuentro virtual"
-                className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]"
+                className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC] h-11"
               />
               <p className="text-xs text-[#B8B4AA] mt-1">
                 Sugerencias: "Encuentro virtual", "Tiempo de decantación", "Apertura + presentación"
               </p>
             </div>
 
-            <div>
-              <Label htmlFor="module" className="text-[#F4F2EC]">Módulo (opcional)</Label>
+            <div className="space-y-2">
+              <Label htmlFor="module" className="text-[#F4F2EC] text-sm font-medium">Módulo (opcional)</Label>
               <select
                 id="module"
                 value={formData.module || ''}
                 onChange={(e) => setFormData({ ...formData, module: e.target.value || null })}
-                className="w-full px-3 py-2 bg-[rgba(244,242,236,0.03)] border border-[rgba(244,242,236,0.08)] text-[#F4F2EC] rounded-md"
+                className="w-full px-3 py-2.5 bg-[rgba(244,242,236,0.03)] border border-[rgba(244,242,236,0.08)] text-[#F4F2EC] rounded-md text-sm"
               >
                 <option value="">Sin módulo</option>
                 {modules.map((module) => (
@@ -330,15 +310,15 @@ const CalendarManager: React.FC = () => {
               </select>
             </div>
 
-            <div>
-              <Label htmlFor="orden" className="text-[#F4F2EC]">Orden</Label>
+            <div className="space-y-2">
+              <Label htmlFor="orden" className="text-[#F4F2EC] text-sm font-medium">Orden</Label>
               <Input
                 id="orden"
                 type="number"
                 value={formData.orden || ''}
                 onChange={(e) => setFormData({ ...formData, orden: Number(e.target.value) })}
                 placeholder="Ej: 1"
-                className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]"
+                className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC] h-11"
               />
               <p className="text-xs text-[#B8B4AA] mt-1">
                 Define el orden en que aparecerá el evento en el calendario.
@@ -346,17 +326,17 @@ const CalendarManager: React.FC = () => {
             </div>
           </div>
 
-          <DialogFooter className="gap-2">
+          <DialogFooter className="gap-3 pt-6 mt-4 border-t border-[rgba(244,242,236,0.08)]">
             <Button
               onClick={handleCloseDialog}
               variant="outline"
-              className="border-[rgba(244,242,236,0.08)] text-[#B8B4AA]"
+              className="border-[rgba(244,242,236,0.08)] text-[#B8B4AA] px-6"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleSaveEvent}
-              className="bg-[#C7A36D] hover:bg-[#d4b07a] text-[#0B0B0D]"
+              className="bg-[#C7A36D] hover:bg-[#d4b07a] text-[#0B0B0D] px-6"
             >
               {editingEvent ? 'Actualizar' : 'Crear'} evento
             </Button>

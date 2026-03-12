@@ -201,35 +201,47 @@ function OverviewSection({ data }: { data: any }) {
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA] mb-5">Progreso por módulo</p>
           <div className="space-y-4">
-            {data?.progresoPorModulo?.slice(0, 5).map((m: any, i: number) => (
-              <div key={m.id}>
-                <div className="flex justify-between text-sm mb-1.5">
-                  <span className="text-[#F4F2EC] text-xs">{String(i + 1).padStart(2, '0')} — {m.titulo}</span>
-                  <span className="font-mono text-xs text-[#C7A36D]">{m.promedioCompletud}%</span>
+            {data?.progresoPorModulo && data.progresoPorModulo.length > 0 ? (
+              data.progresoPorModulo.slice(0, 5).map((m: any, i: number) => (
+                <div key={m.id}>
+                  <div className="flex justify-between text-sm mb-1.5">
+                    <span className="text-[#F4F2EC] text-xs">{String(i + 1).padStart(2, '0')} — {m.titulo}</span>
+                    <span className="font-mono text-xs text-[#C7A36D]">{m.promedioCompletud}%</span>
+                  </div>
+                  <div className="h-1 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
+                    <div className="h-full bg-[#C7A36D] rounded-full" style={{ width: `${m.promedioCompletud}%` }} />
+                  </div>
                 </div>
-                <div className="h-1 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#C7A36D] rounded-full" style={{ width: `${m.promedioCompletud}%` }} />
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-[#B8B4AA] text-sm">No hay módulos con progreso registrado aún</p>
               </div>
-            )) || <p className="text-[#B8B4AA] text-sm">No hay datos disponibles</p>}
+            )}
           </div>
         </div>
 
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA] mb-5">Últimas solicitudes</p>
           <div className="space-y-3">
-            {data?.solicitudesRecientes?.slice(0, 4).map((s: any) => (
-              <div key={s.id} className="flex items-center gap-4">
-                <div className="w-8 h-8 rounded-full bg-[rgba(199,163,109,0.1)] flex items-center justify-center text-xs font-serif text-[#C7A36D]">
-                  {s.nombre.charAt(0)}
+            {data?.solicitudesRecientes && data.solicitudesRecientes.length > 0 ? (
+              data.solicitudesRecientes.slice(0, 4).map((s: any) => (
+                <div key={s.id} className="flex items-center gap-4">
+                  <div className="w-8 h-8 rounded-full bg-[rgba(199,163,109,0.1)] flex items-center justify-center text-xs font-serif text-[#C7A36D]">
+                    {s.nombre.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-[#F4F2EC] truncate">{s.nombre}</p>
+                    <p className="text-xs text-[#B8B4AA]">{s.pais || 'Sin país'}</p>
+                  </div>
+                  <StatusBadge estado={s.estado} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-[#F4F2EC] truncate">{s.nombre}</p>
-                  <p className="text-xs text-[#B8B4AA]">{s.pais || 'Sin país'}</p>
-                </div>
-                <StatusBadge estado={s.estado} />
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-[#B8B4AA] text-sm">No hay solicitudes pendientes</p>
               </div>
-            )) || <p className="text-[#B8B4AA] text-sm">No hay solicitudes pendientes</p>}
+            )}
           </div>
         </div>
       </div>
@@ -237,33 +249,39 @@ function OverviewSection({ data }: { data: any }) {
       <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
         <p className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA] mb-5">Estudiantes en curso</p>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[rgba(244,242,236,0.06)]">
-                {["Nombre", "País", "Estado pago", "Inscripción", "Progreso"].map(h => (
-                  <th key={h} className="text-left font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] pb-3 pr-6">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data?.estudiantesRecientes?.map((e: any) => (
-                <tr key={e.id} className="border-b border-[rgba(244,242,236,0.04)] hover:bg-[rgba(244,242,236,0.02)] transition-colors">
-                  <td className="py-3 pr-6 text-[#F4F2EC]">{e.nombre}</td>
-                  <td className="py-3 pr-6 text-[#B8B4AA]">{e.pais || '—'}</td>
-                  <td className="py-3 pr-6"><StatusBadge estado={e.estadoPago} /></td>
-                  <td className="py-3 pr-6 text-[#B8B4AA] text-xs">{e.fechaInscripcion ? new Date(e.fechaInscripcion).toLocaleDateString('es-AR') : '—'}</td>
-                  <td className="py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-24 h-1 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
-                        <div className="h-full bg-[#C7A36D]" style={{ width: `${e.progreso || 0}%` }} />
-                      </div>
-                      <span className="text-xs text-[#B8B4AA]">{e.progreso || 0}%</span>
-                    </div>
-                  </td>
+          {data?.estudiantesRecientes && data.estudiantesRecientes.length > 0 ? (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[rgba(244,242,236,0.06)]">
+                  {["Nombre", "País", "Estado pago", "Inscripción", "Progreso"].map(h => (
+                    <th key={h} className="text-left font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] pb-3 pr-6">{h}</th>
+                  ))}
                 </tr>
-              )) || <tr><td colSpan={5} className="py-4 text-[#B8B4AA] text-center">No hay estudiantes registrados</td></tr>}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data.estudiantesRecientes.map((e: any) => (
+                  <tr key={e.id} className="border-b border-[rgba(244,242,236,0.04)] hover:bg-[rgba(244,242,236,0.02)] transition-colors">
+                    <td className="py-3 pr-6 text-[#F4F2EC]">{e.nombre}</td>
+                    <td className="py-3 pr-6 text-[#B8B4AA]">{e.pais || '—'}</td>
+                    <td className="py-3 pr-6"><StatusBadge estado={e.estadoPago} /></td>
+                    <td className="py-3 pr-6 text-[#B8B4AA] text-xs">{e.fechaInscripcion ? new Date(e.fechaInscripcion).toLocaleDateString('es-AR') : '—'}</td>
+                    <td className="py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-24 h-1 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
+                          <div className="h-full bg-[#C7A36D]" style={{ width: `${e.progreso || 0}%` }} />
+                        </div>
+                        <span className="text-xs text-[#B8B4AA]">{e.progreso || 0}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-[#B8B4AA] text-sm">No hay estudiantes registrados aún</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

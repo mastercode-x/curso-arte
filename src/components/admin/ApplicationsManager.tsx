@@ -12,17 +12,17 @@ import type { SolicitudAcceso } from '@/types';
 
 const ApplicationsManager: React.FC = () => {
   const [search, setSearch] = useState('');
- const [estado, setEstado] = useState<string>('todos');
+  const [estado, setEstado] = useState<string>('todos');
   const [selectedApplication, setSelectedApplication] = useState<SolicitudAcceso | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
 
- const { applications, isLoading, pagination, refetch, approveApplication, rejectApplication } = useApplications({
-  search: search || undefined,
-  estado: estado === 'todos' ? undefined : estado,  // Cambiado
-  page: 1,
-  limit: 20
-});
+  const { applications, isLoading, pagination, refetch, approveApplication, rejectApplication } = useApplications({
+    search: search || undefined,
+    estado: estado === 'todos' ? undefined : estado,
+    page: 1,
+    limit: 20
+  });
 
   const handleApprove = async (id: string) => {
     try {
@@ -64,27 +64,27 @@ const ApplicationsManager: React.FC = () => {
             <CardTitle className="text-lg font-serif text-[#F4F2EC]">
               Solicitudes de acceso
             </CardTitle>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8B4AA]" />
                 <Input
                   placeholder="Buscar..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 w-64 bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]"
+                  className="pl-10 w-full sm:w-64 bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]"
                 />
               </div>
               <Select value={estado} onValueChange={setEstado}>
-                <SelectTrigger className="w-40 bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]">
+                <SelectTrigger className="w-full sm:w-40 bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]">
                   <Filter className="w-4 h-4 mr-2" />
                   <SelectValue placeholder="Estado" />
                 </SelectTrigger>
                 <SelectContent>
-  <SelectItem value="todos">Todos</SelectItem>
-  <SelectItem value="pendiente">Pendiente</SelectItem>
-  <SelectItem value="aprobado">Aprobado</SelectItem>
-  <SelectItem value="rechazado">Rechazado</SelectItem>
-</SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="pendiente">Pendiente</SelectItem>
+                  <SelectItem value="aprobado">Aprobado</SelectItem>
+                  <SelectItem value="rechazado">Rechazado</SelectItem>
+                </SelectContent>
               </Select>
             </div>
           </div>
@@ -95,71 +95,126 @@ const ApplicationsManager: React.FC = () => {
           ) : applications.length === 0 ? (
             <div className="text-center py-8 text-[#B8B4AA]">No hay solicitudes</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-[rgba(244,242,236,0.08)]">
-                    <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Nombre</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Email</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Fecha</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Estado</th>
-                    <th className="text-right py-3 px-4 text-sm font-medium text-[#B8B4AA]">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {applications.map((app) => (
-                    <tr key={app.id} className="border-b border-[rgba(244,242,236,0.05)] hover:bg-[rgba(244,242,236,0.02)]">
-                      <td className="py-3 px-4 text-[#F4F2EC]">{app.nombre}</td>
-                      <td className="py-3 px-4 text-[#B8B4AA]">{app.email}</td>
-                      <td className="py-3 px-4 text-[#B8B4AA]">
-                        {new Date(app.fechaSolicitud).toLocaleDateString('es-ES')}
-                      </td>
-                      <td className="py-3 px-4">{getStatusBadge(app.estado)}</td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex justify-end gap-2">
+            <>
+              {/* Vista de tabla en desktop */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[rgba(244,242,236,0.08)]">
+                      <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Nombre</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Email</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Fecha</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-[#B8B4AA]">Estado</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-[#B8B4AA]">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {applications.map((app) => (
+                      <tr key={app.id} className="border-b border-[rgba(244,242,236,0.05)] hover:bg-[rgba(244,242,236,0.02)]">
+                        <td className="py-3 px-4 text-[#F4F2EC]">{app.nombre}</td>
+                        <td className="py-3 px-4 text-[#B8B4AA]">{app.email}</td>
+                        <td className="py-3 px-4 text-[#B8B4AA]">
+                          {new Date(app.fechaSolicitud).toLocaleDateString('es-ES')}
+                        </td>
+                        <td className="py-3 px-4">{getStatusBadge(app.estado)}</td>
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setSelectedApplication(app)}
+                              className="text-[#B8B4AA]"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            {app.estado === 'pendiente' && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleApprove(app.id)}
+                                  className="bg-green-500/20 text-green-500 hover:bg-green-500/30"
+                                >
+                                  <CheckCircle className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedApplication(app);
+                                    setRejectDialogOpen(true);
+                                  }}
+                                  className="bg-red-500/20 text-red-500 hover:bg-red-500/30"
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Vista de cards en mobile */}
+              <div className="md:hidden space-y-3">
+                {applications.map((app) => (
+                  <div
+                    key={app.id}
+                    className="bg-[rgba(244,242,236,0.03)] border border-[rgba(244,242,236,0.08)] rounded-lg p-4 space-y-3"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-[#F4F2EC] font-medium">{app.nombre}</p>
+                        <p className="text-sm text-[#B8B4AA]">{app.email}</p>
+                      </div>
+                      {getStatusBadge(app.estado)}
+                    </div>
+                    <p className="text-xs text-[#B8B4AA]">
+                      {new Date(app.fechaSolicitud).toLocaleDateString('es-ES')}
+                    </p>
+                    <div className="flex gap-2 pt-2 border-t border-[rgba(244,242,236,0.06)]">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSelectedApplication(app)}
+                        className="flex-1 border-[rgba(244,242,236,0.15)] text-[#B8B4AA]"
+                      >
+                        <Eye className="w-4 h-4 mr-2" /> Ver
+                      </Button>
+                      {app.estado === 'pendiente' && (
+                        <>
                           <Button
                             size="sm"
-                            variant="ghost"
-                            onClick={() => setSelectedApplication(app)}
-                            className="text-[#B8B4AA]"
+                            onClick={() => handleApprove(app.id)}
+                            className="flex-1 bg-green-500/20 text-green-500 hover:bg-green-500/30"
                           >
-                            <Eye className="w-4 h-4" />
+                            <CheckCircle className="w-4 h-4 mr-2" /> Aprobar
                           </Button>
-                          {app.estado === 'pendiente' && (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() => handleApprove(app.id)}
-                                className="bg-green-500/20 text-green-500 hover:bg-green-500/30"
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedApplication(app);
-                                  setRejectDialogOpen(true);
-                                }}
-                                className="bg-red-500/20 text-red-500 hover:bg-red-500/30"
-                              >
-                                <XCircle className="w-4 h-4" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              setSelectedApplication(app);
+                              setRejectDialogOpen(true);
+                            }}
+                            className="flex-1 bg-red-500/20 text-red-500 hover:bg-red-500/30"
+                          >
+                            <XCircle className="w-4 h-4 mr-2" /> Rechazar
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
 
       {/* Detail Dialog */}
       <Dialog open={!!selectedApplication && !rejectDialogOpen} onOpenChange={() => setSelectedApplication(null)}>
-        <DialogContent className="bg-[#141419] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]">
+        <DialogContent className="bg-[#141419] border-[rgba(244,242,236,0.08)] text-[#F4F2EC] max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-serif">Detalle de solicitud</DialogTitle>
           </DialogHeader>
@@ -199,19 +254,19 @@ const ApplicationsManager: React.FC = () => {
               )}
             </div>
           )}
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             {selectedApplication?.estado === 'pendiente' && (
               <>
                 <Button
                   onClick={() => handleApprove(selectedApplication.id)}
-                  className="bg-green-500/20 text-green-500 hover:bg-green-500/30"
+                  className="w-full sm:w-auto bg-green-500/20 text-green-500 hover:bg-green-500/30"
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Aprobar
                 </Button>
                 <Button
                   onClick={() => setRejectDialogOpen(true)}
-                  className="bg-red-500/20 text-red-500 hover:bg-red-500/30"
+                  className="w-full sm:w-auto bg-red-500/20 text-red-500 hover:bg-red-500/30"
                 >
                   <XCircle className="w-4 h-4 mr-2" />
                   Rechazar
@@ -237,11 +292,11 @@ const ApplicationsManager: React.FC = () => {
             onChange={(e) => setRejectReason(e.target.value)}
             className="bg-[rgba(244,242,236,0.03)] border-[rgba(244,242,236,0.08)] text-[#F4F2EC]"
           />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectDialogOpen(false)} className="border-[rgba(244,242,236,0.15)]">
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)} className="w-full sm:w-auto border-[rgba(244,242,236,0.15)]">
               Cancelar
             </Button>
-            <Button onClick={handleReject} className="bg-red-500/20 text-red-500 hover:bg-red-500/30">
+            <Button onClick={handleReject} className="w-full sm:w-auto bg-red-500/20 text-red-500 hover:bg-red-500/30">
               Rechazar solicitud
             </Button>
           </DialogFooter>

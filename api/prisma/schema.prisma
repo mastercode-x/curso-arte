@@ -168,6 +168,8 @@ model ConfiguracionProfesor {
   notificarWhatsApp Boolean   @default(false) @map("notificar_whatsapp")
   notificarEmail    Boolean   @default(true) @map("notificar_email")
   googleFormUrl     String?   @map("google_form_url")
+  instagramUrl      String?   @map("instagram_url")
+  facebookUrl       String?   @map("facebook_url")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 

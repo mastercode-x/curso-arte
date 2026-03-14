@@ -1,26 +1,18 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { getAuthToken } from '@/contexts/AuthContext';
 
-// URL del backend en Railway
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://curso2-production.up.railway.app/api';
 
-// Crear instancia de axios para peticiones autenticadas
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  headers: { 'Content-Type': 'application/json' }
 });
 
-// Crear instancia de axios para peticiones públicas (sin interceptores de auth)
 export const publicApi = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  headers: { 'Content-Type': 'application/json' }
 });
 
-// Interceptor para agregar token (solo en api autenticada)
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getAuthToken();
@@ -32,22 +24,41 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor para manejar errores (solo en api autenticada)
+// ✅ Interceptor con renovación automática de token
 api.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      // Token expirado o inválido
-      localStorage.removeItem('poetica_access_token');
-      localStorage.removeItem('poetica_refresh_token');
-      // ✅ Use hash-based redirect so Vercel serves the React app correctly
-      window.location.href = '/#/login';
+  async (error: AxiosError) => {
+    const originalRequest = error.config as any;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      const refreshToken = localStorage.getItem('poetica_refresh_token');
+      if (refreshToken) {
+        try {
+          const response = await axios.post(
+            `${API_BASE_URL}/auth/refresh`,
+            { refreshToken }
+          );
+          const { accessToken } = response.data;
+          localStorage.setItem('poetica_access_token', accessToken);
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          return api(originalRequest);
+        } catch {
+          localStorage.removeItem('poetica_access_token');
+          localStorage.removeItem('poetica_refresh_token');
+          window.location.href = '/#/login';
+        }
+      } else {
+        localStorage.removeItem('poetica_access_token');
+        window.location.href = '/#/login';
+      }
     }
+
     return Promise.reject(error);
   }
 );
 
-// Helper para manejar errores
 export const handleApiError = (error: unknown): string => {
   if (axios.isAxiosError(error)) {
     return error.response?.data?.error || error.message || 'Error desconocido';

@@ -1147,6 +1147,8 @@ const loadConfig = async () => {
             { key: "fotoProfesorUrl", label: "URL de Foto del Profesor", type: "url" },
             { key: "emailContacto", label: "Email de contacto", type: "email" },
             { key: "whatsappNumero", label: "WhatsApp (con código de país)", type: "text" },
+            { key: "instagramUrl", label: "Instagram URL", type: "url" },
+{ key: "facebookUrl", label: "Facebook URL", type: "url" },
           ]
         },
         {

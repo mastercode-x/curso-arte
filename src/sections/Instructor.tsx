@@ -69,12 +69,10 @@ const Instructor = ({ config }: { config?: any }) => {
     return () => ctx.revert();
   }, []);
 
-  const socials = [
-    { icon: TrendingUp, label: 'X', href: '#' },
-    { icon: Youtube, label: 'YouTube', href: '#' },
-    { icon: TrendingUp, label: 'TikTok', href: '#' },
-    { icon: Instagram, label: 'Instagram', href: '#' },
-  ];
+const socials = [
+  config?.instagramUrl && { icon: Instagram, label: 'Instagram', href: config.instagramUrl },
+  config?.facebookUrl && { icon: ExternalLink, label: 'Facebook', href: config.facebookUrl },
+].filter(Boolean);
 
   return (
     <section

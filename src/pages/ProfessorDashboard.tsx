@@ -22,6 +22,8 @@ import ApplicationsManager from '../components/admin/ApplicationsManager';
 import StudentsManager from '../components/admin/StudentsManager';
 import PaymentsManager from '../components/admin/PaymentsManager';
 
+import { useAuth } from '@/contexts/AuthContext';
+
 const SECTIONS = [
   { id: 'overview', icon: LayoutDashboard, label: 'Dashboard' },
   { id: 'solicitudes', icon: UserCheck, label: 'Solicitudes' },
@@ -40,6 +42,10 @@ export default function ProfessorDashboard() {
   const [showNotif, setShowNotif] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
+
+
+  const { logout } = useAuth();
+  
 
   useEffect(() => {
     loadDashboardData();
@@ -117,12 +123,12 @@ export default function ProfessorDashboard() {
               <p className="text-xs text-[#B8B4AA]">Admin</p>
             </div>
           </div>
-          <button
-            onClick={() => window.location.href = createPageUrl('Landing')}
-            className="w-full flex items-center justify-center gap-2 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors text-xs py-2.5"
-          >
-            <LogOut className="w-4 h-4" /> Cerrar sesión
-          </button>
+     <button
+  onClick={logout}
+  className="w-full flex items-center justify-center gap-2 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors text-xs py-2.5"
+>
+  <LogOut className="w-4 h-4" /> Cerrar sesión
+</button>
         </div>
       </aside>
 

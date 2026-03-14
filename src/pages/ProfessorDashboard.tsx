@@ -33,7 +33,9 @@ const SECTIONS = [
 ];
 
 export default function ProfessorDashboard() {
-  const [section, setSection] = useState<string>('overview');
+  const [section, setSection] = useState<string>(() => {
+  return localStorage.getItem('dashboard_section') || 'overview';
+});
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [showNotif, setShowNotif] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,7 +88,11 @@ export default function ProfessorDashboard() {
           {SECTIONS.map((s: any) => (
             <button
               key={s.id}
-              onClick={() => { setSection(s.id); setSidebarOpen(false); }}
+              onClick={() => { 
+  setSection(s.id); 
+  localStorage.setItem('dashboard_section', s.id);
+  setSidebarOpen(false); 
+}}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded mb-1 transition-colors ${
                 section === s.id
                   ? 'bg-[rgba(199,163,109,0.1)] text-[#C7A36D]'
@@ -1107,7 +1113,6 @@ const loadConfig = async () => {
       await adminApi.updateConfig(config);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-      toast.success('Configuración guardada');
     } catch (error) {
       toast.error('Error guardando configuración');
     }
@@ -1123,11 +1128,7 @@ const loadConfig = async () => {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      {saved && (
-        <div className="p-4 bg-green-500/10 border border-green-500/30 text-green-400 text-sm">
-          ✓ Configuración guardada correctamente
-        </div>
-      )}
+
 
       {[
         {
@@ -1177,12 +1178,21 @@ const loadConfig = async () => {
         </div>
       ))}
 
-      <button
-        onClick={save}
-        className="font-mono text-xs uppercase tracking-[0.14em] px-8 py-3.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors"
-      >
-        Guardar cambios
-      </button>
+        
+
+     <div className="flex items-center gap-4">
+  <button
+    onClick={save}
+    className="font-mono text-xs uppercase tracking-[0.14em] px-8 py-3.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors"
+  >
+    Guardar cambios
+  </button>
+  {saved && (
+    <span className="flex items-center gap-2 text-sm text-green-400">
+      ✓ Configuración guardada correctamente
+    </span>
+  )}
+</div>
     </div>
   );
 }

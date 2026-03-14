@@ -194,13 +194,11 @@ const MobileMenuPortal = memo(({
           {/* Mobile Acceder Button */}
           <li className="pt-4 border-t border-[rgba(244,242,236,0.08)]">
             <a
-              href="https://curso2-nine.vercel.app/#/login"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block font-mono text-sm uppercase tracking-[0.14em] px-6 py-3 border border-[#C7A36D] text-[#C7A36D] hover:bg-[#C7A36D] hover:text-[#0B0B0D] transition-all duration-300 rounded-sm"
-            >
-              Acceder
-            </a>
+  href={localStorage.getItem('poetica_access_token') ? '/#/profesor' : '/#/login'}
+  className="inline-block font-mono text-sm uppercase tracking-[0.14em] px-6 py-3 border border-[#C7A36D] text-[#C7A36D] hover:bg-[#C7A36D] hover:text-[#0B0B0D] transition-all duration-300 rounded-sm"
+>
+  {localStorage.getItem('poetica_access_token') ? 'Mi cuenta' : 'Acceder'}
+</a>
           </li>
         </ul>
       </div>
@@ -372,13 +370,11 @@ const Navigation = memo(() => {
           {/* Botón Acceder */}
           <li>
             <a
-              href="https://curso2-nine.vercel.app/#/login"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-xs uppercase tracking-[0.14em] px-4 py-2 border border-[#C7A36D] text-[#C7A36D] hover:bg-[#C7A36D] hover:text-[#0B0B0D] transition-all duration-300 rounded-sm"
-            >
-              Acceder
-            </a>
+       href={localStorage.getItem('poetica_access_token') ? '/#/profesor' : '/#/login'}
+  className="font-mono text-xs uppercase tracking-[0.14em] px-4 py-2 border border-[#C7A36D] text-[#C7A36D] hover:bg-[#C7A36D] hover:text-[#0B0B0D] transition-all duration-300 rounded-sm"
+>
+  {localStorage.getItem('poetica_access_token') ? 'Mi cuenta' : 'Acceder'}
+</a>
           </li>
         </ul>
       </nav>

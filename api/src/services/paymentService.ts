@@ -103,13 +103,42 @@ export const createCheckoutPreference = async (
   }
 };
 
+
+const processMerchantOrder = async (resourceUrl: string) => {
+  try {
+    const accessToken = process.env.MP_ACCESS_TOKEN;
+    if (!accessToken) return;
+
+    const response = await fetch(resourceUrl, {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+
+    if (!response.ok) {
+      logger.error(`Error obteniendo merchant order: ${response.status}`);
+      return;
+    }
+
+    const order = await response.json();
+    logger.info(`Merchant order status: ${order.status}, payments: ${JSON.stringify(order.payments)}`);
+
+    // Buscar pagos aprobados en la orden
+    if (order.payments && order.payments.length > 0) {
+      for (const payment of order.payments) {
+        if (payment.status === 'approved') {
+          await processPaymentNotification(payment.id.toString());
+        }
+      }
+    }
+  } catch (error) {
+    logger.error('Error procesando merchant order:', error);
+  }
+};
+
 // Procesar notificación de webhook de Mercado Pago
 export const handleWebhook = async (data: any): Promise<boolean> => {
   try {
     logger.info(`Webhook recibido de Mercado Pago: ${JSON.stringify(data)}`);
 
-    // Mercado Pago envía diferentes tipos de notificaciones
-    // topic: 'payment' | 'merchant_order' | 'subscription'
     const { topic, id, type, data_id } = data;
 
     if (topic === 'payment' || type === 'payment') {
@@ -118,10 +147,15 @@ export const handleWebhook = async (data: any): Promise<boolean> => {
         await processPaymentNotification(paymentId);
       }
     } else if (data.action === 'payment.created' || data.action === 'payment.updated') {
-      // Notificación por API v1
       const paymentData = data.data;
       if (paymentData && paymentData.id) {
         await processPaymentNotification(paymentData.id);
+      }
+    } else if (topic === 'merchant_order') {
+      // ← AGREGAR ESTE BLOQUE
+      const resourceUrl = data.resource;
+      if (resourceUrl) {
+        await processMerchantOrder(resourceUrl);
       }
     }
 

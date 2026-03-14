@@ -118,7 +118,7 @@ const processMerchantOrder = async (resourceUrl: string) => {
       return;
     }
 
-    const order = await response.json();
+    const order = await response.json() as any;
     logger.info(`Merchant order status: ${order.status}, payments: ${JSON.stringify(order.payments)}`);
 
     // Buscar pagos aprobados en la orden

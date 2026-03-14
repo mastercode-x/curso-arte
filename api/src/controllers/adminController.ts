@@ -118,17 +118,20 @@ export const getConfig = asyncHandler(async (req: Request, res: Response) => {
 // Actualizar configuración del profesor
 export const updateConfig = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user?.userId;
-  const {
+const {
     nombreCurso,
     descripcionCurso,
     precioCurso,
     moneda,
+    nombreProfesor,
     bioProfesor,
     fotoProfesorUrl,
     emailContacto,
     whatsappNumero,
     pais,
     googleFormUrl,
+    instagramUrl,
+    facebookUrl,
     notificarEmail,
     notificarWhatsApp
   } = req.body;
@@ -145,34 +148,38 @@ export const updateConfig = asyncHandler(async (req: Request, res: Response) => 
   const config = await prisma.configuracionProfesor.upsert({
     where: { profesorId: profesor.id },
     update: {
-      nombreCurso,
-      descripcionCurso,
-      precioCurso,
-      moneda,
-      bioProfesor,
-      fotoProfesorUrl,
-      emailContacto,
-      whatsappNumero,
-      pais,
-      googleFormUrl,
-      notificarEmail,
-      notificarWhatsApp
-    },
-    create: {
-      profesorId: profesor.id,
-      nombreCurso: nombreCurso || 'Poética de la Mirada',
-      precioCurso: precioCurso || 100,
-      moneda: moneda || 'USD',
-      descripcionCurso,
-      bioProfesor,
-      fotoProfesorUrl,
-      emailContacto,
-      whatsappNumero,
-      pais,
-      googleFormUrl,
-      notificarEmail: notificarEmail ?? true,
-      notificarWhatsApp: notificarWhatsApp ?? false
-    }
+  nombreCurso,
+  descripcionCurso,
+  precioCurso,
+  moneda,
+  bioProfesor,
+  fotoProfesorUrl,
+  emailContacto,
+  whatsappNumero,
+  pais,
+  googleFormUrl,
+  instagramUrl,   // ← agregar
+  facebookUrl,    // ← agregar
+  notificarEmail,
+  notificarWhatsApp
+},
+create: {
+  profesorId: profesor.id,
+  nombreCurso: nombreCurso || 'Poética de la Mirada',
+  precioCurso: precioCurso || 100,
+  moneda: moneda || 'USD',
+  descripcionCurso,
+  bioProfesor,
+  fotoProfesorUrl,
+  emailContacto,
+  whatsappNumero,
+  pais,
+  googleFormUrl,
+  instagramUrl,   // ← agregar
+  facebookUrl,    // ← agregar
+  notificarEmail: notificarEmail ?? true,
+  notificarWhatsApp: notificarWhatsApp ?? false
+}
   });
 
   logger.info(`Configuración actualizada por profesor: ${profesor.id}`);

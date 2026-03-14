@@ -45,12 +45,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, []);
 
-  const login = useCallback(async (credentials: LoginCredentials) => {
-    const response = await authApi.login(credentials);
-    localStorage.setItem(TOKEN_KEY, response.accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
-    setUser(response.user);
-  }, []);
+const login = useCallback(async (credentials: LoginCredentials) => {
+  const response = await authApi.login(credentials);
+  localStorage.setItem(TOKEN_KEY, response.accessToken);
+  localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
+  setUser(response.user);
+
+  // Si es estudiante y nunca completó onboarding → redirigir
+  if (response.user.rol === 'estudiante') {
+    const onboardingKey = `onboarding_done_${response.user.id}`;
+    if (!localStorage.getItem(onboardingKey)) {
+      window.location.href = '/#/onboarding';
+      return;
+    }
+  }
+}, []);
 
   const register = useCallback(async (data: RegisterData) => {
     const response = await authApi.register(data);

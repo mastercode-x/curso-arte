@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react';
 import { createPageUrl } from '@/utils';
 import { ArrowLeft, CheckCircle, Clock, BookOpen, DollarSign, Mail, Phone, MapPin, Calendar, XCircle, Award } from 'lucide-react';
 import * as studentApi from '@/services/studentApi';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+
 
 function StatusBadge({ estado }) {
   const map = {
@@ -34,7 +35,9 @@ function StatusBadge({ estado }) {
 }
 
 export default function EstudianteDetalle() {
-  const { id } = useParams();
+  const { id: paramId } = useParams();
+const [searchParams] = useSearchParams();
+const id = paramId || searchParams.get('id');
   const navigate = useNavigate();
   const { toast } = useToast();
   const [estudiante, setEstudiante] = useState(null);

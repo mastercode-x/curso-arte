@@ -6,7 +6,8 @@ import {
   markModuleComplete,
   getDashboard,
   getStudents,
-  getStudentDetail
+  getStudentDetail,
+  updateStudentByProfessor  // ← agregar
 } from '../controllers/studentController';
 import { authenticate, requireProfessor, requireStudent } from '../middleware/auth';
 
@@ -33,5 +34,11 @@ router.post(
 // Rutas del profesor (gestión de estudiantes)
 router.get('/', authenticate, requireProfessor, getStudents);
 router.get('/:id', authenticate, requireProfessor, getStudentDetail);
+
+
+
+// Agregar después de router.get('/:id', ...)
+router.put('/:id', authenticate, requireProfessor, updateStudentByProfessor);
+router.patch('/:id/toggle-active', authenticate, requireProfessor, updateStudentByProfessor);
 
 export default router;

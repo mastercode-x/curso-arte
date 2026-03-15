@@ -68,16 +68,16 @@ const id = paramId || searchParams.get('id');
     }
   };
 
-  const toggleActivo = async () => {
-    try {
-      const nuevoEstado = !estudiante.activo;
-      await studentApi.updateStudentStatus(id, { activo: nuevoEstado });
-      setEstudiante(prev => ({ ...prev, activo: nuevoEstado }));
-      toast({ title: 'Estado actualizado', description: `Estudiante ${nuevoEstado ? 'activado' : 'desactivado'}.` });
-    } catch (error) {
-      toast({ title: 'Error', description: 'No se pudo actualizar el estado.', variant: 'destructive' });
-    }
-  };
+const toggleActivo = async () => {
+  try {
+    const nuevoEstado = estudiante.estado === 'activo' ? 'inactivo' : 'activo';
+    await studentApi.updateStudentStatus(id, { estado: nuevoEstado });
+    setEstudiante(prev => ({ ...prev, estado: nuevoEstado }));
+    toast({ title: 'Estado actualizado' });
+  } catch (error) {
+    toast({ title: 'Error', description: 'No se pudo actualizar el estado.', variant: 'destructive' });
+  }
+};
 
   if (loading) {
     return (
@@ -120,7 +120,7 @@ const id = paramId || searchParams.get('id');
         <div className="w-px h-5 bg-[rgba(244,242,236,0.1)]" />
         <p className="font-serif text-lg text-[#F4F2EC]">{estudiante.nombre}</p>
         <div className="ml-auto flex items-center gap-3">
-          <StatusBadge estado={estudiante.activo ? 'activo' : 'inactivo'} />
+          <StatusBadge estado={estudiante.estado === 'activo' ? 'activo' : 'inactivo'} />
         </div>
       </header>
 

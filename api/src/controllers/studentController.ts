@@ -368,3 +368,47 @@ export const getStudentDetail = asyncHandler(async (req: Request, res: Response)
     pagos: estudiante.pagos
   });
 });
+
+
+
+
+
+
+export const updateStudentByProfessor = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { estadoPago, activo, estado } = req.body;
+
+  const estudiante = await prisma.estudiante.findUnique({
+    where: { id },
+    include: { user: true }
+  });
+
+  if (!estudiante) {
+    res.status(404).json({ error: 'Estudiante no encontrado' });
+    return;
+  }
+
+  // Actualizar estado de pago
+  if (estadoPago !== undefined) {
+    await prisma.estudiante.update({
+      where: { id },
+      data: { estadoPago }
+    });
+  }
+
+  // Activar/desactivar acceso (actualiza User.estado)
+  if (activo !== undefined || estado !== undefined) {
+    const nuevoEstado = activo === false || estado === 'inactivo' ? 'inactivo' : 'activo';
+    await prisma.user.update({
+      where: { id: estudiante.userId },
+      data: { estado: nuevoEstado }
+    });
+  }
+
+  const updated = await prisma.estudiante.findUnique({
+    where: { id },
+    include: { user: true }
+  });
+
+  res.json(updated);
+});

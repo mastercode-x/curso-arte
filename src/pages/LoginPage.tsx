@@ -18,20 +18,20 @@ const LoginPage: React.FC = () => {
   });
   const [localError, setLocalError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLocalError(null);
-    try {
-      await login(formData);
-      // ✅ After login, user state is set — navigate based on role
-      // We read the updated user from auth context via isProfessor
-      // But since state updates are async, we check the response role directly
-      // navigate() works with HashRouter — no need for window.location
-      navigate('/dashboard');
-    } catch (err: any) {
-      setLocalError(err?.message || 'Error al iniciar sesión');
-    }
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLocalError(null);
+  try {
+    await login(formData);
+    // El AuthContext ya maneja el redirect:
+    // - estudiante sin onboarding → /#/onboarding
+    // - estudiante con onboarding → /dashboard
+    // - profesor → /profesor
+    // Solo llegamos acá si el AuthContext no redirigió (no debería pasar)
+  } catch (err: any) {
+    setLocalError(err?.message || 'Error al iniciar sesión');
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center p-4">

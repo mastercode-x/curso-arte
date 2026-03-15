@@ -17,23 +17,29 @@ export default function OnboardingPage() {
     interes: '',
   });
 
-  const handleSave = async () => {
-    try {
-      setIsSaving(true);
-      await studentApi.updateStudentProfile({
-        nombre: form.nombre,
-        telefono: form.telefono,
-        pais: form.pais,
-      });
-      await refreshUser();
-      toast.success('Perfil completado');
-      window.location.href = createPageUrl('dashboard');
-    } catch (error) {
-      toast.error('Error guardando perfil');
-    } finally {
-      setIsSaving(false);
+ const handleSave = async () => {
+  try {
+    setIsSaving(true);
+    await studentApi.updateStudentProfile({
+      nombre: form.nombre,
+      telefono: form.telefono,
+      pais: form.pais,
+    });
+    await refreshUser();
+    
+    // ✅ Marcar onboarding como completado
+    if (user?.id) {
+      localStorage.setItem(`onboarding_done_${user.id}`, 'true');
     }
-  };
+    
+    toast.success('Perfil completado');
+    window.location.href = '/#/dashboard';
+  } catch (error) {
+    toast.error('Error guardando perfil');
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center p-4">

@@ -51,13 +51,15 @@ const login = useCallback(async (credentials: LoginCredentials) => {
   localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
   setUser(response.user);
 
-  // Si es estudiante y nunca completó onboarding → redirigir
   if (response.user.rol === 'estudiante') {
     const onboardingKey = `onboarding_done_${response.user.id}`;
     if (!localStorage.getItem(onboardingKey)) {
       window.location.href = '/#/onboarding';
-      return;
+    } else {
+      window.location.href = '/#/dashboard';
     }
+  } else if (response.user.rol === 'profesor') {
+    window.location.href = '/#/profesor';
   }
 }, []);
 

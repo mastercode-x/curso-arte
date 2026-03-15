@@ -266,16 +266,36 @@ const CalendarManager: React.FC = () => {
                     {formData.date ? format(new Date(formData.date), "PPP", { locale: es }) : <span className="text-[#B8B4AA]">Selecciona una fecha</span>}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-[#141419] border-[rgba(244,242,236,0.08)]">
-                  <Calendar
-                    mode="single"
-                    selected={formData.date ? new Date(formData.date) : undefined}
-                    onSelect={(date) => setFormData({ ...formData, date: date ? format(date, 'yyyy-MM-dd') : '' })}
-                    initialFocus
-                    locale={es}
-                    className="text-[#F4F2EC]"
-                  />
-                </PopoverContent>
+             <PopoverContent className="w-auto p-3 bg-[#141419] border-[rgba(244,242,236,0.08)]">
+  <Calendar
+    mode="single"
+    selected={formData.date ? new Date(formData.date) : undefined}
+    onSelect={(date) => setFormData({ ...formData, date: date ? format(date, 'yyyy-MM-dd') : '' })}
+    initialFocus
+    locale={es}
+    className="text-[#F4F2EC]"
+    classNames={{
+      months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+      month: "space-y-4",
+      caption: "flex justify-center pt-1 relative items-center mb-2",
+      caption_label: "text-sm font-medium text-[#F4F2EC]",
+      nav: "space-x-1 flex items-center",
+      nav_button: "h-7 w-7 bg-transparent p-0 text-[#B8B4AA] hover:text-[#F4F2EC]",
+      nav_button_previous: "absolute left-1",
+      nav_button_next: "absolute right-1",
+      table: "w-full border-collapse",
+      head_row: "flex mb-1",
+      head_cell: "text-[#B8B4AA] rounded-md w-9 font-normal text-[0.8rem] text-center",
+      row: "flex w-full mt-1",
+      cell: "h-9 w-9 text-center text-sm relative p-0",
+      day: "h-9 w-9 p-0 font-normal text-[#F4F2EC] hover:bg-[rgba(199,163,109,0.15)] rounded-md transition-colors",
+      day_selected: "bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#C7A36D] rounded-md",
+      day_today: "border border-[#C7A36D] text-[#C7A36D] rounded-md",
+      day_outside: "text-[#B8B4AA]/40",
+      day_disabled: "text-[#B8B4AA]/20",
+    }}
+  />
+</PopoverContent>
               </Popover>
             </div>
 

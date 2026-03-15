@@ -171,9 +171,15 @@ const toggleActivo = async () => {
                 className="w-full font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2.5 border border-yellow-400/30 text-yellow-400 hover:bg-yellow-400/10 transition-colors text-left"
               >⊘ Quitar estado de pago</button>
               <button
-                onClick={toggleActivo}
-                className="w-full font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2.5 border border-red-400/30 text-red-400 hover:bg-red-400/10 transition-colors text-left"
-              >{estudiante.activo ? '✕ Desactivar acceso' : '✓ Activar acceso'}</button>
+  onClick={toggleActivo}
+  className={`w-full font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2.5 border transition-colors text-left ${
+    estudiante.estado === 'activo'
+      ? 'border-red-400/30 text-red-400 hover:bg-red-400/10'
+      : 'border-green-400/30 text-green-400 hover:bg-green-400/10'
+  }`}
+>
+  {estudiante.estado === 'activo' ? '✕ Desactivar acceso' : '✓ Activar acceso'}
+</button>
               <a
                 href={`mailto:${estudiante.email}`}
                 className="w-full inline-block font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2.5 border border-[rgba(199,163,109,0.3)] text-[#C7A36D] hover:bg-[rgba(199,163,109,0.08)] transition-colors text-center"

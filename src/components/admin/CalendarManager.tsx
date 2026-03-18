@@ -315,12 +315,12 @@ const CalendarManager: React.FC = () => {
 
             <div className="space-y-2">
               <Label htmlFor="module" className="text-[#F4F2EC] text-sm font-medium">Módulo (opcional)</Label>
-              <select
-                id="module"
-                value={formData.module || ''}
-                onChange={(e) => setFormData({ ...formData, module: e.target.value || null })}
-                className="w-full px-3 py-2.5 bg-[rgba(244,242,236,0.03)] border border-[rgba(244,242,236,0.08)] text-[#F4F2EC] rounded-md text-sm"
-              >
+         <select
+  id="module"
+  value={formData.module || ''}
+  onChange={(e) => setFormData({ ...formData, module: e.target.value || null })}
+  className="w-full px-3 py-2.5 bg-[#141419] border border-[rgba(244,242,236,0.08)] text-[#F4F2EC] rounded-md text-sm [&>option]:bg-[#141419] [&>option]:text-[#F4F2EC]"
+>
                 <option value="">Sin módulo</option>
                 {modules.map((module) => (
                   <option key={module.id} value={module.titulo}>

@@ -1,1 +1,0 @@
-UPDATE "_prisma_migrations" SET "finished_at" = NOW(), "logs" = NULL WHERE "migration_name" = '20260311141907_add_calendar_table';

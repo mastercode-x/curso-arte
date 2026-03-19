@@ -421,45 +421,85 @@ function SolicitudesSection() {
       </div>
 
       {selected && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#141419] border border-[rgba(244,242,236,0.12)] w-full max-w-lg p-8 relative">
-            <button onClick={() => setSelected(null)} className="absolute top-4 right-4 text-[#B8B4AA] hover:text-[#F4F2EC]"><X className="w-5 h-5" /></button>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#C7A36D] mb-2">Solicitud</p>
-            <h2 className="font-serif text-2xl text-[#F4F2EC] mb-6">{selected.nombre}</h2>
-            <div className="space-y-4 mb-6 text-sm">
-              {[["Email", selected.email], ["Teléfono", selected.telefono]].map(([k, v]) => (
-                <div key={k} className="flex gap-4">
-                  <span className="text-[#B8B4AA] w-24 shrink-0">{k}</span>
-                  <span className="text-[#F4F2EC]">{v || '—'}</span>
-                </div>
-              ))}
-              <div>
-                <p className="text-[#B8B4AA] mb-1 font-medium">Vínculo con el arte</p>
-                <p className="text-[#F4F2EC] text-sm leading-relaxed">{selected.experiencia || '—'}</p>
-              </div>
-              <div>
-                <p className="text-[#B8B4AA] mb-1 font-medium">Motivación e interés</p>
-                <p className="text-[#F4F2EC] text-sm leading-relaxed whitespace-pre-wrap">{selected.interes || '—'}</p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <StatusBadge estado={selected.estado} />
-              {selected.estado === 'pendiente' && (
-                <>
-                  <button
-                    onClick={() => handleApprove(selected.id)}
-                    className="font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2 bg-green-600 text-white hover:bg-green-700 transition-colors"
-                  >Aprobar</button>
-                  <button
-                    onClick={() => handleReject(selected.id)}
-                    className="font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2 border border-red-500/40 text-red-400 hover:bg-red-500/10 transition-colors"
-                  >Rechazar</button>
-                </>
-              )}
-            </div>
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+      
+      {/* Header */}
+      <div className="flex items-start justify-between p-6 border-b border-[rgba(244,242,236,0.08)]">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-[rgba(199,163,109,0.15)] flex items-center justify-center font-serif text-xl text-[#C7A36D]">
+            {selected.nombre?.charAt(0)}
+          </div>
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#C7A36D] mb-1">Solicitud de acceso</p>
+            <h2 className="font-serif text-2xl text-[#F4F2EC]">{selected.nombre}</h2>
           </div>
         </div>
+        <div className="flex items-center gap-3">
+          <StatusBadge estado={selected.estado} />
+          <button onClick={() => setSelected(null)} className="text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors p-1">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Info Grid */}
+      <div className="grid grid-cols-2 gap-px bg-[rgba(244,242,236,0.04)] border-b border-[rgba(244,242,236,0.08)]">
+        {[
+          { label: "Email", value: selected.email },
+          { label: "Teléfono", value: selected.telefono || '—' },
+          { label: "País", value: selected.pais || '—' },
+          { label: "Fecha de solicitud", value: new Date(selected.fechaSolicitud).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }) },
+        ].map(({ label, value }) => (
+          <div key={label} className="bg-[#141419] px-6 py-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1">{label}</p>
+            <p className="text-sm text-[#F4F2EC]">{value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Respuestas */}
+      <div className="p-6 space-y-6">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D] mb-3 flex items-center gap-2">
+            <span className="w-4 h-px bg-[#C7A36D]" />
+            Vínculo con el arte
+          </p>
+          <p className="text-sm text-[#F4F2EC] leading-relaxed bg-[rgba(244,242,236,0.02)] border border-[rgba(244,242,236,0.06)] p-4">
+            {selected.experiencia || '—'}
+          </p>
+        </div>
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D] mb-3 flex items-center gap-2">
+            <span className="w-4 h-px bg-[#C7A36D]" />
+            Motivación e interés
+          </p>
+          <p className="text-sm text-[#F4F2EC] leading-relaxed whitespace-pre-wrap bg-[rgba(244,242,236,0.02)] border border-[rgba(244,242,236,0.06)] p-4">
+            {selected.interes || '—'}
+          </p>
+        </div>
+      </div>
+
+      {/* Actions */}
+      {selected.estado === 'pendiente' && (
+        <div className="flex gap-3 p-6 pt-0">
+          <button
+            onClick={() => handleApprove(selected.id)}
+            className="flex-1 flex items-center justify-center gap-2 font-mono text-xs uppercase tracking-[0.14em] px-6 py-3 bg-green-600 text-white hover:bg-green-700 transition-colors"
+          >
+            <Check className="w-4 h-4" /> Aprobar solicitud
+          </button>
+          <button
+            onClick={() => handleReject(selected.id)}
+            className="flex-1 flex items-center justify-center gap-2 font-mono text-xs uppercase tracking-[0.14em] px-6 py-3 border border-red-500/40 text-red-400 hover:bg-red-500/10 transition-colors"
+          >
+            <XCircle className="w-4 h-4" /> Rechazar
+          </button>
+        </div>
       )}
+    </div>
+  </div>
+)}
     </div>
   );
 }

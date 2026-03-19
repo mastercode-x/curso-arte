@@ -374,7 +374,15 @@ function App() {
           />
         </Routes>
       </HashRouter>
-      <Toaster />
+      <Toaster
+  toastOptions={{
+    style: {
+      background: '#166534',
+      border: '1px solid #16a34a',
+      color: '#dcfce7',
+    }
+  }}
+/>
     </AuthProvider>
   );
 }

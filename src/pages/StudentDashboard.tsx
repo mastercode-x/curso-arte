@@ -380,19 +380,26 @@ function ModuleViewer({ moduloId, onBack, onComplete }: { moduloId: string, onBa
     }
   };
 
-  const handleComplete = async () => {
-    try {
-      setIsCompleting(true);
-      await moduleApi.updateModuleProgress(moduloId, { completudPorcentaje: 100, completado: true });
-      toast.success('¡Módulo completado!');
-      onComplete?.();
-      onBack();
-    } catch (error) {
-      toast.error('Error completando módulo');
-    } finally {
-      setIsCompleting(false);
-    }
-  };
+const handleComplete = async () => {
+  try {
+    setIsCompleting(true);
+    await moduleApi.updateModuleProgress(moduloId, { completudPorcentaje: 100, completado: true });
+    toast.success('¡Módulo completado!');
+    onComplete?.();
+    // No redirigir — recargar el módulo para reflejar el estado
+    await loadModulo();
+  } catch (error) {
+    toast.error('Error completando módulo');
+  } finally {
+    setIsCompleting(false);
+  }
+};
+
+
+const [isCompleted, setIsCompleted] = useState(false);
+
+// En handleComplete después del updateModuleProgress:
+setIsCompleted(true);
 
   if (isLoading) {
     return (
@@ -483,13 +490,17 @@ function ModuleViewer({ moduloId, onBack, onComplete }: { moduloId: string, onBa
             </div>
           )}
           <div className="flex justify-end">
-            <button 
-              className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.14em] px-4 sm:px-6 py-2.5 sm:py-3 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors disabled:opacity-50"
-              onClick={handleComplete}
-              disabled={isCompleting}
-            >
-              {isCompleting ? 'Guardando...' : 'Marcar como completado ✓'}
-            </button>
+           <button 
+  className={`font-mono text-[10px] sm:text-xs uppercase tracking-[0.14em] px-4 sm:px-6 py-2.5 sm:py-3 transition-colors ${
+    isCompleted 
+      ? 'bg-green-600/20 border border-green-600/40 text-green-400 cursor-default'
+      : 'bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a]'
+  }`}
+  onClick={!isCompleted ? handleComplete : undefined}
+  disabled={isCompleting}
+>
+  {isCompleting ? 'Guardando...' : isCompleted ? '✓ Completado' : 'Marcar como completado ✓'}
+</button>
           </div>
         </div>
       </main>

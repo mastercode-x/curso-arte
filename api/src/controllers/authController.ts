@@ -282,7 +282,7 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
 // Actualizar perfil
 export const updateProfile = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user?.userId;
-  const { nombre, avatarUrl } = req.body;
+  const { nombre, avatarUrl, telefono, pais } = req.body;
 
   if (!userId) {
     res.status(401).json({ error: 'No autenticado' });
@@ -291,18 +291,22 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
 
   const updatedUser = await prisma.user.update({
     where: { id: userId },
-    data: {
-      nombre,
-      avatarUrl
-    }
+    data: { nombre, avatarUrl },
+    include: { estudiante: true }
   });
 
-  res.json({
-    id: updatedUser.id,
-    email: updatedUser.email,
-    nombre: updatedUser.nombre,
-    avatarUrl: updatedUser.avatarUrl
-  });
+  // Actualizar teléfono y país en el modelo Estudiante
+  if (updatedUser.estudiante && (telefono !== undefined || pais !== undefined)) {
+    await prisma.estudiante.update({
+      where: { id: updatedUser.estudiante.id },
+      data: {
+        ...(telefono !== undefined && { telefono }),
+        ...(pais !== undefined && { pais }),
+      }
+    });
+  }
+
+  res.json({ message: 'Perfil actualizado' });
 });
 
 // Cambiar contraseña

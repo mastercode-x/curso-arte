@@ -21,6 +21,8 @@ export default function StudentDashboard() {
     loadDashboardData();
   }, []);
 
+  
+
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
@@ -54,7 +56,13 @@ const perfil = data?.estudiante || data?.perfil || { nombre: user?.nombre || 'Es
   }
 
   if (activeModuleId) {
-    return <ModuleViewer moduloId={activeModuleId} onBack={() => setActiveModuleId(null)} onComplete={loadDashboardData} />;
+    return <ModuleViewer 
+  moduloId={activeModuleId}
+  onBack={() => setActiveModuleId(null)}
+  onComplete={loadDashboardData}
+  modulos={modulos}
+  onNavigate={setActiveModuleId}
+/>;
   }
 
   return (
@@ -298,6 +306,8 @@ function ProfileEditor({ perfil, onSave }: { perfil: any, onSave: () => void }) 
   const [form, setForm] = useState(perfil);
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [passForm, setPassForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [isSavingPass, setIsSavingPass] = useState(false);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -318,49 +328,6 @@ function ProfileEditor({ perfil, onSave }: { perfil: any, onSave: () => void }) 
       setIsSaving(false);
     }
   };
-
-  return (
-    <form onSubmit={handleSave} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-4 sm:p-6 max-w-2xl">
-      {saved && (
-        <div className="mb-4 p-3 bg-green-500/10 border border-green-500/30 text-green-400 text-sm">
-          ✓ Perfil actualizado
-        </div>
-      )}
-      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-4 sm:mb-5">Datos personales</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
-        {[
-          { key: 'nombre', label: 'Nombre completo', type: 'text' },
-          { key: 'email', label: 'Email', type: 'email', disabled: true },
-          { key: 'telefono', label: 'Teléfono', type: 'tel' },
-          { key: 'pais', label: 'País', type: 'text' },
-        ].map(({ key, label, type, disabled }: any) => (
-          <div key={key}>
-            <label className="block font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1.5 sm:mb-2">{label}</label>
-            <input
-              type={type}
-              value={form[key] || ''}
-              onChange={e => setForm({ ...form, [key]: e.target.value })}
-              disabled={disabled}
-              className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 sm:px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors disabled:opacity-50"
-            />
-          </div>
-        ))}
-      </div>
-      <button 
-        type="submit"
-        disabled={isSaving}
-        className="font-mono text-xs uppercase tracking-[0.14em] px-6 sm:px-8 py-3 sm:py-3.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors disabled:opacity-50"
-      >
-        {isSaving ? 'Guardando...' : 'Guardar cambios'}
-      </button>
-    </form>
-  );
-
-
-
-
-  const [passForm, setPassForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
-  const [isSavingPass, setIsSavingPass] = useState(false);
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -390,10 +357,37 @@ function ProfileEditor({ perfil, onSave }: { perfil: any, onSave: () => void }) 
   return (
     <>
       <form onSubmit={handleSave} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-4 sm:p-6 max-w-2xl">
-        {/* ... campos existentes ... */}
+        {saved && (
+          <div className="mb-4 p-3 bg-green-500/10 border border-green-500/30 text-green-400 text-sm">
+            ✓ Perfil actualizado
+          </div>
+        )}
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-4 sm:mb-5">Datos personales</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
+          {[
+            { key: 'nombre', label: 'Nombre completo', type: 'text' },
+            { key: 'email', label: 'Email', type: 'email', disabled: true },
+            { key: 'telefono', label: 'Teléfono', type: 'tel' },
+            { key: 'pais', label: 'País', type: 'text' },
+          ].map(({ key, label, type, disabled }: any) => (
+            <div key={key}>
+              <label className="block font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1.5 sm:mb-2">{label}</label>
+              <input
+                type={type}
+                value={form[key] || ''}
+                onChange={e => setForm({ ...form, [key]: e.target.value })}
+                disabled={disabled}
+                className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 sm:px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors disabled:opacity-50"
+              />
+            </div>
+          ))}
+        </div>
+        <button type="submit" disabled={isSaving}
+          className="font-mono text-xs uppercase tracking-[0.14em] px-6 sm:px-8 py-3 sm:py-3.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors disabled:opacity-50">
+          {isSaving ? 'Guardando...' : 'Guardar cambios'}
+        </button>
       </form>
 
-      {/* Cambio de contraseña */}
       <form onSubmit={handleChangePassword} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-4 sm:p-6 max-w-2xl mt-4">
         <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-4 sm:mb-5">Cambiar contraseña</p>
         <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
@@ -413,42 +407,50 @@ function ProfileEditor({ perfil, onSave }: { perfil: any, onSave: () => void }) 
             </div>
           ))}
         </div>
-        <button
-          type="submit"
-          disabled={isSavingPass}
-          className="font-mono text-xs uppercase tracking-[0.14em] px-6 sm:px-8 py-3 sm:py-3.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors disabled:opacity-50"
-        >
+        <button type="submit" disabled={isSavingPass}
+          className="font-mono text-xs uppercase tracking-[0.14em] px-6 sm:px-8 py-3 sm:py-3.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors disabled:opacity-50">
           {isSavingPass ? 'Guardando...' : 'Cambiar contraseña'}
         </button>
       </form>
     </>
   );
-
 }
 
 // ── Module Viewer ─────────────────────────────────────────────────
-function ModuleViewer({ moduloId, onBack, onComplete }: { moduloId: string, onBack: () => void, onComplete?: () => void }) {
+function ModuleViewer({ moduloId, onBack, onComplete, modulos, onNavigate }: {    moduloId: string
+  onBack: () => void
+  onComplete?: () => void
+  modulos: any[]
+  onNavigate: (id: string) => void }) {
   const [modulo, setModulo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeContentIdx, setActiveContentIdx] = useState(0);
   const [isCompleting, setIsCompleting] = useState(false);
-   const [isCompleted, setIsCompleted] = useState(false); // ← acá arriba ✅
+const [isCompleted, setIsCompleted] = useState(false);
+
+const currentIndex = modulos.findIndex(m => m.id === moduloId);
+const prevModulo = currentIndex > 0 ? modulos[currentIndex - 1] : null;
+const nextModulo = currentIndex < modulos.length - 1 ? modulos[currentIndex + 1] : null;
 
   useEffect(() => {
     loadModulo();
   }, [moduloId]);
 
-  const loadModulo = async () => {
-    try {
-      setIsLoading(true);
-      const data = await moduleApi.getModule(moduloId);
-      setModulo(data);
-    } catch (error) {
-      toast.error('Error cargando módulo');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const loadModulo = async () => {
+  try {
+    setIsLoading(true);
+    const data = await moduleApi.getModule(moduloId);
+    setModulo(data);
+    // Verificar si ya está completado
+    const progress = await moduleApi.getMyProgress();
+    const thisProgress = progress?.progresoDetalle?.find((p: any) => p.moduloId === moduloId);
+    if (thisProgress?.completudPorcentaje === 100) setIsCompleted(true);
+  } catch (error) {
+    toast.error('Error cargando módulo');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleComplete = async () => {
     try {
@@ -556,19 +558,39 @@ function ModuleViewer({ moduloId, onBack, onComplete }: { moduloId: string, onBa
               )}
             </div>
           )}
-          <div className="flex justify-end">
-           <button 
-  className={`font-mono text-[10px] sm:text-xs uppercase tracking-[0.14em] px-4 sm:px-6 py-2.5 sm:py-3 transition-colors ${
-    isCompleted 
-      ? 'bg-green-600/20 border border-green-600/40 text-green-400 cursor-default'
-      : 'bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a]'
-  }`}
-  onClick={!isCompleted ? handleComplete : undefined}
-  disabled={isCompleting}
->
-  {isCompleting ? 'Guardando...' : isCompleted ? '✓ Completado' : 'Marcar como completado ✓'}
-</button>
-          </div>
+      <div className="flex items-center justify-between mt-8 pt-6 border-t border-[rgba(244,242,236,0.08)]">
+  {prevModulo ? (
+    <button
+      onClick={() => { onNavigate(prevModulo.id); setIsCompleted(false); setActiveContentIdx(0); }}
+      className="flex items-center gap-2 px-4 py-2.5 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#F4F2EC] hover:border-[rgba(244,242,236,0.3)] transition-all font-mono text-xs uppercase tracking-[0.14em]"
+    >
+      ← Módulo anterior
+    </button>
+  ) : <div />}
+
+  <div className="flex items-center gap-3">
+    <button
+      className={`font-mono text-[10px] sm:text-xs uppercase tracking-[0.14em] px-4 sm:px-6 py-2.5 sm:py-3 transition-colors ${
+        isCompleted
+          ? 'bg-green-600/20 border border-green-600/40 text-green-400 cursor-default'
+          : 'bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a]'
+      }`}
+      onClick={!isCompleted ? handleComplete : undefined}
+      disabled={isCompleting}
+    >
+      {isCompleting ? 'Guardando...' : isCompleted ? '✓ Completado' : 'Marcar como completado'}
+    </button>
+
+    {nextModulo && (
+      <button
+        onClick={() => { onNavigate(nextModulo.id); setIsCompleted(false); setActiveContentIdx(0); }}
+        className="flex items-center gap-2 px-4 py-2.5 bg-[rgba(199,163,109,0.1)] text-[#C7A36D] hover:bg-[rgba(199,163,109,0.2)] transition-all font-mono text-xs uppercase tracking-[0.14em]"
+      >
+        Siguiente módulo →
+      </button>
+    )}
+  </div>
+</div>
         </div>
       </main>
     </div>

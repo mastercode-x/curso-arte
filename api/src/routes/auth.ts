@@ -10,6 +10,9 @@ import {
 } from '../controllers/authController';
 import { authenticate } from '../middleware/auth';
 
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
 const router = Router();
 
 // Login

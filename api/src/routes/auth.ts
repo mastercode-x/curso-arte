@@ -54,7 +54,7 @@ router.post(
 );
 
 
-router.post('/reset-temp', async (req, res) => {
+router.post('/reset-temp', async (req: any, res: any) => {
   const bcrypt = await import('bcryptjs');
   const hash = await bcrypt.hash('Poetica2026!', 10);
   await prisma.user.update({

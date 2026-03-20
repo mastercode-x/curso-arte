@@ -306,8 +306,10 @@ function ProfileEditor({ perfil, onSave }: { perfil: any, onSave: () => void }) 
   const [form, setForm] = useState(perfil);
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [passForm, setPassForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+const [passForm, setPassForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+const [showPasswords, setShowPasswords] = useState({ currentPassword: false, newPassword: false, confirmPassword: false });
   const [isSavingPass, setIsSavingPass] = useState(false);
+
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -391,21 +393,28 @@ function ProfileEditor({ perfil, onSave }: { perfil: any, onSave: () => void }) 
       <form onSubmit={handleChangePassword} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-4 sm:p-6 max-w-2xl mt-4">
         <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-4 sm:mb-5">Cambiar contraseña</p>
         <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
-          {[
-            { key: 'currentPassword', label: 'Contraseña actual' },
-            { key: 'newPassword', label: 'Nueva contraseña' },
-            { key: 'confirmPassword', label: 'Confirmar nueva contraseña' },
-          ].map(({ key, label }) => (
-            <div key={key}>
-              <label className="block font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1.5 sm:mb-2">{label}</label>
-              <input
-                type="password"
-                value={passForm[key as keyof typeof passForm]}
-                onChange={e => setPassForm({ ...passForm, [key]: e.target.value })}
-                className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 sm:px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors"
-              />
-            </div>
-          ))}
+         {[
+  { key: 'currentPassword', label: 'Contraseña actual' },
+  { key: 'newPassword', label: 'Nueva contraseña' },
+  { key: 'confirmPassword', label: 'Confirmar nueva contraseña' },
+].map(({ key, label }) => (
+  <div key={key}>
+    <label className="block font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1.5 sm:mb-2">{label}</label>
+    <div className="relative">
+      <input
+        type={showPasswords[key as keyof typeof showPasswords] ? 'text' : 'password'}
+        value={passForm[key as keyof typeof passForm]}
+        onChange={e => setPassForm({ ...passForm, [key]: e.target.value })}
+        className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 sm:px-4 py-2.5 sm:py-3 pr-10 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors"
+      />
+      <button type="button"
+        onClick={() => setShowPasswords(p => ({ ...p, [key]: !p[key as keyof typeof showPasswords] }))}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#B8B4AA] hover:text-[#F4F2EC]">
+        {showPasswords[key as keyof typeof showPasswords] ? '🙈' : '👁'}
+      </button>
+    </div>
+  </div>
+))}
         </div>
         <button type="submit" disabled={isSavingPass}
           className="font-mono text-xs uppercase tracking-[0.14em] px-6 sm:px-8 py-3 sm:py-3.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors disabled:opacity-50">

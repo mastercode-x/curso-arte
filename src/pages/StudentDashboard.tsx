@@ -9,6 +9,8 @@ import * as moduleApi from '../services/moduleApi';
 import * as studentApi from '../services/studentApi';
 import { useAuth } from '@/contexts/AuthContext';
 
+import { generateCertificate } from '../utils/generateCertificate';
+
 export default function StudentDashboard() {
   const { user, logout } = useAuth();
   const [data, setData] = useState<any>(null);
@@ -16,6 +18,7 @@ export default function StudentDashboard() {
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -23,17 +26,30 @@ export default function StudentDashboard() {
 
   
 
-  const loadDashboardData = async () => {
-    try {
-      setIsLoading(true);
-      const dashboardData = await dashboardApi.getStudentDashboard();
-      setData(dashboardData);
-    } catch (error) {
-      toast.error('Error cargando datos del dashboard');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+   
+const handleDownloadCertificate = async () => {
+  if (!allCompleted) return;
+  try {
+    setIsGenerating(true);
+    await generateCertificate({ studentName: perfil.nombre });
+  } catch {
+    toast.error('Error generando el certificado');
+  } finally {
+    setIsGenerating(false);
+  }
+};
+
+const loadDashboardData = async (silent = false) => {
+  try {
+    if (!silent) setIsLoading(true);
+    const dashboardData = await dashboardApi.getStudentDashboard();
+    setData(dashboardData);
+  } catch (error) {
+    toast.error('Error cargando datos del dashboard');
+  } finally {
+    if (!silent) setIsLoading(false);
+  }
+};
 
   const notifications = [
     { id: 1, text: "Bienvenido al curso Poética de la Mirada", time: "Ahora", read: false },
@@ -59,7 +75,7 @@ const perfil = data?.estudiante || data?.perfil || { nombre: user?.nombre || 'Es
     return <ModuleViewer 
   moduloId={activeModuleId}
   onBack={() => setActiveModuleId(null)}
-  onComplete={loadDashboardData}
+  onComplete={() => loadDashboardData(true)}
   modulos={modulos}
   onNavigate={setActiveModuleId}
 />;
@@ -282,9 +298,13 @@ const perfil = data?.estudiante || data?.perfil || { nombre: user?.nombre || 'Es
                 </p>
               </div>
               {allCompleted && (
-                <button className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] px-3 sm:px-5 py-2 sm:py-2.5 border border-[#C7A36D] text-[#C7A36D] hover:bg-[rgba(199,163,109,0.1)] transition-colors">
-                  Descargar
-                </button>
+                <button
+  onClick={handleDownloadCertificate}
+  disabled={isGenerating}
+  className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] px-3 sm:px-5 py-2 sm:py-2.5 border border-[#C7A36D] text-[#C7A36D] hover:bg-[rgba(199,163,109,0.1)] transition-colors disabled:opacity-50"
+>
+  {isGenerating ? 'Generando...' : 'Descargar'}
+</button>
               )}
               {!allCompleted && <Lock className="w-4 h-4 text-[#B8B4AA]" />}
             </div>

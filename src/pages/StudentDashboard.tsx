@@ -15,7 +15,9 @@ export default function StudentDashboard() {
   const { user, logout } = useAuth();
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
+ const [activeModuleId, setActiveModuleId] = useState<string | null>(
+  () => localStorage.getItem('activeModuleId')
+);
   const [showProfile, setShowProfile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -24,6 +26,14 @@ export default function StudentDashboard() {
     loadDashboardData();
   }, []);
 
+
+  useEffect(() => {
+  if (activeModuleId) {
+    localStorage.setItem('activeModuleId', activeModuleId);
+  } else {
+    localStorage.removeItem('activeModuleId');
+  }
+}, [activeModuleId]);
   
 
    
@@ -74,7 +84,10 @@ const perfil = data?.estudiante || data?.perfil || { nombre: user?.nombre || 'Es
   if (activeModuleId) {
     return <ModuleViewer 
   moduloId={activeModuleId}
-  onBack={() => setActiveModuleId(null)}
+  onBack={() => {
+  setActiveModuleId(null);
+  localStorage.removeItem('activeModuleId');
+}}
   onComplete={() => loadDashboardData(true)}
   modulos={modulos}
   onNavigate={setActiveModuleId}
@@ -610,7 +623,7 @@ const loadModulo = async () => {
       {isCompleting ? 'Guardando...' : isCompleted ? '✓ Completado' : 'Marcar como completado'}
     </button>
 
-// DESPUÉS
+
 {nextModulo ? (
   <button
     onClick={() => { onNavigate(nextModulo.id); setIsCompleted(false); setActiveContentIdx(0); }}

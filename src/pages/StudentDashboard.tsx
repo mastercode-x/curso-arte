@@ -610,14 +610,29 @@ const loadModulo = async () => {
       {isCompleting ? 'Guardando...' : isCompleted ? '✓ Completado' : 'Marcar como completado'}
     </button>
 
-    {nextModulo && (
-      <button
-        onClick={() => { onNavigate(nextModulo.id); setIsCompleted(false); setActiveContentIdx(0); }}
-        className="flex items-center gap-2 px-4 py-2.5 bg-[rgba(199,163,109,0.1)] text-[#C7A36D] hover:bg-[rgba(199,163,109,0.2)] transition-all font-mono text-xs uppercase tracking-[0.14em]"
-      >
-        Siguiente módulo →
-      </button>
-    )}
+// DESPUÉS
+{nextModulo ? (
+  <button
+    onClick={() => { onNavigate(nextModulo.id); setIsCompleted(false); setActiveContentIdx(0); }}
+    className="flex items-center gap-2 px-4 py-2.5 bg-[rgba(199,163,109,0.1)] text-[#C7A36D] hover:bg-[rgba(199,163,109,0.2)] transition-all font-mono text-xs uppercase tracking-[0.14em]"
+  >
+    Siguiente módulo →
+  </button>
+) : isCompleted && (
+  <button
+    onClick={async () => {
+      try {
+        const { generateCertificate } = await import('../utils/generateCertificate');
+        await generateCertificate({ studentName: modulo.estudianteNombre || '' });
+      } catch {
+        toast.error('Error generando el certificado');
+      }
+    }}
+    className="flex items-center gap-2 px-4 py-2.5 bg-[rgba(199,163,109,0.15)] border border-[rgba(199,163,109,0.4)] text-[#C7A36D] hover:bg-[rgba(199,163,109,0.25)] transition-all font-mono text-xs uppercase tracking-[0.14em]"
+  >
+    ★ Descargar certificado
+  </button>
+)}
   </div>
 </div>
         </div>
@@ -632,14 +647,23 @@ function ContentIcon(tipo: string) {
 
 function ContentBlock({ content }: { content: any }) {
   const { tipo, titulo, texto, url } = content;
-  if (tipo === 'video') return (
-    <div>
-      {titulo && <h3 className="font-serif text-xl text-[#F4F2EC] mb-4">{titulo}</h3>}
-      <div className="relative w-full aspect-video bg-black">
-        <iframe src={url} className="absolute inset-0 w-full h-full" allow="autoplay; encrypted-media" allowFullScreen title={titulo} />
-      </div>
+// DESPUÉS
+
+
+if (tipo === 'video') return (
+  <div>
+    {titulo && <h3 className="font-serif text-xl text-[#F4F2EC] mb-4">{titulo}</h3>}
+    <div className="relative w-full aspect-video bg-black">
+      <iframe
+        src={getEmbedUrl(url)}
+        className="absolute inset-0 w-full h-full"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        title={titulo}
+      />
     </div>
-  );
+  </div>
+);
   if (tipo === 'texto') return (
     <div className="prose-dark">
       {titulo && <h2>{titulo}</h2>}
@@ -667,4 +691,27 @@ function ContentBlock({ content }: { content: any }) {
     </div>
   );
   return <p className="text-[#B8B4AA]">Contenido no disponible.</p>;
+}
+
+
+
+
+
+function getEmbedUrl(rawUrl: string): string {
+  try {
+    const u = new URL(rawUrl);
+    // youtube.com/watch?v=ID
+    if (u.hostname.includes('youtube.com') && u.searchParams.get('v')) {
+      return `https://www.youtube.com/embed/${u.searchParams.get('v')}`;
+    }
+    // youtu.be/ID
+    if (u.hostname === 'youtu.be') {
+      return `https://www.youtube.com/embed${u.pathname}`;
+    }
+    // vimeo.com/ID
+    if (u.hostname.includes('vimeo.com')) {
+      return `https://player.vimeo.com/video${u.pathname}`;
+    }
+  } catch { /* url inválida, devolver tal cual */ }
+  return rawUrl;
 }

@@ -19,7 +19,7 @@ const router = Router();
 router.post(
   '/login',
   [
-    body('email').isEmail().normalizeEmail(),
+    body('email').isEmail(),  // ← sacar .normalizeEmail()
     body('password').notEmpty()
   ],
   login

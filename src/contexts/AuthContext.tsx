@@ -27,20 +27,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Cargar usuario al iniciar
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem(TOKEN_KEY);
-      if (token) {
-        try {
-          const userData = await authApi.getProfile();
-          setUser(userData);
-        } catch (error) {
-          // Token inválido, limpiar sin redirigir
-          // (the 401 interceptor in api.ts handles the redirect)
-          localStorage.removeItem(TOKEN_KEY);
-          localStorage.removeItem(REFRESH_TOKEN_KEY);
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) {
+    try {
+      const userData = await authApi.getProfile();
+      setUser(userData);
+
+      // Si es estudiante y no completó onboarding → redirigir
+      if (userData.rol === 'estudiante') {
+        const onboardingKey = `onboarding_done_${userData.id}`;
+        if (!localStorage.getItem(onboardingKey)) {
+          const currentPath = window.location.hash;
+          // Solo redirigir si no está ya en onboarding o login
+          if (!currentPath.includes('onboarding') && !currentPath.includes('login')) {
+            window.location.href = '/#/onboarding';
+          }
         }
       }
-      setIsLoading(false);
-    };
+    } catch (error) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+    }
+  }
+  setIsLoading(false);
+};
 
     initAuth();
   }, []);

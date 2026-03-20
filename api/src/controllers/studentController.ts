@@ -220,7 +220,9 @@ export const getDashboard = asyncHandler(async (req: Request, res: Response) => 
       nombre: estudiante.user.nombre,
       email: estudiante.user.email,
       avatarUrl: estudiante.user.avatarUrl,
-      fechaInscripcion: estudiante.fechaInscripcion
+      fechaInscripcion: estudiante.fechaInscripcion,
+      telefono: estudiante.telefono,
+      pais: estudiante.pais,
     },
     estadisticas: {
       progresoGeneral,

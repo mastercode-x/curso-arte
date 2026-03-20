@@ -39,7 +39,7 @@ export default function StudentDashboard() {
   ];
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const perfil = data?.perfil || { nombre: user?.nombre || 'Estudiante', email: user?.email || '' };
+const perfil = data?.estudiante || data?.perfil || { nombre: user?.nombre || 'Estudiante', email: user?.email || '' };
   const estadisticas = data?.estadisticas || { progresoGeneral: 0, totalModulos: 0, modulosCompletados: 0 };
   const modulos = data?.modulos || [];
   const siguienteModulo = data?.siguienteModulo;
@@ -355,6 +355,75 @@ function ProfileEditor({ perfil, onSave }: { perfil: any, onSave: () => void }) 
       </button>
     </form>
   );
+
+
+
+
+  const [passForm, setPassForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [isSavingPass, setIsSavingPass] = useState(false);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passForm.newPassword !== passForm.confirmPassword) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+    if (passForm.newPassword.length < 6) {
+      toast.error('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    try {
+      setIsSavingPass(true);
+      await studentApi.changePassword({
+        currentPassword: passForm.currentPassword,
+        newPassword: passForm.newPassword,
+      });
+      setPassForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      toast.success('Contraseña actualizada');
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Error cambiando contraseña');
+    } finally {
+      setIsSavingPass(false);
+    }
+  };
+
+  return (
+    <>
+      <form onSubmit={handleSave} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-4 sm:p-6 max-w-2xl">
+        {/* ... campos existentes ... */}
+      </form>
+
+      {/* Cambio de contraseña */}
+      <form onSubmit={handleChangePassword} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-4 sm:p-6 max-w-2xl mt-4">
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-4 sm:mb-5">Cambiar contraseña</p>
+        <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+          {[
+            { key: 'currentPassword', label: 'Contraseña actual' },
+            { key: 'newPassword', label: 'Nueva contraseña' },
+            { key: 'confirmPassword', label: 'Confirmar nueva contraseña' },
+          ].map(({ key, label }) => (
+            <div key={key}>
+              <label className="block font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1.5 sm:mb-2">{label}</label>
+              <input
+                type="password"
+                value={passForm[key as keyof typeof passForm]}
+                onChange={e => setPassForm({ ...passForm, [key]: e.target.value })}
+                className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 sm:px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors"
+              />
+            </div>
+          ))}
+        </div>
+        <button
+          type="submit"
+          disabled={isSavingPass}
+          className="font-mono text-xs uppercase tracking-[0.14em] px-6 sm:px-8 py-3 sm:py-3.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors disabled:opacity-50"
+        >
+          {isSavingPass ? 'Guardando...' : 'Cambiar contraseña'}
+        </button>
+      </form>
+    </>
+  );
+
 }
 
 // ── Module Viewer ─────────────────────────────────────────────────
@@ -363,6 +432,7 @@ function ModuleViewer({ moduloId, onBack, onComplete }: { moduloId: string, onBa
   const [isLoading, setIsLoading] = useState(true);
   const [activeContentIdx, setActiveContentIdx] = useState(0);
   const [isCompleting, setIsCompleting] = useState(false);
+   const [isCompleted, setIsCompleted] = useState(false); // ← acá arriba ✅
 
   useEffect(() => {
     loadModulo();
@@ -380,26 +450,23 @@ function ModuleViewer({ moduloId, onBack, onComplete }: { moduloId: string, onBa
     }
   };
 
-const handleComplete = async () => {
-  try {
-    setIsCompleting(true);
-    await moduleApi.updateModuleProgress(moduloId, { completudPorcentaje: 100, completado: true });
-    toast.success('¡Módulo completado!');
-    onComplete?.();
-    // No redirigir — recargar el módulo para reflejar el estado
-    await loadModulo();
-  } catch (error) {
-    toast.error('Error completando módulo');
-  } finally {
-    setIsCompleting(false);
-  }
-};
+  const handleComplete = async () => {
+    try {
+      setIsCompleting(true);
+      await moduleApi.updateModuleProgress(moduloId, { completudPorcentaje: 100, completado: true });
+      toast.success('¡Módulo completado!');
+      setIsCompleted(true); // ← acá dentro ✅
+      onComplete?.();
+      await loadModulo();
+    } catch (error) {
+      toast.error('Error completando módulo');
+    } finally {
+      setIsCompleting(false);
+    }
+  };
 
 
-const [isCompleted, setIsCompleted] = useState(false);
 
-// En handleComplete después del updateModuleProgress:
-setIsCompleted(true);
 
   if (isLoading) {
     return (

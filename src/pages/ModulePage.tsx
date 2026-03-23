@@ -15,9 +15,11 @@ import {
   Menu,
   X,
   ExternalLink,
-  Upload
+  Upload,
+  Image
 } from 'lucide-react';
 import { modulesData } from '../App';
+import { convertDriveUrl } from '../utils/driveUrl';
 
 const ModulePage = () => {
   const { moduleId } = useParams<{ moduleId: string }>();
@@ -30,11 +32,9 @@ const ModulePage = () => {
   const prevModule = modulesData.find(m => m.id === currentModuleId - 1);
   const nextModule = modulesData.find(m => m.id === currentModuleId + 1);
 
-  // Calculate progress
   const progress = Math.round((currentModuleId / modulesData.length) * 100);
 
   useEffect(() => {
-    // Animate content on load
     if (contentRef.current) {
       const elements = contentRef.current.querySelectorAll('.animate-in');
       gsap.fromTo(
@@ -45,7 +45,6 @@ const ModulePage = () => {
     }
   }, [currentModuleId]);
 
-  // Scroll to top when module changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentModuleId]);
@@ -60,6 +59,176 @@ const ModulePage = () => {
       case 'libro': return <BookOpen className="w-4 h-4" />;
       default: return <Download className="w-4 h-4" />;
     }
+  };
+
+  const renderContentBlock = (block: any, index: number) => {
+    // Soporta 'type' (datos estáticos App.tsx) y 'tipo' (datos del backend)
+    const tipo = block.tipo || block.type;
+
+    if (tipo === 'text' || tipo === 'texto') {
+      return (
+        <div key={index} className="space-y-4">
+          {(block.titulo || block.title) && (
+            <h3 className="font-serif text-xl text-[#F4F2EC]">
+              {block.titulo || block.title}
+            </h3>
+          )}
+          <div className="text-[#B8B4AA] leading-relaxed whitespace-pre-line">
+            {block.texto || block.body}
+          </div>
+        </div>
+      );
+    }
+
+    if (tipo === 'quote') {
+      return (
+        <blockquote key={index} className="border-l-2 border-[#C7A36D] pl-6 py-2 my-8">
+          <p className="font-serif text-xl lg:text-2xl text-[#F4F2EC] italic leading-relaxed">
+            "{block.quote}"
+          </p>
+          <cite className="block mt-4 text-sm text-[#B8B4AA] not-italic">
+            — {block.author}
+          </cite>
+        </blockquote>
+      );
+    }
+
+    if (tipo === 'imagen' || tipo === 'image') {
+      const rawUrl = block.url || block.src || '';
+      const src = convertDriveUrl(rawUrl);
+      return (
+        <div key={index} className="space-y-3">
+          {(block.titulo || block.title) && (
+            <h3 className="font-serif text-xl text-[#F4F2EC]">
+              {block.titulo || block.title}
+            </h3>
+          )}
+          {src ? (
+            <div className="relative rounded-xl overflow-hidden border border-[rgba(244,242,236,0.08)]">
+              <img
+                src={src}
+                alt={block.titulo || block.title || 'Imagen del módulo'}
+                className="w-full object-contain max-h-[600px] bg-[#141419]"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  target.style.display = 'none';
+                  const fallback = target.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.classList.remove('hidden');
+                }}
+              />
+              {/* Fallback si la imagen no carga */}
+              <div className="hidden p-8 text-center border border-dashed border-[rgba(244,242,236,0.12)] rounded-xl bg-[#141419]">
+                <Image className="w-10 h-10 mx-auto mb-3 text-[#B8B4AA] opacity-30" />
+                <p className="text-[#B8B4AA] text-sm mb-2">No se pudo cargar la imagen.</p>
+                {rawUrl && (
+                  <a
+                    href={rawUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-[#C7A36D] text-sm underline hover:text-[#d4b07a] transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Abrir en Drive
+                  </a>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="p-6 text-center border border-dashed border-[rgba(244,242,236,0.10)] rounded-xl bg-[#141419]">
+              <Image className="w-8 h-8 mx-auto mb-2 text-[#B8B4AA] opacity-30" />
+              <p className="text-[#B8B4AA] text-sm">URL de imagen no configurada.</p>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (tipo === 'video') {
+      const url = block.url || '';
+      const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+      if (youtubeMatch) {
+        return (
+          <div key={index} className="space-y-3">
+            {(block.titulo || block.title) && (
+              <h3 className="font-serif text-xl text-[#F4F2EC]">
+                {block.titulo || block.title}
+              </h3>
+            )}
+            <div className="relative aspect-video rounded-xl overflow-hidden border border-[rgba(244,242,236,0.08)]">
+              <iframe
+                src={`https://www.youtube.com/embed/${youtubeMatch[1]}`}
+                title={block.titulo || block.title || 'Video'}
+                className="w-full h-full"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div key={index} className="space-y-3">
+          {(block.titulo || block.title) && (
+            <h3 className="font-serif text-xl text-[#F4F2EC]">
+              {block.titulo || block.title}
+            </h3>
+          )}
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-[#C7A36D] hover:text-[#d4b07a] transition-colors"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Ver video
+          </a>
+        </div>
+      );
+    }
+
+    if (tipo === 'pdf') {
+      return (
+        <div key={index} className="space-y-3">
+          {(block.titulo || block.title) && (
+            <h3 className="font-serif text-xl text-[#F4F2EC]">
+              {block.titulo || block.title}
+            </h3>
+          )}
+          <a
+            href={block.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-[rgba(244,242,236,0.04)] border border-[rgba(244,242,236,0.10)] rounded-lg text-[#F4F2EC] hover:border-[rgba(199,163,109,0.3)] hover:text-[#C7A36D] transition-all"
+          >
+            <FileText className="w-4 h-4" />
+            Descargar PDF
+            <ExternalLink className="w-3.5 h-3.5 ml-1 opacity-60" />
+          </a>
+        </div>
+      );
+    }
+
+    if (tipo === 'zoom') {
+      return (
+        <div key={index} className="space-y-3">
+          {(block.titulo || block.title) && (
+            <h3 className="font-serif text-xl text-[#F4F2EC]">
+              {block.titulo || block.title}
+            </h3>
+          )}
+          <a
+            href={block.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-[rgba(199,163,109,0.08)] border border-[rgba(199,163,109,0.2)] rounded-lg text-[#C7A36D] hover:bg-[rgba(199,163,109,0.14)] transition-all"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Unirse a la clase en vivo
+          </a>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -78,7 +247,6 @@ const ModulePage = () => {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        {/* Course Title */}
         <div className="p-6 border-b border-[rgba(244,242,236,0.08)]">
           <Link to="/" className="font-serif text-xl text-[#F4F2EC] hover:text-[#C7A36D] transition-colors">
             Poética de la Mirada
@@ -88,7 +256,6 @@ const ModulePage = () => {
           </p>
         </div>
 
-        {/* Progress */}
         <div className="px-6 py-4">
           <div className="flex justify-between items-center mb-2">
             <span className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA]">
@@ -104,7 +271,6 @@ const ModulePage = () => {
           </div>
         </div>
 
-        {/* Module List */}
         <nav className="px-4 pb-4 overflow-y-auto max-h-[calc(100vh-200px)]">
           {modulesData.map((m) => {
             const isActive = m.id === currentModuleId;
@@ -148,7 +314,6 @@ const ModulePage = () => {
           })}
         </nav>
 
-        {/* User Profile */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[rgba(244,242,236,0.08)] bg-[#141419]">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-[#C7A36D]/20 flex items-center justify-center">
@@ -162,7 +327,6 @@ const ModulePage = () => {
         </div>
       </aside>
 
-      {/* Overlay for mobile */}
       {sidebarOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/50 z-30"
@@ -172,9 +336,7 @@ const ModulePage = () => {
 
       {/* Main Content */}
       <main ref={contentRef} className="flex-1 min-h-screen overflow-y-auto">
-        {/* Header */}
         <header className="sticky top-0 z-20 bg-[#0B0B0D]/95 backdrop-blur-sm border-b border-[rgba(244,242,236,0.08)] px-6 py-4 lg:px-10">
-          {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm mb-2">
             <Link to="/" className="text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors">
               Curso
@@ -187,7 +349,6 @@ const ModulePage = () => {
             <span className="text-[#C7A36D]">Módulo {module.id}</span>
           </nav>
 
-          {/* Title & Meta */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <h1 className="font-serif text-3xl lg:text-4xl text-[#F4F2EC]">
@@ -204,7 +365,6 @@ const ModulePage = () => {
               </div>
             </div>
 
-            {/* Mark Complete Button */}
             <button
               onClick={() => setCompleted(!completed)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-xs uppercase tracking-[0.14em] transition-all duration-300 ${
@@ -214,21 +374,14 @@ const ModulePage = () => {
               }`}
             >
               {completed ? (
-                <>
-                  <CheckCircle className="w-4 h-4" />
-                  Completado
-                </>
+                <><CheckCircle className="w-4 h-4" /> Completado</>
               ) : (
-                <>
-                  <Circle className="w-4 h-4" />
-                  Marcar completado
-                </>
+                <><Circle className="w-4 h-4" /> Marcar completado</>
               )}
             </button>
           </div>
         </header>
 
-        {/* Content */}
         <div className="px-6 py-8 lg:px-10 lg:py-12 max-w-4xl">
           {/* Hero Image */}
           <div className="animate-in relative aspect-video rounded-xl overflow-hidden mb-10">
@@ -242,19 +395,13 @@ const ModulePage = () => {
 
           {/* Introduction */}
           <section className="animate-in mb-12">
-            <h2 className="font-serif text-2xl text-[#F4F2EC] mb-4">
-              Introducción
-            </h2>
-            <p className="text-lg text-[#B8B4AA] leading-relaxed">
-              {module.description}
-            </p>
+            <h2 className="font-serif text-2xl text-[#F4F2EC] mb-4">Introducción</h2>
+            <p className="text-lg text-[#B8B4AA] leading-relaxed">{module.description}</p>
           </section>
 
           {/* Learning Objectives */}
           <section className="animate-in mb-12">
-            <h2 className="font-serif text-2xl text-[#F4F2EC] mb-4">
-              Objetivos de aprendizaje
-            </h2>
+            <h2 className="font-serif text-2xl text-[#F4F2EC] mb-4">Objetivos de aprendizaje</h2>
             <ul className="space-y-3">
               {module.objectives.map((objective, idx) => (
                 <li key={idx} className="flex items-start gap-3">
@@ -269,37 +416,9 @@ const ModulePage = () => {
 
           {/* Content Blocks */}
           <section className="animate-in mb-12">
-            <h2 className="font-serif text-2xl text-[#F4F2EC] mb-6">
-              Contenido del módulo
-            </h2>
+            <h2 className="font-serif text-2xl text-[#F4F2EC] mb-6">Contenido del módulo</h2>
             <div className="space-y-8">
-              {module.content.map((block, index) => {
-                if (block.type === 'text') {
-                  return (
-                    <div key={index} className="space-y-4">
-                      <h3 className="font-serif text-xl text-[#F4F2EC]">
-                        {block.title}
-                      </h3>
-                      <div className="text-[#B8B4AA] leading-relaxed whitespace-pre-line">
-                        {block.body}
-                      </div>
-                    </div>
-                  );
-                }
-                if (block.type === 'quote') {
-                  return (
-                    <blockquote key={index} className="border-l-2 border-[#C7A36D] pl-6 py-2 my-8">
-                      <p className="font-serif text-xl lg:text-2xl text-[#F4F2EC] italic leading-relaxed">
-                        "{block.quote}"
-                      </p>
-                      <cite className="block mt-4 text-sm text-[#B8B4AA] not-italic">
-                        — {block.author}
-                      </cite>
-                    </blockquote>
-                  );
-                }
-                return null;
-              })}
+              {module.content.map((block, index) => renderContentBlock(block, index))}
             </div>
           </section>
 
@@ -311,22 +430,14 @@ const ModulePage = () => {
                   <Upload className="w-5 h-5 text-[#C7A36D]" />
                 </div>
                 <div>
-                  <h2 className="font-serif text-xl text-[#F4F2EC]">
-                    Ejercicio práctico
-                  </h2>
+                  <h2 className="font-serif text-xl text-[#F4F2EC]">Ejercicio práctico</h2>
                   <span className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA]">
                     Entrega: {module.exercise.deadline}
                   </span>
                 </div>
               </div>
-
-              <h3 className="text-lg text-[#F4F2EC] font-medium mb-3">
-                {module.exercise.title}
-              </h3>
-              <p className="text-[#B8B4AA] leading-relaxed mb-6">
-                {module.exercise.description}
-              </p>
-
+              <h3 className="text-lg text-[#F4F2EC] font-medium mb-3">{module.exercise.title}</h3>
+              <p className="text-[#B8B4AA] leading-relaxed mb-6">{module.exercise.description}</p>
               <button className="flex items-center gap-2 px-6 py-3 bg-[#C7A36D] text-[#0B0B0D] font-mono text-sm uppercase tracking-[0.14em] font-medium rounded-lg hover:bg-[#d4b07a] transition-colors">
                 <Upload className="w-4 h-4" />
                 Subir trabajo
@@ -336,9 +447,7 @@ const ModulePage = () => {
 
           {/* Resources Section */}
           <section className="animate-in mb-12">
-            <h2 className="font-serif text-2xl text-[#F4F2EC] mb-4">
-              Recursos y referencias
-            </h2>
+            <h2 className="font-serif text-2xl text-[#F4F2EC] mb-4">Recursos y referencias</h2>
             <div className="grid gap-3">
               {module.resources.map((resource, index) => (
                 <a
@@ -350,12 +459,8 @@ const ModulePage = () => {
                     {getResourceIcon(resource.type)}
                   </div>
                   <div className="flex-1">
-                    <p className="text-[#F4F2EC] group-hover:text-[#C7A36D] transition-colors">
-                      {resource.title}
-                    </p>
-                    <span className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA]">
-                      {resource.type}
-                    </span>
+                    <p className="text-[#F4F2EC] group-hover:text-[#C7A36D] transition-colors">{resource.title}</p>
+                    <span className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA]">{resource.type}</span>
                   </div>
                   <ExternalLink className="w-4 h-4 text-[#B8B4AA] group-hover:text-[#C7A36D] transition-colors" />
                 </a>

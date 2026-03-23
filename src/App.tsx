@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -16,10 +17,18 @@ import PaymentFailed from './pages/PaymentFailed';
 import PaymentPending from './pages/PaymentPending';
 import OnboardingPage from './pages/OnboardingPage';
 
-import { ThemeProvider } from './components/shared/ThemeContext';
+import { ThemeProvider, applyThemeToDOM } from './components/shared/ThemeContext';
 import PaymentRequired from './components/PaymentRequired';
 
-// Export modules data for reuse (mantener compatibilidad con código existente)
+// ─── Fuerza tema oscuro en rutas públicas ────────────────────────────────────
+function ForceDark({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    applyThemeToDOM('dark');
+  }, []);
+  return <>{children}</>;
+}
+
+// ─── Módulos data ────────────────────────────────────────────────────────────
 export interface ModuleData {
   id: number;
   badge: string;
@@ -46,7 +55,6 @@ export interface ModuleData {
   }>;
 }
 
-// Datos de módulos para la landing page (visualización estática)
 export const modulesData = [
   {
     id: 1,
@@ -298,91 +306,74 @@ export const modulesData = [
   },
 ];
 
+// ─── App ─────────────────────────────────────────────────────────────────────
 function App() {
   return (
     <AuthProvider>
       <HashRouter>
         <Routes>
-          {/* Public routes (Always Dark) */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<Register />} />
-          
-          {/* Payment result routes */}
-          <Route path="/pago-exitoso" element={<PaymentSuccess />} />
-          <Route path="/pago-fallido" element={<PaymentFailed />} />
-          <Route path="/pago-pendiente" element={<PaymentPending />} />
-          
-          {/* Protected routes (With Theme Support) */}
-          <Route 
-            path="/onboarding" 
-            element={
-              <ThemeProvider>
-                <ProtectedRoute requireStudent>
-                  <OnboardingPage />
-                </ProtectedRoute>
-              </ThemeProvider>
-            } 
-          />
-          <Route 
-            path="/dashboard" 
-            element={
-              <ThemeProvider>
-                <ProtectedRoute requireStudent>
-                  <StudentDashboard />
-                </ProtectedRoute>
-              </ThemeProvider>
-            } 
-          />
-          <Route 
-            path="/modulo/:moduleId" 
-            element={
-              <ThemeProvider>
-                <ProtectedRoute requireStudent requirePayment>
-                  <ModulePage />
-                </ProtectedRoute>
-              </ThemeProvider>
-            } 
-          />
-          <Route 
-            path="/pago-requerido" 
-            element={
-              <ThemeProvider>
-                <ProtectedRoute requireStudent>
-                  <PaymentRequired />
-                </ProtectedRoute>
-              </ThemeProvider>
-            } 
-          />
-          <Route 
-            path="/profesor/*" 
-            element={
-              <ThemeProvider>
-                <ProtectedRoute requireProfessor>
-                  <ProfessorDashboard />
-                </ProtectedRoute>
-              </ThemeProvider>
-            } 
-          />
-          <Route 
-            path="/estudiantedetalle" 
-            element={
-              <ThemeProvider>
-                <EstudianteDetalle />
-              </ThemeProvider>
-            } 
-          />
+          {/* Public routes — siempre dark */}
+          <Route path="/" element={<ForceDark><LandingPage /></ForceDark>} />
+          <Route path="/login" element={<ForceDark><LoginPage /></ForceDark>} />
+          <Route path="/register" element={<ForceDark><Register /></ForceDark>} />
+
+          {/* Payment result routes — siempre dark */}
+          <Route path="/pago-exitoso" element={<ForceDark><PaymentSuccess /></ForceDark>} />
+          <Route path="/pago-fallido" element={<ForceDark><PaymentFailed /></ForceDark>} />
+          <Route path="/pago-pendiente" element={<ForceDark><PaymentPending /></ForceDark>} />
+
+          {/* Protected routes — con soporte de tema */}
+          <Route path="/onboarding" element={
+            <ThemeProvider>
+              <ProtectedRoute requireStudent>
+                <OnboardingPage />
+              </ProtectedRoute>
+            </ThemeProvider>
+          } />
+          <Route path="/dashboard" element={
+            <ThemeProvider>
+              <ProtectedRoute requireStudent>
+                <StudentDashboard />
+              </ProtectedRoute>
+            </ThemeProvider>
+          } />
+          <Route path="/modulo/:moduleId" element={
+            <ThemeProvider>
+              <ProtectedRoute requireStudent requirePayment>
+                <ModulePage />
+              </ProtectedRoute>
+            </ThemeProvider>
+          } />
+          <Route path="/pago-requerido" element={
+            <ThemeProvider>
+              <ProtectedRoute requireStudent>
+                <PaymentRequired />
+              </ProtectedRoute>
+            </ThemeProvider>
+          } />
+          <Route path="/profesor/*" element={
+            <ThemeProvider>
+              <ProtectedRoute requireProfessor>
+                <ProfessorDashboard />
+              </ProtectedRoute>
+            </ThemeProvider>
+          } />
+          <Route path="/estudiantedetalle" element={
+            <ThemeProvider>
+              <EstudianteDetalle />
+            </ThemeProvider>
+          } />
         </Routes>
       </HashRouter>
       <Toaster
-  toastOptions={{
-    style: {
-      background: '#166534',
-      border: '1px solid #16a34a',
-      color: '#dcfce7',
-    }
-  }}
-/>
+        toastOptions={{
+          style: {
+            background: '#166534',
+            border: '1px solid #16a34a',
+            color: '#dcfce7',
+          }
+        }}
+      />
     </AuthProvider>
   );
 }

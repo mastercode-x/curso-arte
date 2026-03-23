@@ -133,6 +133,18 @@ const CalendarManager: React.FC = () => {
     }
   };
 
+  const handleClearAll = async () => {
+    if (!confirm('¿Estás seguro de eliminar TODOS los eventos del calendario? Esta acción no se puede deshacer.')) return;
+    try {
+      await calendarApi.updateCalendar({ events: [] });
+      setEvents([]);
+      toast({ title: 'Calendario limpiado', description: 'Todos los eventos fueron eliminados.', duration: 2000 });
+    } catch (error) {
+      console.error('Error limpiando calendario:', error);
+      toast({ title: 'Error', description: 'No se pudo limpiar el calendario.', variant: 'destructive', duration: 2000 });
+    }
+  };
+
   const getActivityStyle = (activity: string) => {
     if (activity.includes('Encuentro')) {
       return 'bg-[rgba(199,163,109,0.15)] text-[#C7A36D] border-[rgba(199,163,109,0.3)]';
@@ -151,13 +163,25 @@ const CalendarManager: React.FC = () => {
             <CalendarIcon className="w-5 h-5 text-[#C7A36D]" />
             Gestión del Calendario
           </CardTitle>
-          <Button
-            onClick={() => handleOpenDialog()}
-            className="bg-[#C7A36D] hover:bg-[#d4b07a] text-[#0B0B0D] text-sm"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Agregar evento
-          </Button>
+          <div className="flex items-center gap-2">
+            {events.length > 0 && (
+              <Button
+                onClick={handleClearAll}
+                variant="outline"
+                className="border-red-500/30 text-red-400 hover:bg-red-500/10 text-sm"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Limpiar todo
+              </Button>
+            )}
+            <Button
+              onClick={() => handleOpenDialog()}
+              className="bg-[#C7A36D] hover:bg-[#d4b07a] text-[#0B0B0D] text-sm"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Agregar evento
+            </Button>
+          </div>
         </CardHeader>
 
         <CardContent className="space-y-4">

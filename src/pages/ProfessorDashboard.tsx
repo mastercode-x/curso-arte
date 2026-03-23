@@ -21,7 +21,7 @@ import ModulesManager from '../components/admin/ModulesManager';
 import ApplicationsManager from '../components/admin/ApplicationsManager';
 import StudentsManager from '../components/admin/StudentsManager';
 import PaymentsManager from '../components/admin/PaymentsManager';
-
+import { convertDriveUrl } from '../utils/driveUrl';
 import { useAuth } from '@/contexts/AuthContext';
 
 const SECTIONS = [
@@ -36,20 +36,15 @@ const SECTIONS = [
 
 export default function ProfessorDashboard() {
   const [section, setSection] = useState<string>(() => {
-  return localStorage.getItem('dashboard_section') || 'overview';
-});
+    return localStorage.getItem('dashboard_section') || 'overview';
+  });
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [showNotif, setShowNotif] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
-
-
   const { logout } = useAuth();
-  
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
+  useEffect(() => { loadDashboardData(); }, []);
 
   const loadDashboardData = async () => {
     try {
@@ -84,7 +79,6 @@ export default function ProfessorDashboard() {
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex">
-      {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#141419] border-r border-[rgba(244,242,236,0.08)] flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="p-6 border-b border-[rgba(244,242,236,0.08)]">
           <p className="font-serif text-lg text-[#F4F2EC]">Poética de la Mirada</p>
@@ -92,19 +86,8 @@ export default function ProfessorDashboard() {
         </div>
         <nav className="flex-1 px-3 py-4 overflow-y-auto">
           {SECTIONS.map((s: any) => (
-            <button
-              key={s.id}
-              onClick={() => { 
-  setSection(s.id); 
-  localStorage.setItem('dashboard_section', s.id);
-  setSidebarOpen(false); 
-}}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded mb-1 transition-colors ${
-                section === s.id
-                  ? 'bg-[rgba(199,163,109,0.1)] text-[#C7A36D]'
-                  : 'text-[#B8B4AA] hover:bg-[rgba(244,242,236,0.03)] hover:text-[#F4F2EC]'
-              }`}
-            >
+            <button key={s.id} onClick={() => { setSection(s.id); localStorage.setItem('dashboard_section', s.id); setSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded mb-1 transition-colors ${section === s.id ? 'bg-[rgba(199,163,109,0.1)] text-[#C7A36D]' : 'text-[#B8B4AA] hover:bg-[rgba(244,242,236,0.03)] hover:text-[#F4F2EC]'}`}>
               <s.icon className="w-4 h-4" />
               <span className="flex-1 text-sm text-left">{s.label}</span>
               {s.id === 'solicitudes' && pendientes > 0 && (
@@ -123,27 +106,20 @@ export default function ProfessorDashboard() {
               <p className="text-xs text-[#B8B4AA]">Admin</p>
             </div>
           </div>
-     <button
-  onClick={logout}
-  className="w-full flex items-center justify-center gap-2 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors text-xs py-2.5"
->
-  <LogOut className="w-4 h-4" /> Cerrar sesión
-</button>
+          <button onClick={logout} className="w-full flex items-center justify-center gap-2 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors text-xs py-2.5">
+            <LogOut className="w-4 h-4" /> Cerrar sesión
+          </button>
         </div>
       </aside>
 
       {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      {/* Main */}
       <main className="flex-1 lg:ml-64 flex flex-col min-h-screen">
-        {/* Top bar */}
         <header className="bg-[#141419] border-b border-[rgba(244,242,236,0.08)] sticky top-0 z-30 h-16 flex items-center px-6 gap-4">
           <button className="lg:hidden text-[#B8B4AA]" onClick={() => setSidebarOpen(true)}>
             <LayoutDashboard className="w-5 h-5" />
           </button>
-          <h1 className="font-serif text-xl text-[#F4F2EC] flex-1">
-            {SECTIONS.find(s => s.id === section)?.label}
-          </h1>
+          <h1 className="font-serif text-xl text-[#F4F2EC] flex-1">{SECTIONS.find(s => s.id === section)?.label}</h1>
           <ThemeToggle />
           <div className="relative">
             <button onClick={() => setShowNotif(!showNotif)} className="relative text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors p-1">
@@ -186,112 +162,179 @@ export default function ProfessorDashboard() {
 
 // ── OVERVIEW ─────────────────────────────────────────────────────
 function OverviewSection({ data }: { data: any }) {
-  const stats = [
-    { label: "Estudiantes activos", value: data?.estadisticas?.estudiantesPagados || 0, icon: Users, color: "text-[#C7A36D]", bg: "bg-[rgba(199,163,109,0.1)]" },
-    { label: "Ingresos totales", value: `$${data?.estadisticas?.ingresosTotales?.toLocaleString() || 0} ${data?.configuracion?.moneda || 'ARS'}`, icon: DollarSign, color: "text-green-400", bg: "bg-green-400/10" },
-    { label: "Solicitudes pendientes", value: data?.estadisticas?.solicitudesPendientes || 0, icon: Clock, color: "text-yellow-400", bg: "bg-yellow-400/10" },
-    { label: "Módulos publicados", value: data?.estadisticas?.modulosPublicados || 0, icon: BookOpen, color: "text-blue-400", bg: "bg-blue-400/10" },
-  ];
+  const stats = data?.estadisticas || {};
+  const moneda = data?.configuracion?.moneda || 'ARS';
+  const nombreCurso = data?.configuracion?.nombreCurso || 'Poética de la Mirada';
+  const solicitudesPendientes = stats.solicitudesPendientes || 0;
+  const hora = new Date().getHours();
+  const saludo = hora < 13 ? 'Buenos días' : hora < 20 ? 'Buenas tardes' : 'Buenas noches';
+  const tasaConversion = stats.totalEstudiantes > 0 ? Math.round((stats.estudiantesPagados / stats.totalEstudiantes) * 100) : 0;
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {stats.map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-4 sm:p-5">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${bg} flex items-center justify-center`}>
-                <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${color}`} />
-              </div>
+    <div className="space-y-6">
+      <div className="relative overflow-hidden bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6 sm:p-8">
+        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`, backgroundSize: '200px' }} />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C7A36D]/60 to-transparent" />
+        <div className="relative flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#C7A36D]/70 mb-2">{saludo}</p>
+            <h1 className="font-serif text-2xl sm:text-3xl text-[#F4F2EC] leading-tight">{nombreCurso}</h1>
+            <p className="text-sm text-[#B8B4AA] mt-1">{new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+          </div>
+          {solicitudesPendientes > 0 && (
+            <div className="flex items-center gap-3 bg-[rgba(199,163,109,0.08)] border border-[rgba(199,163,109,0.2)] px-4 py-3 shrink-0">
+              <div className="w-2 h-2 rounded-full bg-[#C7A36D] animate-pulse" />
+              <span className="font-mono text-xs text-[#C7A36D]">{solicitudesPendientes} solicitud{solicitudesPendientes > 1 ? 'es' : ''} pendiente{solicitudesPendientes > 1 ? 's' : ''}</span>
             </div>
-            <p className={`text-xl sm:text-2xl font-bold ${color} mb-1`}>{value}</p>
-            <p className="text-[10px] sm:text-xs text-[#B8B4AA]">{label}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+        {[
+          { label: 'Estudiantes activos', value: stats.estudiantesPagados || 0, sub: `de ${stats.totalEstudiantes || 0} inscriptos`, icon: Users, accent: '#C7A36D', bar: stats.totalEstudiantes > 0 ? (stats.estudiantesPagados / stats.totalEstudiantes) * 100 : 0 },
+          { label: 'Ingresos totales', value: `$${(stats.ingresosTotales || 0).toLocaleString('es-AR')}`, sub: moneda, icon: TrendingUp, accent: '#4ade80', bar: null },
+          { label: 'Conversión', value: `${tasaConversion}%`, sub: 'aprobados que pagaron', icon: BarChart2, accent: '#60a5fa', bar: tasaConversion },
+          { label: 'Módulos publicados', value: stats.modulosPublicados || 0, sub: `de ${stats.totalModulos || 0} módulos`, icon: BookOpen, accent: '#a78bfa', bar: stats.totalModulos > 0 ? (stats.modulosPublicados / stats.totalModulos) * 100 : 0 },
+        ].map(({ label, value, sub, icon: Icon, accent, bar }) => (
+          <div key={label} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-5 flex flex-col gap-3 group hover:border-[rgba(244,242,236,0.14)] transition-colors">
+            <div className="flex items-start justify-between">
+              <div className="w-9 h-9 rounded flex items-center justify-center" style={{ background: `${accent}18` }}>
+                <Icon className="w-4 h-4" style={{ color: accent }} />
+              </div>
+              <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-[#B8B4AA]/50">{label}</span>
+            </div>
+            <div>
+              <p className="font-serif text-2xl sm:text-3xl leading-none" style={{ color: accent }}>{value}</p>
+              <p className="font-mono text-[10px] text-[#B8B4AA]/60 mt-1">{sub}</p>
+            </div>
+            {bar !== null && (
+              <div className="h-0.5 bg-[rgba(244,242,236,0.05)] rounded-full overflow-hidden mt-auto">
+                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${bar}%`, background: accent }} />
+              </div>
+            )}
           </div>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA] mb-5">Progreso por módulo</p>
-          <div className="space-y-4">
+      <div className="grid lg:grid-cols-5 gap-4">
+        <div className="lg:col-span-3 bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
+          <div className="flex items-center justify-between mb-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA]">Progreso por módulo</p>
+            <span className="font-mono text-[9px] text-[#B8B4AA]/50 uppercase tracking-wider">promedio grupal</span>
+          </div>
+          <div className="space-y-3">
             {data?.progresoPorModulo && data.progresoPorModulo.length > 0 ? (
-              data.progresoPorModulo.slice(0, 5).map((m: any, i: number) => (
-                <div key={m.id}>
-                  <div className="flex justify-between text-sm mb-1.5">
-                    <span className="text-[#F4F2EC] text-xs">{String(i + 1).padStart(2, '0')} — {m.titulo}</span>
-                    <span className="font-mono text-xs text-[#C7A36D]">{m.promedioCompletud}%</span>
+              data.progresoPorModulo.map((m: any, i: number) => {
+                const pct = m.promedioCompletud || 0;
+                return (
+                  <div key={m.id} className="group">
+                    <div className="flex items-center gap-3 mb-1.5">
+                      <span className="font-mono text-[9px] text-[#C7A36D]/50 shrink-0 w-5 text-right">{String(i + 1).padStart(2, '0')}</span>
+                      <span className="text-xs text-[#F4F2EC] flex-1 truncate">{m.titulo}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {m.estudiantesActivos > 0 && <span className="font-mono text-[9px] text-[#B8B4AA]/50">{m.estudiantesActivos} ests.</span>}
+                        <span className="font-mono text-[10px] text-[#C7A36D] w-8 text-right">{pct}%</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 shrink-0" />
+                      <div className="flex-1 h-1 bg-[rgba(244,242,236,0.05)] rounded-full overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: pct === 100 ? '#4ade80' : pct > 0 ? '#C7A36D' : 'transparent' }} />
+                      </div>
+                    </div>
                   </div>
-                  <div className="h-1 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#C7A36D] rounded-full" style={{ width: `${m.promedioCompletud}%` }} />
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
-              <div className="text-center py-8">
-                <p className="text-[#B8B4AA] text-sm">No hay módulos con progreso registrado aún</p>
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <BookOpen className="w-8 h-8 text-[#B8B4AA]/20 mb-3" />
+                <p className="text-sm text-[#B8B4AA]">Aún no hay progreso registrado</p>
+                <p className="text-xs text-[#B8B4AA]/50 mt-1">Aparecerá cuando los estudiantes comiencen los módulos</p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA] mb-5">Últimas solicitudes</p>
-          <div className="space-y-3">
+        <div className="lg:col-span-2 bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6 flex flex-col">
+          <div className="flex items-center justify-between mb-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA]">Solicitudes recientes</p>
+            {solicitudesPendientes > 0 && (
+              <span className="font-mono text-[9px] bg-[rgba(199,163,109,0.15)] text-[#C7A36D] px-2 py-0.5 border border-[rgba(199,163,109,0.2)]">{solicitudesPendientes} pendientes</span>
+            )}
+          </div>
+          <div className="flex-1 space-y-1">
             {data?.solicitudesRecientes && data.solicitudesRecientes.length > 0 ? (
-              data.solicitudesRecientes.slice(0, 4).map((s: any) => (
-                <div key={s.id} className="flex items-center gap-4">
-                  <div className="w-8 h-8 rounded-full bg-[rgba(199,163,109,0.1)] flex items-center justify-center text-xs font-serif text-[#C7A36D]">
-                    {s.nombre.charAt(0)}
-                  </div>
+              data.solicitudesRecientes.slice(0, 5).map((s: any) => (
+                <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 rounded hover:bg-[rgba(244,242,236,0.03)] transition-colors">
+                  <div className="w-7 h-7 rounded-full bg-[rgba(199,163,109,0.12)] flex items-center justify-center font-serif text-xs text-[#C7A36D] shrink-0">{s.nombre.charAt(0).toUpperCase()}</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#F4F2EC] truncate">{s.nombre}</p>
-                    <p className="text-xs text-[#B8B4AA]">{s.pais || 'Sin país'}</p>
+                    <p className="text-xs text-[#F4F2EC] truncate">{s.nombre}</p>
+                    <p className="text-[10px] text-[#B8B4AA]/60 truncate">{s.pais || s.email}</p>
                   </div>
-                  <StatusBadge estado={s.estado} />
+                  <div className="w-1.5 h-1.5 rounded-full bg-yellow-400/70 shrink-0" title="Pendiente" />
                 </div>
               ))
             ) : (
-              <div className="text-center py-8">
-                <p className="text-[#B8B4AA] text-sm">No hay solicitudes pendientes</p>
+              <div className="flex flex-col items-center justify-center h-full py-10 text-center">
+                <CheckCircle className="w-8 h-8 text-[#B8B4AA]/20 mb-3" />
+                <p className="text-sm text-[#B8B4AA]">Todo al día</p>
+                <p className="text-xs text-[#B8B4AA]/50 mt-1">No hay solicitudes pendientes</p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
-        <p className="font-mono text-xs uppercase tracking-[0.14em] text-[#B8B4AA] mb-5">Estudiantes en curso</p>
+      <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(244,242,236,0.06)]">
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA]">Últimos estudiantes inscriptos</p>
+          <span className="font-mono text-[9px] text-[#B8B4AA]/40 uppercase tracking-wider">{data?.estudiantesRecientes?.length || 0} registros</span>
+        </div>
         <div className="overflow-x-auto">
           {data?.estudiantesRecientes && data.estudiantesRecientes.length > 0 ? (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[rgba(244,242,236,0.06)]">
-                  {["Nombre", "País", "Estado pago", "Inscripción", "Progreso"].map(h => (
-                    <th key={h} className="text-left font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] pb-3 pr-6">{h}</th>
+                <tr className="border-b border-[rgba(244,242,236,0.04)]">
+                  {['Estudiante', 'País', 'Estado', 'Inscripción', 'Progreso'].map(h => (
+                    <th key={h} className="text-left font-mono text-[9px] uppercase tracking-[0.14em] text-[#B8B4AA]/50 px-5 py-3">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {data.estudiantesRecientes.map((e: any) => (
-                  <tr key={e.id} className="border-b border-[rgba(244,242,236,0.04)] hover:bg-[rgba(244,242,236,0.02)] transition-colors">
-                    <td className="py-3 pr-6 text-[#F4F2EC]">{e.nombre}</td>
-                    <td className="py-3 pr-6 text-[#B8B4AA]">{e.pais || '—'}</td>
-                    <td className="py-3 pr-6"><StatusBadge estado={e.estadoPago} /></td>
-                    <td className="py-3 pr-6 text-[#B8B4AA] text-xs">{e.fechaInscripcion ? new Date(e.fechaInscripcion).toLocaleDateString('es-AR') : '—'}</td>
-                    <td className="py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-24 h-1 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
-                          <div className="h-full bg-[#C7A36D]" style={{ width: `${e.progresoPromedio || 0}%` }} />
+                {data.estudiantesRecientes.map((e: any) => {
+                  const pct = e.progresoPromedio || 0;
+                  return (
+                    <tr key={e.id} className="border-b border-[rgba(244,242,236,0.03)] hover:bg-[rgba(244,242,236,0.02)] transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-7 h-7 rounded-full bg-[rgba(199,163,109,0.1)] flex items-center justify-center font-serif text-xs text-[#C7A36D] shrink-0">{e.nombre?.charAt(0).toUpperCase()}</div>
+                          <div>
+                            <p className="text-[#F4F2EC] text-xs">{e.nombre}</p>
+                            <p className="text-[10px] text-[#B8B4AA]/50">{e.email}</p>
+                          </div>
                         </div>
-                        <span className="text-xs text-[#B8B4AA]">{e.progresoPromedio || 0}%</span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-5 py-3.5 text-xs text-[#B8B4AA]">{e.pais || '—'}</td>
+                      <td className="px-5 py-3.5"><StatusBadge estado={e.estadoPago} /></td>
+                      <td className="px-5 py-3.5 text-[10px] text-[#B8B4AA]/60 font-mono">{e.fechaInscripcion ? new Date(e.fechaInscripcion).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '—'}</td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-20 h-1 bg-[rgba(244,242,236,0.05)] rounded-full overflow-hidden">
+                            <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pct === 100 ? '#4ade80' : '#C7A36D' }} />
+                          </div>
+                          <span className="font-mono text-[10px] text-[#B8B4AA]/60 w-7">{pct}%</span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-[#B8B4AA] text-sm">No hay estudiantes registrados aún</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Users className="w-8 h-8 text-[#B8B4AA]/20 mb-3" />
+              <p className="text-sm text-[#B8B4AA]">Aún no hay estudiantes inscriptos</p>
             </div>
           )}
         </div>
@@ -306,22 +349,15 @@ function SolicitudesSection() {
   const [filter, setFilter] = useState('todas');
   const [selected, setSelected] = useState<null | any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState<any>(null);
 
-  useEffect(() => {
-    loadSolicitudes();
-  }, [filter]);
+  useEffect(() => { loadSolicitudes(); }, [filter]);
 
   const loadSolicitudes = async () => {
     try {
       setIsLoading(true);
       const estado = filter === 'todas' ? undefined : filter;
-      const [data, statsData] = await Promise.all([
-        applicationApi.getApplications({ estado, limit: 50 }),
-        applicationApi.getApplicationStats()
-      ]);
+      const [data] = await Promise.all([applicationApi.getApplications({ estado, limit: 50 }), applicationApi.getApplicationStats()]);
       setSolicitudes(data.solicitudes || []);
-      setStats(statsData);
     } catch (error) {
       toast.error('Error cargando solicitudes');
     } finally {
@@ -353,32 +389,18 @@ function SolicitudesSection() {
 
   const filtered = filter === 'todas' ? solicitudes : solicitudes.filter((s: any) => s.estado === filter);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
-      </div>
-    );
-  }
+  if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" /></div>;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-2">
         {['todas', 'pendiente', 'aprobado', 'rechazado'].map((f: string) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2 border transition-colors ${
-              filter === f
-                ? 'border-[#C7A36D] text-[#C7A36D] bg-[rgba(199,163,109,0.08)]'
-                : 'border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:border-[rgba(244,242,236,0.2)]'
-            }`}
-          >
+          <button key={f} onClick={() => setFilter(f)}
+            className={`font-mono text-[10px] uppercase tracking-[0.14em] px-4 py-2 border transition-colors ${filter === f ? 'border-[#C7A36D] text-[#C7A36D] bg-[rgba(199,163,109,0.08)]' : 'border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:border-[rgba(244,242,236,0.2)]'}`}>
             {f} {f === 'todas' ? `(${solicitudes.length})` : `(${solicitudes.filter(s => s.estado === f).length})`}
           </button>
         ))}
       </div>
-
       <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)]">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -410,96 +432,55 @@ function SolicitudesSection() {
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-[#B8B4AA]">No hay solicitudes {filter !== 'todas' ? `en estado "${filter}"` : ''}</td>
-                </tr>
-              )}
+              {filtered.length === 0 && <tr><td colSpan={6} className="px-5 py-8 text-center text-[#B8B4AA]">No hay solicitudes {filter !== 'todas' ? `en estado "${filter}"` : ''}</td></tr>}
             </tbody>
           </table>
         </div>
       </div>
 
       {selected && (
-  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
-      
-      {/* Header */}
-      <div className="flex items-start justify-between p-6 border-b border-[rgba(244,242,236,0.08)]">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-[rgba(199,163,109,0.15)] flex items-center justify-center font-serif text-xl text-[#C7A36D]">
-            {selected.nombre?.charAt(0)}
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+            <div className="flex items-start justify-between p-6 border-b border-[rgba(244,242,236,0.08)]">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-[rgba(199,163,109,0.15)] flex items-center justify-center font-serif text-xl text-[#C7A36D]">{selected.nombre?.charAt(0)}</div>
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#C7A36D] mb-1">Solicitud de acceso</p>
+                  <h2 className="font-serif text-2xl text-[#F4F2EC]">{selected.nombre}</h2>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <StatusBadge estado={selected.estado} />
+                <button onClick={() => setSelected(null)} className="text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors p-1"><X className="w-5 h-5" /></button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-px bg-[rgba(244,242,236,0.04)] border-b border-[rgba(244,242,236,0.08)]">
+              {[{ label: "Email", value: selected.email }, { label: "Teléfono", value: selected.telefono || '—' }, { label: "País", value: selected.pais || '—' }, { label: "Fecha de solicitud", value: new Date(selected.fechaSolicitud).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }) }].map(({ label, value }) => (
+                <div key={label} className="bg-[#141419] px-6 py-4">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1">{label}</p>
+                  <p className="text-sm text-[#F4F2EC]">{value}</p>
+                </div>
+              ))}
+            </div>
+            <div className="p-6 space-y-6">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D] mb-3 flex items-center gap-2"><span className="w-4 h-px bg-[#C7A36D]" />Vínculo con el arte</p>
+                <p className="text-sm text-[#F4F2EC] leading-relaxed bg-[rgba(244,242,236,0.02)] border border-[rgba(244,242,236,0.06)] p-4">{selected.experiencia || '—'}</p>
+              </div>
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D] mb-3 flex items-center gap-2"><span className="w-4 h-px bg-[#C7A36D]" />Motivación e interés</p>
+                <p className="text-sm text-[#F4F2EC] leading-relaxed whitespace-pre-wrap bg-[rgba(244,242,236,0.02)] border border-[rgba(244,242,236,0.06)] p-4">{selected.interes || '—'}</p>
+              </div>
+            </div>
+            {selected.estado === 'pendiente' && (
+              <div className="flex gap-3 p-6 pt-0">
+                <button onClick={() => handleApprove(selected.id)} className="flex-1 flex items-center justify-center gap-2 font-mono text-xs uppercase tracking-[0.14em] px-6 py-3 bg-green-600 text-white hover:bg-green-700 transition-colors"><Check className="w-4 h-4" />Aprobar solicitud</button>
+                <button onClick={() => handleReject(selected.id)} className="flex-1 flex items-center justify-center gap-2 font-mono text-xs uppercase tracking-[0.14em] px-6 py-3 border border-red-500/40 text-red-400 hover:bg-red-500/10 transition-colors"><XCircle className="w-4 h-4" />Rechazar</button>
+              </div>
+            )}
           </div>
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#C7A36D] mb-1">Solicitud de acceso</p>
-            <h2 className="font-serif text-2xl text-[#F4F2EC]">{selected.nombre}</h2>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <StatusBadge estado={selected.estado} />
-          <button onClick={() => setSelected(null)} className="text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors p-1">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Info Grid */}
-      <div className="grid grid-cols-2 gap-px bg-[rgba(244,242,236,0.04)] border-b border-[rgba(244,242,236,0.08)]">
-        {[
-          { label: "Email", value: selected.email },
-          { label: "Teléfono", value: selected.telefono || '—' },
-          { label: "País", value: selected.pais || '—' },
-          { label: "Fecha de solicitud", value: new Date(selected.fechaSolicitud).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }) },
-        ].map(({ label, value }) => (
-          <div key={label} className="bg-[#141419] px-6 py-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1">{label}</p>
-            <p className="text-sm text-[#F4F2EC]">{value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Respuestas */}
-      <div className="p-6 space-y-6">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D] mb-3 flex items-center gap-2">
-            <span className="w-4 h-px bg-[#C7A36D]" />
-            Vínculo con el arte
-          </p>
-          <p className="text-sm text-[#F4F2EC] leading-relaxed bg-[rgba(244,242,236,0.02)] border border-[rgba(244,242,236,0.06)] p-4">
-            {selected.experiencia || '—'}
-          </p>
-        </div>
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D] mb-3 flex items-center gap-2">
-            <span className="w-4 h-px bg-[#C7A36D]" />
-            Motivación e interés
-          </p>
-          <p className="text-sm text-[#F4F2EC] leading-relaxed whitespace-pre-wrap bg-[rgba(244,242,236,0.02)] border border-[rgba(244,242,236,0.06)] p-4">
-            {selected.interes || '—'}
-          </p>
-        </div>
-      </div>
-
-      {/* Actions */}
-      {selected.estado === 'pendiente' && (
-        <div className="flex gap-3 p-6 pt-0">
-          <button
-            onClick={() => handleApprove(selected.id)}
-            className="flex-1 flex items-center justify-center gap-2 font-mono text-xs uppercase tracking-[0.14em] px-6 py-3 bg-green-600 text-white hover:bg-green-700 transition-colors"
-          >
-            <Check className="w-4 h-4" /> Aprobar solicitud
-          </button>
-          <button
-            onClick={() => handleReject(selected.id)}
-            className="flex-1 flex items-center justify-center gap-2 font-mono text-xs uppercase tracking-[0.14em] px-6 py-3 border border-red-500/40 text-red-400 hover:bg-red-500/10 transition-colors"
-          >
-            <XCircle className="w-4 h-4" /> Rechazar
-          </button>
         </div>
       )}
-    </div>
-  </div>
-)}
     </div>
   );
 }
@@ -507,13 +488,10 @@ function SolicitudesSection() {
 // ── ESTUDIANTES ──────────────────────────────────────────────────
 function EstudiantesSection() {
   const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState<null | any>(null);
   const [estudiantes, setEstudiantes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadEstudiantes();
-  }, []);
+  useEffect(() => { loadEstudiantes(); }, []);
 
   const loadEstudiantes = async () => {
     try {
@@ -542,27 +520,15 @@ function EstudiantesSection() {
     e.email?.toLowerCase().includes(query.toLowerCase())
   );
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
-      </div>
-    );
-  }
+  if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" /></div>;
 
   return (
     <div className="space-y-6">
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8B4AA]" />
-        <input
-          type="text"
-          placeholder="Buscar estudiante..."
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-[#141419] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] text-sm focus:outline-none focus:border-[#C7A36D] transition-colors"
-        />
+        <input type="text" placeholder="Buscar estudiante..." value={query} onChange={e => setQuery(e.target.value)}
+          className="w-full pl-10 pr-4 py-3 bg-[#141419] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
       </div>
-
       <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)]">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -576,40 +542,25 @@ function EstudiantesSection() {
             <tbody>
               {filtered.map((e: any) => (
                 <tr key={e.id} className={`border-b border-[rgba(244,242,236,0.04)] transition-colors ${e.activo !== false ? 'hover:bg-[rgba(244,242,236,0.02)]' : 'opacity-50'}`}>
-                  <td className="px-5 py-4">
-                    <div>
-                      <p className="text-[#F4F2EC]">{e.nombre}</p>
-                      <p className="text-xs text-[#B8B4AA]">{e.email}</p>
-                    </div>
-                  </td>
+                  <td className="px-5 py-4"><div><p className="text-[#F4F2EC]">{e.nombre}</p><p className="text-xs text-[#B8B4AA]">{e.email}</p></div></td>
                   <td className="px-5 py-4 text-[#B8B4AA]">{e.pais || '—'}</td>
                   <td className="px-5 py-4"><StatusBadge estado={e.estadoPago} /></td>
                   <td className="px-5 py-4 text-xs text-[#B8B4AA]">{e.fechaInscripcion ? new Date(e.fechaInscripcion).toLocaleDateString('es-AR') : '—'}</td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-20 h-1.5 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
-                        <div className="h-full bg-[#C7A36D] rounded-full" style={{ width: `${e.progresoPromedio || 0}%` }} />
-                      </div>
-                     <span className="text-xs text-[#B8B4AA]">{e.progresoPromedio || 0}%</span>
+                      <div className="w-20 h-1.5 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden"><div className="h-full bg-[#C7A36D] rounded-full" style={{ width: `${e.progresoPromedio || 0}%` }} /></div>
+                      <span className="text-xs text-[#B8B4AA]">{e.progresoPromedio || 0}%</span>
                     </div>
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1">
-                      <button onClick={() => window.location.href = createPageUrl(`#/estudiantedetalle?id=${e.id}`)} className="p-1.5 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors" title="Ver detalle">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => toggleActivo(e.id)} className={`p-1.5 transition-colors ${e.activo !== false ? 'text-[#B8B4AA] hover:text-yellow-400' : 'text-yellow-400 hover:text-[#B8B4AA]'}`} title={e.activo !== false ? 'Desactivar' : 'Activar'}>
-                        <XCircle className="w-4 h-4" />
-                      </button>
+                      <button onClick={() => window.location.href = createPageUrl(`#/estudiantedetalle?id=${e.id}`)} className="p-1.5 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors" title="Ver detalle"><Eye className="w-4 h-4" /></button>
+                      <button onClick={() => toggleActivo(e.id)} className={`p-1.5 transition-colors ${e.activo !== false ? 'text-[#B8B4AA] hover:text-yellow-400' : 'text-yellow-400 hover:text-[#B8B4AA]'}`} title={e.activo !== false ? 'Desactivar' : 'Activar'}><XCircle className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-[#B8B4AA]">No se encontraron estudiantes</td>
-                </tr>
-              )}
+              {filtered.length === 0 && <tr><td colSpan={6} className="px-5 py-8 text-center text-[#B8B4AA]">No se encontraron estudiantes</td></tr>}
             </tbody>
           </table>
         </div>
@@ -625,9 +576,7 @@ function ModulosSection() {
   const [creating, setCreating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadModulos();
-  }, []);
+  useEffect(() => { loadModulos(); }, []);
 
   const loadModulos = async () => {
     try {
@@ -643,7 +592,6 @@ function ModulosSection() {
 
   const handleSave = async (formData: any) => {
     try {
-      // Transform form data to match backend schema
       const transformedData = {
         titulo: formData.titulo,
         descripcion: formData.descripcion,
@@ -654,7 +602,8 @@ function ModulosSection() {
         contenido: formData.contenidos?.map((c: any, index: number) => ({
           tipo: c.tipo,
           titulo: c.titulo,
-          url: c.url || null,
+          // Convertir URL de Drive automáticamente al guardar
+          url: c.tipo === 'imagen' ? convertDriveUrl(c.url || '') : (c.url || null),
           texto: c.texto || null,
           orden: index + 1,
         })) || [],
@@ -665,7 +614,6 @@ function ModulosSection() {
         } : null,
         scheduledPublishAt: formData.scheduledPublishAt || null,
       };
-
       if (editId) {
         await moduleApi.updateModule(editId, transformedData);
         toast.success('Módulo actualizado');
@@ -702,42 +650,22 @@ function ModulosSection() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
-      </div>
-    );
-  }
-
+  if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" /></div>;
   if (creating || editId) {
     const modulo = editId ? modulos.find(m => m.id === editId) : null;
-    return (
-      <ModuloEditor
-        modulo={modulo}
-        onSave={handleSave}
-        onCancel={() => { setEditId(null); setCreating(false); }}
-      />
-    );
+    return <ModuloEditor modulo={modulo} onSave={handleSave} onCancel={() => { setEditId(null); setCreating(false); }} />;
   }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <p className="text-[#B8B4AA] text-sm">{modulos.length} módulos en total</p>
-        <button
-          onClick={() => setCreating(true)}
-          className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] px-5 py-2.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors"
-        >
-          <Plus className="w-4 h-4" /> Nuevo módulo
-        </button>
+        <button onClick={() => setCreating(true)} className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] px-5 py-2.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors"><Plus className="w-4 h-4" />Nuevo módulo</button>
       </div>
       <div className="space-y-3">
         {modulos.map((m, i) => (
           <div key={m.id} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-5 flex items-center gap-5 hover:border-[rgba(244,242,236,0.15)] transition-colors">
-            <div className="w-12 h-12 bg-[rgba(199,163,109,0.1)] flex items-center justify-center font-serif text-lg text-[#C7A36D] shrink-0">
-              {String(i + 1).padStart(2, '0')}
-            </div>
+            <div className="w-12 h-12 bg-[rgba(199,163,109,0.1)] flex items-center justify-center font-serif text-lg text-[#C7A36D] shrink-0">{String(i + 1).padStart(2, '0')}</div>
             <div className="flex-1 min-w-0">
               <p className="font-serif text-[#F4F2EC]">{m.titulo}</p>
               <p className="text-xs text-[#B8B4AA] mt-0.5 line-clamp-1">{m.descripcion}</p>
@@ -747,66 +675,43 @@ function ModulosSection() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button onClick={() => handleToggleStatus(m.id)}>
-                <StatusBadge estado={m.estado} />
-              </button>
+              <button onClick={() => handleToggleStatus(m.id)}><StatusBadge estado={m.estado} /></button>
               <button onClick={() => setEditId(m.id)} className="p-1.5 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors"><Edit className="w-4 h-4" /></button>
               <button onClick={() => handleDelete(m.id)} className="p-1.5 text-[#B8B4AA] hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
             </div>
           </div>
         ))}
-        {modulos.length === 0 && (
-          <p className="text-center text-[#B8B4AA] py-8">No hay módulos creados</p>
-        )}
+        {modulos.length === 0 && <p className="text-center text-[#B8B4AA] py-8">No hay módulos creados</p>}
       </div>
     </div>
   );
 }
 
-
-
-
-
 // ── MÓDULO EDITOR ────────────────────────────────────────────────
 function ModuloEditor({ modulo, onSave, onCancel }: any) {
-  // Transform backend data to form format when editing
   const initialForm = modulo ? {
-    titulo: modulo.titulo || '',
-    descripcion: modulo.descripcion || '',
-    duracion: modulo.duracion || '2 semanas',
-    estado: modulo.estado || 'borrador',
+    titulo: modulo.titulo || '', descripcion: modulo.descripcion || '',
+    duracion: modulo.duracion || '2 semanas', estado: modulo.estado || 'borrador',
     objetivos: modulo.objetivos?.length > 0 ? modulo.objetivos : [''],
-    ejercicio_titulo: modulo.ejercicio?.titulo || '',
-    ejercicio_descripcion: modulo.ejercicio?.descripcion || '',
-    ejercicio_deadline: modulo.ejercicio?.deadline || '',
-    contenidos: modulo.contenido || [],
-    scheduledPublishAt: modulo.scheduledPublishAt || undefined,
-    imagenUrl: modulo.imagenUrl || '',
+    ejercicio_titulo: modulo.ejercicio?.titulo || '', ejercicio_descripcion: modulo.ejercicio?.descripcion || '',
+    ejercicio_deadline: modulo.ejercicio?.deadline || '', contenidos: modulo.contenido || [],
+    scheduledPublishAt: modulo.scheduledPublishAt || undefined, imagenUrl: modulo.imagenUrl || '',
   } : {
     titulo: '', descripcion: '', duracion: '2 semanas', estado: 'borrador',
     objetivos: [''], ejercicio_titulo: '', ejercicio_descripcion: '',
-    ejercicio_deadline: '', contenidos: [], scheduledPublishAt: undefined,
-    imagenUrl: '',
+    ejercicio_deadline: '', contenidos: [], scheduledPublishAt: undefined, imagenUrl: '',
   };
 
-  // ✅ useState de form PRIMERO, scheduleMode lo inicializamos después
   const [form, setForm] = useState(initialForm);
-
-  // ✅ Ahora sí podemos usar form.estado
   const [scheduleMode, setScheduleMode] = useState(form.estado === 'programado');
   const minDateTime = new Date().toISOString().slice(0, 16);
 
   const addObjetivo = () => setForm(f => ({ ...f, objetivos: [...(f.objetivos || []), ''] }));
-  const updateObjetivo = (i, val) => setForm(f => { const o = [...(f.objetivos || [])]; o[i] = val; return { ...f, objetivos: o }; });
-  const removeObjetivo = (i) => setForm(f => ({ ...f, objetivos: f.objetivos.filter((_, idx) => idx !== i) }));
-
-  const addContenido = (tipo) => setForm(f => ({
-    ...f, contenidos: [...(f.contenidos || []), { tipo, titulo: '', url: '', texto: '', orden: (f.contenidos || []).length + 1 }]
-  }));
-  const updateContenido = (i, key, val) => setForm(f => {
-    const c = [...(f.contenidos || [])]; c[i] = { ...c[i], [key]: val }; return { ...f, contenidos: c };
-  });
-  const removeContenido = (i) => setForm(f => ({ ...f, contenidos: f.contenidos.filter((_, idx) => idx !== i) }));
+  const updateObjetivo = (i: number, val: string) => setForm(f => { const o = [...(f.objetivos || [])]; o[i] = val; return { ...f, objetivos: o }; });
+  const removeObjetivo = (i: number) => setForm(f => ({ ...f, objetivos: f.objetivos.filter((_: any, idx: number) => idx !== i) }));
+  const addContenido = (tipo: string) => setForm(f => ({ ...f, contenidos: [...(f.contenidos || []), { tipo, titulo: '', url: '', texto: '', orden: (f.contenidos || []).length + 1 }] }));
+  const updateContenido = (i: number, key: string, val: string) => setForm(f => { const c = [...(f.contenidos || [])]; c[i] = { ...c[i], [key]: val }; return { ...f, contenidos: c }; });
+  const removeContenido = (i: number) => setForm(f => ({ ...f, contenidos: f.contenidos.filter((_: any, idx: number) => idx !== i) }));
 
   return (
     <div>
@@ -825,104 +730,62 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
         {/* Información básica */}
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6 space-y-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Información básica</p>
-          <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Título *</label>
-            <input type="text" value={form.titulo} onChange={e => setForm({...form, titulo: e.target.value})}
-              className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
-          </div>
+          {[['Título *', 'titulo', 'text'], ['Duración', 'duracion', 'text']].map(([label, key, type]) => (
+            <div key={key}>
+              <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">{label}</label>
+              <input type={type} value={(form as any)[key]} onChange={e => setForm({ ...form, [key]: e.target.value })}
+                className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
+            </div>
+          ))}
           <div>
             <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Descripción</label>
-            <textarea rows={3} value={form.descripcion} onChange={e => setForm({...form, descripcion: e.target.value})}
+            <textarea rows={3} value={form.descripcion} onChange={e => setForm({ ...form, descripcion: e.target.value })}
               className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors resize-none" />
           </div>
           <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Duración</label>
-            <input type="text" value={form.duracion} onChange={e => setForm({...form, duracion: e.target.value})}
-              className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
-          </div>
-          <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">URL de la imagen</label>
-            <input type="text" value={form.imagenUrl || ''} onChange={e => setForm({...form, imagenUrl: e.target.value})}
-              placeholder="https://ejemplo.com/imagen.jpg"
+            <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">URL de la imagen de portada</label>
+            <input type="text" value={form.imagenUrl || ''} onChange={e => setForm({ ...form, imagenUrl: e.target.value })} placeholder="https://ejemplo.com/imagen.jpg"
               className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
             {form.imagenUrl && (
-              <div className="mt-3 relative">
-                <img src={form.imagenUrl} alt="Vista previa" className="w-full h-32 object-cover border border-[rgba(244,242,236,0.1)]"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              <div className="mt-3">
+                <img src={form.imagenUrl} alt="Vista previa" className="w-full h-32 object-cover border border-[rgba(244,242,236,0.1)]" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               </div>
             )}
           </div>
         </div>
 
-        {/* ✅ Sección de publicación — reemplaza el <select> de Estado */}
+        {/* Publicación */}
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6 space-y-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA]">Publicación</p>
-
-          {/* Publicar inmediatamente */}
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-[#F4F2EC]">Publicar inmediatamente</p>
               <p className="text-xs text-[#B8B4AA] mt-0.5">El módulo quedará visible al guardar</p>
             </div>
-            <input
-              type="checkbox"
-              checked={!scheduleMode && form.estado === 'publicado'}
-              onChange={(e) => {
-                setScheduleMode(false);
-                setForm({ ...form, estado: e.target.checked ? 'publicado' : 'borrador', scheduledPublishAt: undefined });
-              }}
-              className="w-4 h-4 accent-[#C7A36D]"
-            />
+            <input type="checkbox" checked={!scheduleMode && form.estado === 'publicado'}
+              onChange={(e) => { setScheduleMode(false); setForm({ ...form, estado: e.target.checked ? 'publicado' : 'borrador', scheduledPublishAt: undefined }); }}
+              className="w-4 h-4 accent-[#C7A36D]" />
           </div>
-
-          {/* Programar publicación */}
           <div className="border-t border-[rgba(244,242,236,0.06)] pt-4 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#F4F2EC] flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-blue-400" />
-                  Programar publicación
-                </p>
+                <p className="text-sm text-[#F4F2EC] flex items-center gap-2"><Clock className="w-4 h-4 text-blue-400" />Programar publicación</p>
                 <p className="text-xs text-[#B8B4AA] mt-0.5">Elige fecha y hora para publicar automáticamente</p>
               </div>
-              <input
-                type="checkbox"
-                checked={scheduleMode}
-                onChange={(e) => {
-                  setScheduleMode(e.target.checked);
-                  setForm({
-                    ...form,
-                    estado: e.target.checked ? 'programado' : 'borrador',
-                    scheduledPublishAt: e.target.checked ? form.scheduledPublishAt : undefined,
-                  });
-                }}
-                className="w-4 h-4 accent-[#C7A36D]"
-              />
+              <input type="checkbox" checked={scheduleMode}
+                onChange={(e) => { setScheduleMode(e.target.checked); setForm({ ...form, estado: e.target.checked ? 'programado' : 'borrador', scheduledPublishAt: e.target.checked ? form.scheduledPublishAt : undefined }); }}
+                className="w-4 h-4 accent-[#C7A36D]" />
             </div>
-
             {scheduleMode && (
               <div>
-                <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1">
-                  Fecha y hora de publicación
-                </label>
-                <input
-                  type="datetime-local"
-                  min={minDateTime}
-                  value={form.scheduledPublishAt ? new Date(form.scheduledPublishAt).toISOString().slice(0, 16) : ''}
-                  onChange={(e) => setForm({
-                    ...form,
-                    scheduledPublishAt: e.target.value ? new Date(e.target.value).toISOString() : undefined,
-                  })}
-                  className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors"
-                />
+                <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1">Fecha y hora de publicación</label>
+                <input type="datetime-local" min={minDateTime} value={form.scheduledPublishAt ? new Date(form.scheduledPublishAt).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => setForm({ ...form, scheduledPublishAt: e.target.value ? new Date(e.target.value).toISOString() : undefined })}
+                  className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
                 {form.scheduledPublishAt && (
                   <p className="text-xs text-blue-400 mt-2 flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    Se publicará el{' '}
-                    {new Date(form.scheduledPublishAt).toLocaleString('es-ES', {
-                      day: 'numeric', month: 'long', year: 'numeric',
-                      hour: '2-digit', minute: '2-digit',
-                    })}
+                    Se publicará el {new Date(form.scheduledPublishAt).toLocaleString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </p>
                 )}
               </div>
@@ -950,21 +813,18 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
         {/* Ejercicio */}
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6 space-y-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Ejercicio</p>
-          <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Título</label>
-            <input type="text" value={form.ejercicio_titulo || ''} onChange={e => setForm({...form, ejercicio_titulo: e.target.value})}
-              className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
-          </div>
+          {[['Título', 'ejercicio_titulo'], ['Fecha límite', 'ejercicio_deadline']].map(([label, key]) => (
+            <div key={key}>
+              <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">{label}</label>
+              <input type="text" value={(form as any)[key] || ''} onChange={e => setForm({ ...form, [key]: e.target.value })}
+                placeholder={key === 'ejercicio_deadline' ? 'ej: 20 de Octubre 2026' : ''}
+                className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
+            </div>
+          ))}
           <div>
             <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Descripción</label>
-            <textarea rows={3} value={form.ejercicio_descripcion || ''} onChange={e => setForm({...form, ejercicio_descripcion: e.target.value})}
+            <textarea rows={3} value={form.ejercicio_descripcion || ''} onChange={e => setForm({ ...form, ejercicio_descripcion: e.target.value })}
               className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors resize-none" />
-          </div>
-          <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Fecha límite</label>
-            <input type="text" value={form.ejercicio_deadline || ''} onChange={e => setForm({...form, ejercicio_deadline: e.target.value})}
-              placeholder="ej: 20 de Octubre 2026"
-              className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
           </div>
         </div>
 
@@ -973,22 +833,16 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
           <div className="flex justify-between items-center mb-4">
             <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA]">Contenidos</p>
             <div className="flex gap-2">
-              {[
-                { tipo: 'video', icon: Video, label: 'Video' },
-                { tipo: 'pdf', icon: FileText, label: 'PDF' },
-                { tipo: 'texto', icon: AlignLeft, label: 'Texto' },
-                { tipo: 'zoom', icon: Link, label: 'Zoom' },
-                { tipo: 'imagen', icon: Image, label: 'Imagen' },
-              ].map(({ tipo, icon: Icon, label }) => (
+              {[{ tipo: 'video', icon: Video, label: 'Video' }, { tipo: 'pdf', icon: FileText, label: 'PDF' }, { tipo: 'texto', icon: AlignLeft, label: 'Texto' }, { tipo: 'zoom', icon: Link, label: 'Zoom' }, { tipo: 'imagen', icon: Image, label: 'Imagen' }].map(({ tipo, icon: Icon, label }) => (
                 <button key={tipo} onClick={() => addContenido(tipo)}
                   className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.1em] px-2.5 py-1.5 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#C7A36D] hover:border-[rgba(199,163,109,0.3)] transition-colors">
-                  <Icon className="w-3 h-3" /> {label}
+                  <Icon className="w-3 h-3" />{label}
                 </button>
               ))}
             </div>
           </div>
           <div className="space-y-3">
-            {(form.contenidos || []).map((c, i) => (
+            {(form.contenidos || []).map((c: any, i: number) => (
               <div key={i} className="border border-[rgba(244,242,236,0.06)] p-4">
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D]">{c.tipo}</span>
@@ -998,8 +852,21 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
                   <input type="text" value={c.titulo} onChange={e => updateContenido(i, 'titulo', e.target.value)} placeholder="Título"
                     className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 py-2 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
                   {['video', 'pdf', 'zoom', 'imagen'].includes(c.tipo) && (
-                    <input type="text" value={c.url} onChange={e => updateContenido(i, 'url', e.target.value)} placeholder="URL"
-                      className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 py-2 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
+                    <div className="space-y-2">
+                      <input type="text" value={c.url} onChange={e => updateContenido(i, 'url', e.target.value)}
+                        placeholder={c.tipo === 'imagen' ? 'https://drive.google.com/file/d/FILE_ID/view?usp=sharing' : 'URL'}
+                        className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 py-2 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
+                      {c.tipo === 'imagen' && c.url && (
+                        <div>
+                          <img src={convertDriveUrl(c.url)} alt="Preview"
+                            className="w-full h-40 object-contain bg-[#0B0B0D] border border-[rgba(244,242,236,0.08)] rounded"
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                          {convertDriveUrl(c.url) !== c.url && (
+                            <p className="mt-1 font-mono text-[10px] text-[#C7A36D]/60">✓ URL de Drive detectada — se convertirá automáticamente al guardar</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   )}
                   {c.tipo === 'texto' && (
                     <textarea rows={4} value={c.texto} onChange={e => updateContenido(i, 'texto', e.target.value)} placeholder="Contenido de texto..."
@@ -1009,9 +876,7 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
               </div>
             ))}
             {(form.contenidos || []).length === 0 && (
-              <p className="text-center text-[#B8B4AA] text-sm py-6 border border-dashed border-[rgba(244,242,236,0.06)]">
-                Agregá contenido usando los botones de arriba
-              </p>
+              <p className="text-center text-[#B8B4AA] text-sm py-6 border border-dashed border-[rgba(244,242,236,0.06)]">Agregá contenido usando los botones de arriba</p>
             )}
           </div>
         </div>
@@ -1026,17 +891,12 @@ function PagosSection() {
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadPagos();
-  }, []);
+  useEffect(() => { loadPagos(); }, []);
 
   const loadPagos = async () => {
     try {
       setIsLoading(true);
-      const [pagosData, statsData] = await Promise.all([
-        paymentApi.getAllPayments({ limit: 50 }),
-        paymentApi.getPaymentStats()
-      ]);
+      const [pagosData, statsData] = await Promise.all([paymentApi.getAllPayments({ limit: 50 }), paymentApi.getPaymentStats()]);
       setPagos(pagosData.pagos || []);
       setStats(statsData);
     } catch (error) {
@@ -1046,48 +906,22 @@ function PagosSection() {
     }
   };
 
-  const handleRefund = async (id: string) => {
-    if (!confirm('¿Estás seguro de reembolsar este pago?')) return;
-    try {
-      await paymentApi.processRefund(id);
-      toast.success('Reembolso procesado');
-      loadPagos();
-    } catch (error) {
-      toast.error('Error procesando reembolso');
-    }
-  };
-
-  const totalIngresos = stats?.ingresosTotales || 0;
-  const moneda = 'ARS';
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
-      </div>
-    );
-  }
+  if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" /></div>;
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { label: "Ingresos totales", value: `$${totalIngresos.toLocaleString()} ${moneda}`, icon: DollarSign, color: "text-green-400", bg: "bg-green-400/10" },
+          { label: "Ingresos totales", value: `$${(stats?.ingresosTotales || 0).toLocaleString()} ARS`, icon: DollarSign, color: "text-green-400", bg: "bg-green-400/10" },
           { label: "Pagos completados", value: stats?.pagosCompletados || 0, icon: CheckCircle, color: "text-[#C7A36D]", bg: "bg-[rgba(199,163,109,0.1)]" },
           { label: "Pendientes de pago", value: stats?.pagosPendientes || 0, icon: Clock, color: "text-yellow-400", bg: "bg-yellow-400/10" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-5 flex items-center gap-4">
-            <div className={`w-10 h-10 rounded-lg ${bg} flex items-center justify-center`}>
-              <Icon className={`w-5 h-5 ${color}`} />
-            </div>
-            <div>
-              <p className={`text-xl font-bold ${color}`}>{value}</p>
-              <p className="text-xs text-[#B8B4AA]">{label}</p>
-            </div>
+            <div className={`w-10 h-10 rounded-lg ${bg} flex items-center justify-center`}><Icon className={`w-5 h-5 ${color}`} /></div>
+            <div><p className={`text-xl font-bold ${color}`}>{value}</p><p className="text-xs text-[#B8B4AA]">{label}</p></div>
           </div>
         ))}
       </div>
-
       <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)]">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -1101,10 +935,7 @@ function PagosSection() {
             <tbody>
               {pagos.map((p: any) => (
                 <tr key={p.id} className="border-b border-[rgba(244,242,236,0.04)] hover:bg-[rgba(244,242,236,0.02)] transition-colors">
-                  <td className="px-5 py-4">
-                    <p className="text-[#F4F2EC]">{p.nombre}</p>
-                    <p className="text-xs text-[#B8B4AA]">{p.email}</p>
-                  </td>
+                  <td className="px-5 py-4"><p className="text-[#F4F2EC]">{p.nombre}</p><p className="text-xs text-[#B8B4AA]">{p.email}</p></td>
                   <td className="px-5 py-4 text-green-400 font-mono">${p.monto} {p.moneda}</td>
                   <td className="px-5 py-4 text-[#B8B4AA]">{p.proveedor}</td>
                   <td className="px-5 py-4 text-[#B8B4AA] font-mono text-xs">{p.referenciaExterna?.slice(0, 20)}...</td>
@@ -1112,11 +943,7 @@ function PagosSection() {
                   <td className="px-5 py-4 text-[#B8B4AA] text-xs">{p.fechaPago ? new Date(p.fechaPago).toLocaleDateString('es-AR') : '—'}</td>
                 </tr>
               ))}
-              {pagos.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-[#B8B4AA]">No hay pagos registrados</td>
-                </tr>
-              )}
+              {pagos.length === 0 && <tr><td colSpan={6} className="px-5 py-8 text-center text-[#B8B4AA]">No hay pagos registrados</td></tr>}
             </tbody>
           </table>
         </div>
@@ -1126,9 +953,7 @@ function PagosSection() {
 }
 
 // ── CALENDARIO ──────────────────────────────────────────────────
-function CalendarSection() {
-  return <CalendarManager />;
-}
+function CalendarSection() { return <CalendarManager />; }
 
 // ── CONFIGURACIÓN ────────────────────────────────────────────────
 function ConfiguracionSection() {
@@ -1136,23 +961,19 @@ function ConfiguracionSection() {
   const [isLoading, setIsLoading] = useState(true);
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    loadConfig();
-  }, []);
+  useEffect(() => { loadConfig(); }, []);
 
-const loadConfig = async () => {
-  try {
-    setIsLoading(true);
-    const data = await adminApi.getConfig();
-    // El backend devuelve { profesorId, configuracion }
-    // Solo necesitamos la configuración
-    setConfig(data.configuracion || {});
-  } catch (error) {
-    toast.error('Error cargando configuración');
-  } finally {
-    setIsLoading(false);
-  }
-};
+  const loadConfig = async () => {
+    try {
+      setIsLoading(true);
+      const data = await adminApi.getConfig();
+      setConfig(data.configuracion || {});
+    } catch (error) {
+      toast.error('Error cargando configuración');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const save = async () => {
     try {
@@ -1164,46 +985,14 @@ const loadConfig = async () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
-      </div>
-    );
-  }
+  if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" /></div>;
 
   return (
     <div className="space-y-6 max-w-2xl">
-
-
       {[
-        {
-          title: "Información del curso",
-          fields: [
-            { key: "nombreCurso", label: "Nombre del curso", type: "text" },
-            { key: "descripcionCurso", label: "Descripción", type: "textarea" },
-            { key: "precioCurso", label: "Precio", type: "number" },
-            { key: "moneda", label: "Moneda (USD, ARS, etc.)", type: "text" },
-            { key: "pais", label: "País", type: "text" },
-          ]
-        },
-        {
-          title: "Perfil del profesor",
-          fields: [
-            { key: "bioProfesor", label: "Bio del Profesor", type: "textarea" },
-            { key: "fotoProfesorUrl", label: "URL de Foto del Profesor", type: "url" },
-            { key: "emailContacto", label: "Email de contacto", type: "email" },
-            { key: "whatsappNumero", label: "WhatsApp (con código de país)", type: "text" },
-            { key: "instagramUrl", label: "Instagram URL", type: "url" },
-{ key: "facebookUrl", label: "Facebook URL", type: "url" },
-          ]
-        },
-        {
-          title: "Links importantes",
-          fields: [
-            { key: "googleFormUrl", label: "Link del formulario Google", type: "url" },
-          ]
-        },
+        { title: "Información del curso", fields: [{ key: "nombreCurso", label: "Nombre del curso", type: "text" }, { key: "descripcionCurso", label: "Descripción", type: "textarea" }, { key: "precioCurso", label: "Precio", type: "number" }, { key: "moneda", label: "Moneda (USD, ARS, etc.)", type: "text" }, { key: "pais", label: "País", type: "text" }] },
+        { title: "Perfil del profesor", fields: [{ key: "bioProfesor", label: "Bio del Profesor", type: "textarea" }, { key: "fotoProfesorUrl", label: "URL de Foto del Profesor", type: "url" }, { key: "emailContacto", label: "Email de contacto", type: "email" }, { key: "whatsappNumero", label: "WhatsApp (con código de país)", type: "text" }, { key: "instagramUrl", label: "Instagram URL", type: "url" }, { key: "facebookUrl", label: "Facebook URL", type: "url" }] },
+        { title: "Links importantes", fields: [{ key: "googleFormUrl", label: "Link del formulario Google", type: "url" }] },
       ].map(({ title, fields }: any) => (
         <div key={title} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-5">{title}</p>
@@ -1223,22 +1012,10 @@ const loadConfig = async () => {
           </div>
         </div>
       ))}
-
-        
-
-     <div className="flex items-center gap-4">
-  <button
-    onClick={save}
-    className="font-mono text-xs uppercase tracking-[0.14em] px-8 py-3.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors"
-  >
-    Guardar cambios
-  </button>
-  {saved && (
-    <span className="flex items-center gap-2 text-sm text-green-400">
-      ✓ Configuración guardada correctamente
-    </span>
-  )}
-</div>
+      <div className="flex items-center gap-4">
+        <button onClick={save} className="font-mono text-xs uppercase tracking-[0.14em] px-8 py-3.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors">Guardar cambios</button>
+        {saved && <span className="flex items-center gap-2 text-sm text-green-400">✓ Configuración guardada correctamente</span>}
+      </div>
     </div>
   );
 }

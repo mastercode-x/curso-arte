@@ -121,7 +121,6 @@ useEffect(() => {
 
   
 
-
 useEffect(() => {
   if (loading) return;
   const scrollTo = sessionStorage.getItem('scrollTo');
@@ -133,6 +132,8 @@ useEffect(() => {
     return () => clearTimeout(timer);
   }
 }, [loading]);
+
+
 
 
 useEffect(() => {
@@ -250,7 +251,7 @@ useEffect(() => {
       <Calendar />
       
       {/* Instructor & Enrollment */}
-      <div id="instructor">
+ <div id="instructor">
   <Instructor config={config} />
 </div>
     </div>

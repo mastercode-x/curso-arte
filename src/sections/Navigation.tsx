@@ -36,7 +36,7 @@ const ModulesDropdownPortal = memo(({
       />
       
       {/* Dropdown menu */}
-      <div className="fixed z-[100] bg-[#1a1a1f]/95 backdrop-blur-md border border-[rgba(199,163,109,0.3)] rounded-lg shadow-xl min-w-[220px] py-2 overflow-hidden"
+      <div className="fixed z-[100] bg-[#1a1a1f]/95 backdrop-blur-md border border-[rgba(199,163,109,0.3)] rounded-lg shadow-xl w-[210px] py-1 overflow-y-auto max-h-[60vh]"
         style={{
           top: 'calc(4vh + 2rem)',
           right: '4vw',
@@ -45,29 +45,29 @@ const ModulesDropdownPortal = memo(({
         {loading ? (
           <>
             {[1, 2, 3].map((i) => (
-              <div key={i} className="px-4 py-2.5">
-                <div className="h-3 bg-[rgba(244,242,236,0.1)] rounded animate-pulse w-full"></div>
+              <div key={i} className="px-3 py-1.5">
+                <div className="h-2 bg-[rgba(244,242,236,0.1)] rounded animate-pulse w-full"></div>
               </div>
             ))}
           </>
         ) : modules.length === 0 ? (
-          <div className="px-4 py-3 text-center">
-            <span className="text-xs text-[#B8B4AA] italic">Próximamente</span>
+          <div className="px-3 py-2 text-center">
+            <span className="text-[10px] text-[#B8B4AA] italic">Próximamente</span>
           </div>
         ) : (
-          modules.map((module) => (
+          modules.map((module, index) => (
             <button
               key={module.id}
               onClick={() => {
                 onSelectModule(module.id);
                 onClose();
               }}
-              className="w-full px-4 py-2.5 text-left transition-colors duration-200 hover:bg-[rgba(199,163,109,0.1)] group"
+              className="w-full px-3 py-1.5 text-left transition-colors duration-200 hover:bg-[rgba(199,163,109,0.1)] group flex items-baseline gap-2"
             >
-              <span className="font-mono text-[10px] text-[#C7A36D]/60 uppercase tracking-[0.12em]">
-                {String(module.orden).padStart(2, '0')}
+              <span className="font-mono text-[9px] text-[#C7A36D]/60 tracking-[0.1em] shrink-0">
+                {String(index + 1).padStart(2, '0')}
               </span>
-              <span className="block text-xs text-[#B8B4AA] group-hover:text-[#F4F2EC] transition-colors duration-200 mt-0.5">
+              <span className="text-[11px] text-[#B8B4AA] group-hover:text-[#F4F2EC] transition-colors duration-200 leading-tight">
                 {module.titulo}
               </span>
             </button>
@@ -172,16 +172,16 @@ const MobileMenuPortal = memo(({
                 ) : modules.length === 0 ? (
                   <span className="text-xs text-[#B8B4AA] italic">Próximamente</span>
                 ) : (
-                  modules.map((module) => (
+                  modules.map((module, index) => (
                     <button
                       key={module.id}
                       onClick={() => onSelectModule(module.id)}
-                      className="block w-full text-left py-2"
+                      className="flex items-baseline gap-2 w-full text-left py-1.5"
                     >
-                      <span className="font-mono text-[10px] text-[#C7A36D]/60 uppercase tracking-[0.12em]">
-                        {String(module.orden).padStart(2, '0')}
+                      <span className="font-mono text-[9px] text-[#C7A36D]/60 tracking-[0.1em] shrink-0">
+                        {String(index + 1).padStart(2, '0')}
                       </span>
-                      <span className="block text-sm text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors duration-200">
+                      <span className="text-sm text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors duration-200">
                         {module.titulo}
                       </span>
                     </button>

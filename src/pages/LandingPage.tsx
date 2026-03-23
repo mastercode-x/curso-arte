@@ -127,8 +127,13 @@ useEffect(() => {
   if (scrollTo === 'instructor') {
     sessionStorage.removeItem('scrollTo');
     const timer = setTimeout(() => {
-      document.getElementById('instructor')?.scrollIntoView({ behavior: 'smooth' });
-    }, 1200);
+      const element = document.getElementById('instructor');
+      if (!element) return;
+      const pinSpacer = element.closest('[data-pin-spacer]') as HTMLElement;
+      const target = pinSpacer || element;
+      const offsetTop = target.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+    }, 2500);
     return () => clearTimeout(timer);
   }
 }, [loading]);

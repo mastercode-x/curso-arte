@@ -41,7 +41,7 @@ const LoginPage: React.FC = () => {
   const handleSolicitarAcceso = (e: React.MouseEvent) => {
     e.preventDefault();
     sessionStorage.setItem('scrollTo', 'instructor');
-    window.location.href = '/';
+    window.location.href = '/#/';
   };
 
   return (

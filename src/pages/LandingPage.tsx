@@ -89,6 +89,17 @@ const LandingPageContent: React.FC = () => {
   const [config, setConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+
+  // Forzar tema oscuro al montar, restaurar al desmontar
+useEffect(() => {
+  document.documentElement.classList.remove('light');
+  document.documentElement.classList.add('dark');
+  return () => {
+    // Al salir, limpiar para que el dashboard maneje su propio tema
+    document.documentElement.classList.remove('dark');
+  };
+}, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -108,12 +119,17 @@ const LandingPageContent: React.FC = () => {
   }, []);
 
 
-  useEffect(() => {
+  
+
+
+useEffect(() => {
   if (loading) return;
-  if (window.location.hash === '#instructor') {
+  const scrollTo = sessionStorage.getItem('scrollTo');
+  if (scrollTo === 'instructor') {
+    sessionStorage.removeItem('scrollTo');
     const timer = setTimeout(() => {
       document.getElementById('instructor')?.scrollIntoView({ behavior: 'smooth' });
-    }, 1200); // espera a que GSAP/ScrollTrigger termine
+    }, 1200);
     return () => clearTimeout(timer);
   }
 }, [loading]);

@@ -284,13 +284,6 @@ export const getStudents = asyncHandler(async (req: Request, res: Response) => {
   prisma.modulo.count({ where: { estado: 'publicado' } })  // ← agregar esto
 ]);
 
-
-console.log('Total módulos publicados:', totalModulos);
-console.log('Progreso Cristopher:', JSON.stringify(
-  estudiantes.find(e => e.user.nombre.includes('Cristopher'))?.progreso
-));
-
-
   const estudiantesFormateados = estudiantes.map(e => ({
     id: e.id,
     userId: e.userId,

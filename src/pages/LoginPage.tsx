@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,37 +12,40 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { login, isLoading, error, isProfessor, isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [localError, setLocalError] = useState<string | null>(null);
 
-  // ✅ Redirigir si ya tiene sesión activa
+  // Forzar tema oscuro siempre en login
+  useEffect(() => {
+    document.documentElement.classList.remove('light');
+    document.documentElement.classList.add('dark');
+  }, []);
+
+  // Redirigir si ya tiene sesión activa
   useEffect(() => {
     if (isAuthenticated) {
       navigate(isProfessor ? '/profesor' : '/dashboard', { replace: true });
     }
   }, [isAuthenticated, isProfessor, navigate]);
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLocalError(null);
-  try {
-    await login(formData);
-    // El AuthContext ya maneja el redirect:
-    // - estudiante sin onboarding → /#/onboarding
-    // - estudiante con onboarding → /dashboard
-    // - profesor → /profesor
-    // Solo llegamos acá si el AuthContext no redirigió (no debería pasar)
-  } catch (err: any) {
-    setLocalError(err?.message || 'Error al iniciar sesión');
-  }
-};
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLocalError(null);
+    try {
+      await login(formData);
+    } catch (err: any) {
+      setLocalError(err?.message || 'Error al iniciar sesión');
+    }
+  };
+
+  const handleSolicitarAcceso = (e: React.MouseEvent) => {
+    e.preventDefault();
+    sessionStorage.setItem('scrollTo', 'instructor');
+    window.location.href = '/';
+  };
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center p-4">
-      {/* Background gradient */}
       <div className="fixed inset-0 bg-gradient-to-br from-[#C7A36D]/5 via-transparent to-[#C7A36D]/5 pointer-events-none" />
       
       <Card className="w-full max-w-md bg-[#141419] border-[rgba(244,242,236,0.08)] relative z-10 mx-4">
@@ -110,13 +113,8 @@ const handleSubmit = async (e: React.FormEvent) => {
               disabled={isLoading}
               className="w-full bg-[#C7A36D] hover:bg-[#d4b07a] text-[#0B0B0D] font-medium"
             >
-              {isLoading ? (
-                'Iniciando sesión...'
-              ) : (
-                <>
-                  Iniciar sesión
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </>
+              {isLoading ? 'Iniciando sesión...' : (
+                <> Iniciar sesión <ArrowRight className="ml-2 w-4 h-4" /> </>
               )}
             </Button>
           </form>
@@ -124,9 +122,10 @@ const handleSubmit = async (e: React.FormEvent) => {
           <div className="mt-6 text-center">
             <p className="text-sm text-[#B8B4AA]">
               ¿No tienes cuenta?{' '}
-             <Link to="/#instructor" className="text-[#C7A36D] hover:underline">
+              
+             <a href="/" onClick={handleSolicitarAcceso} className="text-[#C7A36D] hover:underline cursor-pointer">
   Solicita acceso al curso
-</Link>
+</a>
             </p>
           </div>
         </CardContent>

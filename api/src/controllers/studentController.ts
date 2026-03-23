@@ -317,31 +317,56 @@ export const getStudents = asyncHandler(async (req: Request, res: Response) => {
 export const getStudentDetail = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const estudiante = await prisma.estudiante.findUnique({
-    where: { id },
-    include: {
-      user: {
-        select: {
-          id: true,
-          nombre: true,
-          email: true,
-          avatarUrl: true,
-          estado: true,
-          createdAt: true
-        }
-      },
-      progreso: {
-        include: { modulo: true },
-        orderBy: { modulo: { orden: 'asc' } }
-      },
-      pagos: true
-    }
-  });
+  const [estudiante, todosLosModulos] = await Promise.all([
+    prisma.estudiante.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            nombre: true,
+            email: true,
+            avatarUrl: true,
+            estado: true,
+            createdAt: true
+          }
+        },
+        progreso: {
+          include: { modulo: true },
+          orderBy: { modulo: { orden: 'asc' } }
+        },
+        pagos: true
+      }
+    }),
+    prisma.modulo.findMany({
+      where: { estado: 'publicado' },
+      orderBy: { orden: 'asc' },
+      select: { id: true, titulo: true, orden: true }
+    })
+  ]);
 
   if (!estudiante) {
     res.status(404).json({ error: 'Estudiante no encontrado' });
     return;
   }
+
+  // Crear mapa de progreso real del estudiante
+  const progresoMap = new Map(
+    estudiante.progreso.map(p => [p.moduloId, p])
+  );
+
+  // Cruzar todos los módulos publicados con el progreso real
+  const progresoCompleto = todosLosModulos.map((modulo, index) => {
+    const progreso = progresoMap.get(modulo.id);
+    return {
+      moduloId: modulo.id,
+      titulo: modulo.titulo,
+      orden: index + 1,
+      completudPorcentaje: progreso?.completudPorcentaje ?? 0,
+      fechaCompletado: progreso?.fechaCompletado ?? null,
+      ultimaActividad: progreso?.ultimaActividad ?? null
+    };
+  });
 
   res.json({
     id: estudiante.id,
@@ -362,14 +387,7 @@ export const getStudentDetail = asyncHandler(async (req: Request, res: Response)
     experiencia: estudiante.experiencia,
     interes: estudiante.interes,
     fechaRegistro: estudiante.user.createdAt,
-    progreso: estudiante.progreso.map(p => ({
-      moduloId: p.moduloId,
-      titulo: p.modulo.titulo,
-      orden: p.modulo.orden,
-      completudPorcentaje: p.completudPorcentaje,
-      fechaCompletado: p.fechaCompletado,
-      ultimaActividad: p.ultimaActividad
-    })),
+    progreso: progresoCompleto,
     pagos: estudiante.pagos
   });
 });

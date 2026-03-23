@@ -59,6 +59,8 @@ const loadDashboardData = async (silent = false) => {
   } finally {
     if (!silent) setIsLoading(false);
   }
+
+  console.log(data)
 };
 
   const notifications = [
@@ -337,6 +339,12 @@ const perfil = data?.estudiante || data?.perfil || { nombre: user?.nombre || 'Es
 // ── Profile Editor ────────────────────────────────────────────────
 function ProfileEditor({ perfil, onSave }: { perfil: any, onSave: () => void }) {
   const [form, setForm] = useState(perfil);
+
+  useEffect(() => {
+    setForm(perfil);
+  }, [perfil]);
+
+ 
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 const [passForm, setPassForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -697,12 +705,12 @@ if (tipo === 'video') return (
       <a href={url} target="_blank" rel="noopener noreferrer" className="font-mono text-xs uppercase tracking-[0.14em] px-6 py-3 bg-blue-600 text-white hover:bg-blue-700 transition-colors">Unirse a Zoom</a>
     </div>
   );
-  if (tipo === 'imagen') return (
-    <div>
-      {titulo && <h3 className="font-serif text-xl text-[#F4F2EC] mb-4">{titulo}</h3>}
-      <img src={url} alt={titulo} className="w-full rounded" />
-    </div>
-  );
+if (tipo === 'imagen') return (
+  <div>
+    {titulo && <h3 className="font-serif text-xl text-[#F4F2EC] mb-4">{titulo}</h3>}
+    <img src={getDriveImageUrl(url)} alt={titulo} className="w-full rounded" />
+  </div>
+);
   return <p className="text-[#B8B4AA]">Contenido no disponible.</p>;
 }
 
@@ -726,5 +734,27 @@ function getEmbedUrl(rawUrl: string): string {
       return `https://player.vimeo.com/video${u.pathname}`;
     }
   } catch { /* url inválida, devolver tal cual */ }
+  return rawUrl;
+}
+
+
+
+// DESPUÉS
+function getDriveImageUrl(rawUrl: string): string {
+  try {
+    const u = new URL(rawUrl);
+    if (u.hostname === 'drive.google.com') {
+      // Formato: /file/d/FILE_ID/view
+      const match = u.pathname.match(/\/file\/d\/([^/]+)/);
+      if (match) {
+        return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+      }
+      // Formato: /open?id=FILE_ID
+      const id = u.searchParams.get('id');
+      if (id) {
+        return `https://drive.google.com/uc?export=view&id=${id}`;
+      }
+    }
+  } catch { /* url inválida */ }
   return rawUrl;
 }

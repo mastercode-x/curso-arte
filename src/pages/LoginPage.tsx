@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,13 +10,20 @@ import { useAuth } from '@/hooks/useAuth';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login, isLoading, error, isProfessor } = useAuth();
+  const { login, isLoading, error, isProfessor, isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [localError, setLocalError] = useState<string | null>(null);
+
+  // ✅ Redirigir si ya tiene sesión activa
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(isProfessor ? '/profesor' : '/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, isProfessor, navigate]);
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -117,9 +124,9 @@ const handleSubmit = async (e: React.FormEvent) => {
           <div className="mt-6 text-center">
             <p className="text-sm text-[#B8B4AA]">
               ¿No tienes cuenta?{' '}
-              <Link to="/" className="text-[#C7A36D] hover:underline">
-                Solicita acceso al curso
-              </Link>
+             <Link to="/#instructor" className="text-[#C7A36D] hover:underline">
+  Solicita acceso al curso
+</Link>
             </p>
           </div>
         </CardContent>

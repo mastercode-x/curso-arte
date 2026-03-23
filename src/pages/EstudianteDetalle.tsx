@@ -101,8 +101,10 @@ const toggleActivo = async () => {
     );
   }
 
-  const progresoEst = estudiante.progreso || [];
-  const totalPct = Math.round(estudiante.progresoPromedio || 0);
+const progresoEst = estudiante.progreso || [];
+const totalPct = progresoEst.length > 0
+  ? Math.round(progresoEst.reduce((acc: number, p: any) => acc + (p.completudPorcentaje || 0), 0) / progresoEst.length)
+  : 0;
   const pagosEst = estudiante.pagos || [];
   const totalPagado = estudiante.montoPagado || 0;
 

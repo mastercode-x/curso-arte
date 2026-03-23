@@ -96,7 +96,7 @@ const LandingPageContent: React.FC = () => {
           moduleApi.getPublicModules(),
           adminApi.getPublicConfig()
         ]);
-        setModules(modulesData);
+        setModules([...modulesData].sort((a, b) => a.orden - b.orden));
         setConfig(configData);
       } catch (error) {
         console.error('Error fetching landing data:', error);
@@ -106,6 +106,26 @@ const LandingPageContent: React.FC = () => {
     };
     fetchData();
   }, []);
+
+
+  useEffect(() => {
+  if (loading) return;
+  if (window.location.hash === '#instructor') {
+    const timer = setTimeout(() => {
+      document.getElementById('instructor')?.scrollIntoView({ behavior: 'smooth' });
+    }, 1200); // espera a que GSAP/ScrollTrigger termine
+    return () => clearTimeout(timer);
+  }
+}, [loading]);
+
+
+useEffect(() => {
+  return () => {
+    // Limpiar todos los ScrollTriggers al salir de la landing
+    ScrollTrigger.getAll().forEach(st => st.kill());
+    ScrollTrigger.clearScrollMemory();
+  };
+}, []);
 
   useLayoutEffect(() => {
     if (loading) return;
@@ -214,7 +234,9 @@ const LandingPageContent: React.FC = () => {
       <Calendar />
       
       {/* Instructor & Enrollment */}
-      <Instructor config={config} />
+      <div id="instructor">
+  <Instructor config={config} />
+</div>
     </div>
   );
 };

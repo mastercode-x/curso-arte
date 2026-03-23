@@ -280,9 +280,9 @@ function OverviewSection({ data }: { data: any }) {
                     <td className="py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-24 h-1 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
-                          <div className="h-full bg-[#C7A36D]" style={{ width: `${e.progreso || 0}%` }} />
+                          <div className="h-full bg-[#C7A36D]" style={{ width: `${e.progresoPromedio || 0}%` }} />
                         </div>
-                        <span className="text-xs text-[#B8B4AA]">{e.progreso || 0}%</span>
+                        <span className="text-xs text-[#B8B4AA]">{e.progresoPromedio || 0}%</span>
                       </div>
                     </td>
                   </tr>
@@ -588,9 +588,9 @@ function EstudiantesSection() {
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-20 h-1.5 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
-                        <div className="h-full bg-[#C7A36D] rounded-full" style={{ width: `${e.progreso || 0}%` }} />
+                        <div className="h-full bg-[#C7A36D] rounded-full" style={{ width: `${e.progresoPromedio || 0}%` }} />
                       </div>
-                      <span className="text-xs text-[#B8B4AA]">{e.progreso || 0}%</span>
+                     <span className="text-xs text-[#B8B4AA]">{e.progresoPromedio || 0}%</span>
                     </div>
                   </td>
                   <td className="px-5 py-4">

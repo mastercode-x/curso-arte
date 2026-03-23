@@ -234,7 +234,7 @@ useEffect(() => {
         modules.map((module, index) => (
           <ModuleSection
             key={module.id}
-            badge={`MÓDULO ${String(module.orden || index + 1).padStart(2, '0')}`}
+            badge={`MÓDULO ${String(index + 1).padStart(2, '0')}`}
             title={module.titulo}
             description={module.descripcion}
             image={module.imagenUrl || `/images/module0${(index % 7) + 1}_bg.jpg`}

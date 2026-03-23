@@ -295,11 +295,11 @@ export const getStudents = asyncHandler(async (req: Request, res: Response) => {
     estadoAprobacion: e.estadoAprobacion,
     fechaPago: e.fechaPago,
     fechaInscripcion: e.fechaInscripcion,
-   progresoPromedio: totalModulos > 0
-    ? Math.round(
-        e.progreso.reduce((acc, p) => acc + p.completudPorcentaje, 0) / totalModulos
-      )
-    : 0
+ progresoPromedio: totalModulos > 0
+  ? Math.round(
+      (e.progreso.filter(p => p.completudPorcentaje === 100).length / totalModulos) * 100
+    )
+  : 0
 }));
 
   res.json({

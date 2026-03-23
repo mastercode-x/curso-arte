@@ -257,7 +257,7 @@ export const getStudents = asyncHandler(async (req: Request, res: Response) => {
     ];
   }
 
-  const [estudiantes, total] = await Promise.all([
+ const [estudiantes, total, totalModulos] = await Promise.all([
   prisma.estudiante.findMany({
     where,
     include: {
@@ -280,7 +280,8 @@ export const getStudents = asyncHandler(async (req: Request, res: Response) => {
     take: limitNum,
     orderBy: { fechaInscripcion: 'desc' }  // Changed from createdAt
   }),
-  prisma.estudiante.count({ where })
+  prisma.estudiante.count({ where }),
+  prisma.modulo.count({ where: { estado: 'publicado' } })  // ← agregar esto
 ]);
 
   const estudiantesFormateados = estudiantes.map(e => ({
@@ -294,10 +295,12 @@ export const getStudents = asyncHandler(async (req: Request, res: Response) => {
     estadoAprobacion: e.estadoAprobacion,
     fechaPago: e.fechaPago,
     fechaInscripcion: e.fechaInscripcion,
-    progresoPromedio: e.progreso.length > 0 
-      ? Math.round(e.progreso.reduce((acc, p) => acc + p.completudPorcentaje, 0) / e.progreso.length)
-      : 0
-  }));
+   progresoPromedio: totalModulos > 0
+    ? Math.round(
+        e.progreso.reduce((acc, p) => acc + p.completudPorcentaje, 0) / totalModulos
+      )
+    : 0
+}));
 
   res.json({
     estudiantes: estudiantesFormateados,

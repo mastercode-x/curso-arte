@@ -21,7 +21,7 @@ import ModulesManager from '../components/admin/ModulesManager';
 import ApplicationsManager from '../components/admin/ApplicationsManager';
 import StudentsManager from '../components/admin/StudentsManager';
 import PaymentsManager from '../components/admin/PaymentsManager';
-
+import { convertDriveUrl } from '../utils/driveUrl';
 import { useAuth } from '@/contexts/AuthContext';
 
 const SECTIONS = [
@@ -923,10 +923,8 @@ function ModulosSection() {
 
 
 
-
 // ── MÓDULO EDITOR ────────────────────────────────────────────────
 function ModuloEditor({ modulo, onSave, onCancel }: any) {
-  // Transform backend data to form format when editing
   const initialForm = modulo ? {
     titulo: modulo.titulo || '',
     descripcion: modulo.descripcion || '',
@@ -945,26 +943,56 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
     ejercicio_deadline: '', contenidos: [], scheduledPublishAt: undefined,
     imagenUrl: '',
   };
-
-  // ✅ useState de form PRIMERO, scheduleMode lo inicializamos después
+ 
   const [form, setForm] = useState(initialForm);
-
-  // ✅ Ahora sí podemos usar form.estado
-  const [scheduleMode, setScheduleMode] = useState(form.estado === 'programado');
-  const minDateTime = new Date().toISOString().slice(0, 16);
-
+ 
+  // Modo de publicación: 'borrador' | 'publicado' | 'programado'
+  const [pubMode, setPubMode] = useState<'borrador' | 'publicado' | 'programado'>(() => {
+    if (modulo?.estado === 'publicado') return 'publicado';
+    if (modulo?.estado === 'programado') return 'programado';
+    return 'borrador';
+  });
+ 
+  // Hora mínima en hora LOCAL (no UTC) para el datetime-local input
+  const getLocalMin = () => {
+    const now = new Date();
+    return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+  };
+ 
+  // Convertir fecha UTC guardada → valor para datetime-local (hora local)
+  const toLocalInputValue = (isoString?: string) => {
+    if (!isoString) return '';
+    const d = new Date(isoString);
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+  };
+ 
+  const handlePubModeChange = (mode: 'borrador' | 'publicado' | 'programado') => {
+    setPubMode(mode);
+    if (mode === 'borrador') {
+      setForm(f => ({ ...f, estado: 'borrador', scheduledPublishAt: undefined }));
+    } else if (mode === 'publicado') {
+      setForm(f => ({ ...f, estado: 'publicado', scheduledPublishAt: undefined }));
+    } else {
+      setForm(f => ({ ...f, estado: 'programado' }));
+    }
+  };
+ 
   const addObjetivo = () => setForm(f => ({ ...f, objetivos: [...(f.objetivos || []), ''] }));
-  const updateObjetivo = (i, val) => setForm(f => { const o = [...(f.objetivos || [])]; o[i] = val; return { ...f, objetivos: o }; });
-  const removeObjetivo = (i) => setForm(f => ({ ...f, objetivos: f.objetivos.filter((_, idx) => idx !== i) }));
-
-  const addContenido = (tipo) => setForm(f => ({
+  const updateObjetivo = (i: number, val: string) => setForm(f => { const o = [...(f.objetivos || [])]; o[i] = val; return { ...f, objetivos: o }; });
+  const removeObjetivo = (i: number) => setForm(f => ({ ...f, objetivos: f.objetivos.filter((_: any, idx: number) => idx !== i) }));
+ 
+  const addContenido = (tipo: string) => setForm(f => ({
     ...f, contenidos: [...(f.contenidos || []), { tipo, titulo: '', url: '', texto: '', orden: (f.contenidos || []).length + 1 }]
   }));
-  const updateContenido = (i, key, val) => setForm(f => {
+  const updateContenido = (i: number, key: string, val: string) => setForm(f => {
     const c = [...(f.contenidos || [])]; c[i] = { ...c[i], [key]: val }; return { ...f, contenidos: c };
   });
-  const removeContenido = (i) => setForm(f => ({ ...f, contenidos: f.contenidos.filter((_, idx) => idx !== i) }));
-
+  const removeContenido = (i: number) => setForm(f => ({ ...f, contenidos: f.contenidos.filter((_: any, idx: number) => idx !== i) }));
+ 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -977,7 +1005,7 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
           <button onClick={() => onSave(form)} className="font-mono text-xs uppercase tracking-[0.14em] px-5 py-2.5 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors">Guardar</button>
         </div>
       </div>
-
+ 
       <div className="space-y-6 max-w-3xl">
         {/* Información básica */}
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6 space-y-4">
@@ -1003,90 +1031,97 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
               placeholder="https://ejemplo.com/imagen.jpg"
               className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
             {form.imagenUrl && (
-              <div className="mt-3 relative">
+              <div className="mt-3">
                 <img src={form.imagenUrl} alt="Vista previa" className="w-full h-32 object-cover border border-[rgba(244,242,236,0.1)]"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               </div>
             )}
           </div>
         </div>
-
-        {/* ✅ Sección de publicación — reemplaza el <select> de Estado */}
+ 
+        {/* ── Publicación con radio buttons ── */}
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6 space-y-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA]">Publicación</p>
-
-          {/* Publicar inmediatamente */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-[#F4F2EC]">Publicar inmediatamente</p>
-              <p className="text-xs text-[#B8B4AA] mt-0.5">El módulo quedará visible al guardar</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={!scheduleMode && form.estado === 'publicado'}
-              onChange={(e) => {
-                setScheduleMode(false);
-                setForm({ ...form, estado: e.target.checked ? 'publicado' : 'borrador', scheduledPublishAt: undefined });
-              }}
-              className="w-4 h-4 accent-[#C7A36D]"
-            />
-          </div>
-
-          {/* Programar publicación */}
-          <div className="border-t border-[rgba(244,242,236,0.06)] pt-4 space-y-3">
-            <div className="flex items-center justify-between">
+ 
+          <div className="space-y-2">
+            {/* Opción: Borrador */}
+            <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${pubMode === 'borrador' ? 'border-[rgba(244,242,236,0.2)] bg-[rgba(244,242,236,0.03)]' : 'border-[rgba(244,242,236,0.06)] hover:border-[rgba(244,242,236,0.1)]'}`}>
+              <input type="radio" name="pubMode" value="borrador" checked={pubMode === 'borrador'}
+                onChange={() => handlePubModeChange('borrador')}
+                className="mt-0.5 accent-[#C7A36D]" />
               <div>
-                <p className="text-sm text-[#F4F2EC] flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-blue-400" />
+                <p className="text-sm text-[#F4F2EC] font-medium">Borrador</p>
+                <p className="text-xs text-[#B8B4AA] mt-0.5">No visible para los estudiantes</p>
+              </div>
+            </label>
+ 
+            {/* Opción: Publicar ahora */}
+            <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${pubMode === 'publicado' ? 'border-[#C7A36D]/40 bg-[rgba(199,163,109,0.05)]' : 'border-[rgba(244,242,236,0.06)] hover:border-[rgba(244,242,236,0.1)]'}`}>
+              <input type="radio" name="pubMode" value="publicado" checked={pubMode === 'publicado'}
+                onChange={() => handlePubModeChange('publicado')}
+                className="mt-0.5 accent-[#C7A36D]" />
+              <div>
+                <p className="text-sm text-[#F4F2EC] font-medium">Publicar inmediatamente</p>
+                <p className="text-xs text-[#B8B4AA] mt-0.5">Visible para estudiantes al guardar</p>
+              </div>
+            </label>
+ 
+            {/* Opción: Programar */}
+            <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${pubMode === 'programado' ? 'border-blue-400/40 bg-blue-400/5' : 'border-[rgba(244,242,236,0.06)] hover:border-[rgba(244,242,236,0.1)]'}`}>
+              <input type="radio" name="pubMode" value="programado" checked={pubMode === 'programado'}
+                onChange={() => handlePubModeChange('programado')}
+                className="mt-0.5 accent-[#C7A36D]" />
+              <div className="flex-1">
+                <p className="text-sm text-[#F4F2EC] font-medium flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5 text-blue-400" />
                   Programar publicación
                 </p>
-                <p className="text-xs text-[#B8B4AA] mt-0.5">Elige fecha y hora para publicar automáticamente</p>
-              </div>
-              <input
-                type="checkbox"
-                checked={scheduleMode}
-                onChange={(e) => {
-                  setScheduleMode(e.target.checked);
-                  setForm({
-                    ...form,
-                    estado: e.target.checked ? 'programado' : 'borrador',
-                    scheduledPublishAt: e.target.checked ? form.scheduledPublishAt : undefined,
-                  });
-                }}
-                className="w-4 h-4 accent-[#C7A36D]"
-              />
-            </div>
-
-            {scheduleMode && (
-              <div>
-                <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1">
-                  Fecha y hora de publicación
-                </label>
-                <input
-                  type="datetime-local"
-                  min={minDateTime}
-                  value={form.scheduledPublishAt ? new Date(form.scheduledPublishAt).toISOString().slice(0, 16) : ''}
-                  onChange={(e) => setForm({
-                    ...form,
-                    scheduledPublishAt: e.target.value ? new Date(e.target.value).toISOString() : undefined,
-                  })}
-                  className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors"
-                />
-                {form.scheduledPublishAt && (
-                  <p className="text-xs text-blue-400 mt-2 flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    Se publicará el{' '}
-                    {new Date(form.scheduledPublishAt).toLocaleString('es-ES', {
-                      day: 'numeric', month: 'long', year: 'numeric',
-                      hour: '2-digit', minute: '2-digit',
-                    })}
-                  </p>
+                <p className="text-xs text-[#B8B4AA] mt-0.5">Se publicará automáticamente en la fecha elegida</p>
+ 
+                {/* Selector de fecha — solo visible si está seleccionado */}
+                {pubMode === 'programado' && (
+                  <div className="mt-4 space-y-2">
+                    <label className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA]">
+                      Fecha y hora (hora local)
+                    </label>
+                    <input
+                      type="datetime-local"
+                      min={getLocalMin()}
+                      value={toLocalInputValue(form.scheduledPublishAt)}
+                      onChange={(e) => {
+                        // El input entrega hora local, new Date() la interpreta como local → ISO correcto
+                        setForm(f => ({
+                          ...f,
+                          scheduledPublishAt: e.target.value
+                            ? new Date(e.target.value).toISOString()
+                            : undefined,
+                        }));
+                      }}
+                      onClick={(e) => e.stopPropagation()} // evitar que el click propague al label
+                      className="bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors w-full"
+                    />
+                    {form.scheduledPublishAt && (
+                      <p className="text-xs text-blue-400 flex items-center gap-1.5 mt-1">
+                        <Calendar className="w-3 h-3" />
+                        Se publicará el{' '}
+                        {new Date(form.scheduledPublishAt).toLocaleString('es-AR', {
+                          weekday: 'long', day: 'numeric', month: 'long',
+                          year: 'numeric', hour: '2-digit', minute: '2-digit',
+                        })}
+                      </p>
+                    )}
+                    {pubMode === 'programado' && !form.scheduledPublishAt && (
+                      <p className="text-xs text-yellow-400/80 flex items-center gap-1.5">
+                        ⚠ Elegí una fecha para programar la publicación
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
+            </label>
           </div>
         </div>
-
+ 
         {/* Objetivos */}
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
           <div className="flex justify-between items-center mb-4">
@@ -1103,7 +1138,7 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
             ))}
           </div>
         </div>
-
+ 
         {/* Ejercicio */}
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6 space-y-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-2">Ejercicio</p>
@@ -1124,7 +1159,7 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
               className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-4 py-3 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
           </div>
         </div>
-
+ 
         {/* Contenidos */}
         <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-6">
           <div className="flex justify-between items-center mb-4">
@@ -1145,7 +1180,7 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
             </div>
           </div>
           <div className="space-y-3">
-            {(form.contenidos || []).map((c, i) => (
+            {(form.contenidos || []).map((c: any, i: number) => (
               <div key={i} className="border border-[rgba(244,242,236,0.06)] p-4">
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D]">{c.tipo}</span>
@@ -1155,8 +1190,21 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
                   <input type="text" value={c.titulo} onChange={e => updateContenido(i, 'titulo', e.target.value)} placeholder="Título"
                     className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 py-2 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
                   {['video', 'pdf', 'zoom', 'imagen'].includes(c.tipo) && (
-                    <input type="text" value={c.url} onChange={e => updateContenido(i, 'url', e.target.value)} placeholder="URL"
-                      className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 py-2 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
+                    <div className="space-y-2">
+                      <input type="text" value={c.url} onChange={e => updateContenido(i, 'url', e.target.value)}
+                        placeholder={c.tipo === 'imagen' ? 'https://drive.google.com/file/d/FILE_ID/view?usp=sharing' : 'URL'}
+                        className="w-full bg-[#0B0B0D] border border-[rgba(244,242,236,0.1)] text-[#F4F2EC] px-3 py-2 text-sm focus:outline-none focus:border-[#C7A36D] transition-colors" />
+                      {c.tipo === 'imagen' && c.url && (
+                        <div>
+                          <img src={convertDriveUrl(c.url)} alt="Preview"
+                            className="w-full h-40 object-contain bg-[#0B0B0D] border border-[rgba(244,242,236,0.08)] rounded"
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                          {convertDriveUrl(c.url) !== c.url && (
+                            <p className="mt-1 font-mono text-[10px] text-[#C7A36D]/60">✓ URL de Drive — se convertirá automáticamente al guardar</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   )}
                   {c.tipo === 'texto' && (
                     <textarea rows={4} value={c.texto} onChange={e => updateContenido(i, 'texto', e.target.value)} placeholder="Contenido de texto..."
@@ -1176,6 +1224,10 @@ function ModuloEditor({ modulo, onSave, onCancel }: any) {
     </div>
   );
 }
+
+
+
+
 
 // ── PAGOS ────────────────────────────────────────────────────────
 function PagosSection() {

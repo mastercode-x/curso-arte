@@ -616,25 +616,26 @@ function SolicitudesSection() {
       </div>
 
       {/* Respuestas */}
-      <div className="p-6 space-y-6">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D] mb-3 flex items-center gap-2">
-            <span className="w-4 h-px bg-[#C7A36D]" />
-            Vínculo con el arte
-          </p>
-          <p className="text-sm text-[#F4F2EC] leading-relaxed bg-[rgba(244,242,236,0.02)] border border-[rgba(244,242,236,0.06)] p-4">
-            {selected.experiencia || '—'}
-          </p>
-        </div>
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D] mb-3 flex items-center gap-2">
-            <span className="w-4 h-px bg-[#C7A36D]" />
-            Motivación e interés
-          </p>
-          <p className="text-sm text-[#F4F2EC] leading-relaxed whitespace-pre-wrap bg-[rgba(244,242,236,0.02)] border border-[rgba(244,242,236,0.06)] p-4">
-            {selected.interes || '—'}
-          </p>
-        </div>
+      <div className="p-6 space-y-5">
+        {[
+          { label: 'Vínculo con el arte', value: selected.experiencia },
+          { label: 'Motivación e interés', value: selected.interes },
+          { label: 'Frente al trabajo lento y sin resultados inmediatos', value: selected.disposicion },
+          { label: 'Disposición a comprometerse (4 meses, encuentros grupales)', value: selected.compromiso },
+        ].filter(q => q.value).map(({ label, value }) => (
+          <div key={label}>
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#C7A36D] mb-3 flex items-center gap-2">
+              <span className="w-4 h-px bg-[#C7A36D]" />
+              {label}
+            </p>
+            <p className="text-sm text-[#F4F2EC] leading-relaxed whitespace-pre-wrap bg-[rgba(244,242,236,0.02)] border border-[rgba(244,242,236,0.06)] p-4">
+              {value}
+            </p>
+          </div>
+        ))}
+        {!selected.experiencia && !selected.interes && !selected.disposicion && !selected.compromiso && (
+          <p className="text-sm text-[#B8B4AA] text-center py-4">Sin respuestas registradas.</p>
+        )}
       </div>
 
       {/* Actions */}

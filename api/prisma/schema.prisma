@@ -73,6 +73,8 @@ model SolicitudAcceso {
   pais            String?
   experiencia     String?         @db.Text
   interes         String?         @db.Text
+  disposicion     String?         @db.Text
+  compromiso      String?         @db.Text
   estado          EstadoSolicitud @default(pendiente)
   fechaSolicitud  DateTime        @default(now()) @map("fecha_solicitud")
   fechaRevision   DateTime?       @map("fecha_revision")

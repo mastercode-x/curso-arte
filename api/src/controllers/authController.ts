@@ -241,7 +241,7 @@ try {
   const frontendUrl = process.env.FRONTEND_URL || 'https://curso-arte.vercel.app';
 
   await resend.emails.send({
-    from: 'Poética de la Mirada <onboarding@resend.dev>',
+    from: 'Poética de la Mirada <curso@ernestoengelcurso.site>',
     to: email,
     subject: 'Tu nueva contraseña temporal — Poética de la Mirada',
       html: `

@@ -233,40 +233,17 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
   // Obtener config SMTP desde la DB o variables de entorno
   let smtpConfig: nodemailer.TransportOptions;
 
-  try {
-    const config = await prisma.configuracionProfesor.findFirst();
-    const smtpHost = config?.smtpHost || process.env.SMTP_HOST;
-    const smtpUser = config?.smtpUser || process.env.SMTP_USER;
-    const smtpPass = config?.smtpPass || process.env.SMTP_PASS;
-    const smtpPort = config?.smtpPort || Number(process.env.SMTP_PORT) || 587;
+  // Reemplazá el bloque de SMTP por esto:
+try {
+  const { Resend } = await import('resend');
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  
+  const frontendUrl = process.env.FRONTEND_URL || 'https://curso-arte.vercel.app';
 
-    if (!smtpHost || !smtpUser || !smtpPass) {
-      throw new Error('SMTP no configurado');
-    }
-
-    smtpConfig = {
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort === 465,
-      auth: { user: smtpUser, pass: smtpPass },
-    } as nodemailer.TransportOptions;
-  } catch (configError) {
-    logger.error('Error obteniendo config SMTP:', configError);
-    // Aún así responder OK — la contraseña ya fue cambiada
-    res.json(successMessage);
-    return;
-  }
-
-  // Enviar email
-  try {
-    const transporter = nodemailer.createTransport(smtpConfig);
-
-    const frontendUrl = process.env.FRONTEND_URL || 'https://curso-arte.vercel.app';
-
-    await transporter.sendMail({
-      from: `"Poética de la Mirada" <${(smtpConfig as any).auth.user}>`,
-      to: email,
-      subject: 'Tu nueva contraseña temporal — Poética de la Mirada',
+  await resend.emails.send({
+    from: 'Poética de la Mirada <onboarding@resend.dev>',
+    to: email,
+    subject: 'Tu nueva contraseña temporal — Poética de la Mirada',
       html: `
         <!DOCTYPE html>
         <html>
@@ -327,13 +304,13 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
         </body>
         </html>
       `
-    });
+  });
 
-    logger.info(`Email de recuperación enviado a: ${email}`);
-  } catch (emailError) {
-    logger.error('Error enviando email de recuperación:', emailError);
-    // No exponer el error al cliente, la contraseña ya fue cambiada
-  }
+  logger.info(`Email de recuperación enviado a: ${email}`);
+} catch (emailError) {
+  logger.error('Error enviando email de recuperación:', emailError);
+}
+
 
   res.json(successMessage);
 });

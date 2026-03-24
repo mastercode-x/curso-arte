@@ -732,7 +732,7 @@ if (tipo === 'imagen') return (
         img.parentNode?.appendChild(msg);
       }}
     />
-    {url}
+ 
   </div>
 );
   return <p className="text-[#B8B4AA]">Contenido no disponible.</p>;

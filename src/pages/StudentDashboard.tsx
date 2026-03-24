@@ -708,7 +708,35 @@ if (tipo === 'video') return (
 if (tipo === 'imagen') return (
   <div>
     {titulo && <h3 className="font-serif text-xl text-[#F4F2EC] mb-4">{titulo}</h3>}
-    <img src={getDriveImageUrl(url)} alt={titulo} className="w-full rounded" />
+    <img
+      src={getDriveImageUrl(url)}
+      alt={titulo || 'Imagen del módulo'}
+      className="w-full rounded object-contain max-h-[70vh]"
+      onError={(e) => {
+        const img = e.currentTarget;
+        // Si falla el thumbnail, intentar con lh3 (CDN alternativo de Drive)
+        if (!img.dataset.fallback) {
+          img.dataset.fallback = '1';
+          try {
+            const u = new URL(url);
+            const match = u.pathname.match(/\/file\/d\/([^/?#]+)/);
+            const id = match ? match[1] : u.searchParams.get('id');
+            if (id) { img.src = `https://lh3.googleusercontent.com/d/${id}`; return; }
+          } catch {}
+        }
+        // Si también falla, mostrar mensaje
+        img.style.display = 'none';
+        const msg = document.createElement('p');
+        msg.textContent = 'No se pudo cargar la imagen. Verificá que el archivo de Drive sea público.';
+        msg.style.cssText = 'color:#B8B4AA;font-size:13px;padding:16px;text-align:center;border:1px solid rgba(244,242,236,0.08);';
+        img.parentNode?.appendChild(msg);
+      }}
+    />
+    {url && (
+      <p className="text-[10px] text-[#B8B4AA]/40 mt-2 text-center font-mono">
+        Para que la imagen cargue, el archivo debe estar compartido como "Cualquier persona con el enlace"
+      </p>
+    )}
   </div>
 );
   return <p className="text-[#B8B4AA]">Contenido no disponible.</p>;
@@ -739,22 +767,22 @@ function getEmbedUrl(rawUrl: string): string {
 
 
 
-// DESPUÉS
 function getDriveImageUrl(rawUrl: string): string {
+  if (!rawUrl) return rawUrl;
   try {
     const u = new URL(rawUrl);
     if (u.hostname === 'drive.google.com') {
-      // Formato: /file/d/FILE_ID/view
-      const match = u.pathname.match(/\/file\/d\/([^/]+)/);
+      // Formato: /file/d/FILE_ID/view  o  /file/d/FILE_ID/preview
+      const match = u.pathname.match(/\/file\/d\/([^/?#]+)/);
       if (match) {
-        return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1920`;
       }
-      // Formato: /open?id=FILE_ID
+      // Formato: /open?id=FILE_ID  o  /uc?id=FILE_ID
       const id = u.searchParams.get('id');
       if (id) {
-        return `https://drive.google.com/uc?export=view&id=${id}`;
+        return `https://drive.google.com/thumbnail?id=${id}&sz=w1920`;
       }
     }
-  } catch { /* url inválida */ }
+  } catch { /* url inválida, devolver tal cual */ }
   return rawUrl;
 }

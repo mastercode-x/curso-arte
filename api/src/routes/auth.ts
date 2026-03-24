@@ -6,12 +6,10 @@ import {
   refreshToken,
   getProfile,
   updateProfile,
-  changePassword
+  changePassword,
+  forgotPassword,
 } from '../controllers/authController';
 import { authenticate } from '../middleware/auth';
-
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
 
 const router = Router();
 
@@ -19,13 +17,13 @@ const router = Router();
 router.post(
   '/login',
   [
-    body('email').isEmail(),  // ← sacar .normalizeEmail()
+    body('email').isEmail(),
     body('password').notEmpty()
   ],
   login
 );
 
-// Registro (para estudiantes aprobados)
+// Registro (para estudiantes aprobados y pagados)
 router.post(
   '/register',
   [
@@ -35,6 +33,15 @@ router.post(
     body('estudianteId').notEmpty()
   ],
   register
+);
+
+// Recuperar contraseña (público — sin autenticación)
+router.post(
+  '/forgot-password',
+  [
+    body('email').isEmail().withMessage('Email inválido')
+  ],
+  forgotPassword
 );
 
 // Refresh token
@@ -52,7 +59,5 @@ router.post(
   ],
   changePassword
 );
-
-
 
 export default router;

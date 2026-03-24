@@ -19,6 +19,9 @@ import webhookRoutes from './routes/webhooks';
 import dashboardRoutes from './routes/dashboard';
 import calendarRoutes from './routes/calendar';
 
+import { startScheduler } from './utils/scheduler';
+
+
 dotenv.config();
 
 const app = express();
@@ -103,6 +106,8 @@ app.use(errorHandler);
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
 });
+
+startScheduler(); // ← antes de app.listen(...)
 
 app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);

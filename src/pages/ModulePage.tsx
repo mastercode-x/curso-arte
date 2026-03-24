@@ -120,7 +120,7 @@ const ModulePage = () => {
               <div className="hidden p-8 text-center border border-dashed border-[rgba(244,242,236,0.12)] rounded-xl bg-[#141419]">
                 <Image className="w-10 h-10 mx-auto mb-3 text-[#B8B4AA] opacity-30" />
                 <p className="text-[#B8B4AA] text-sm mb-2">No se pudo cargar la imagen.</p>
-                {rawUrl && (
+                {(
                   <a
                     href={rawUrl}
                     target="_blank"

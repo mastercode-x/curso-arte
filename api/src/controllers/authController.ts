@@ -234,7 +234,7 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
   let smtpConfig: nodemailer.TransportOptions;
 
   try {
-    const config = await prisma.configuracionCurso.findFirst();
+    const config = await prisma.configuracionProfesor.findFirst();
     const smtpHost = config?.smtpHost || process.env.SMTP_HOST;
     const smtpUser = config?.smtpUser || process.env.SMTP_USER;
     const smtpPass = config?.smtpPass || process.env.SMTP_PASS;

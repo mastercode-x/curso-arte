@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
-import { publicApi } from '@/services/api';
+import { forgotPassword as apiForgotPassword } from '@/services/authApi';
 
 type View = 'login' | 'forgot' | 'forgot-sent';
 
@@ -51,7 +51,7 @@ const LoginPage: React.FC = () => {
     if (!forgotEmail) return;
     try {
       setIsSendingReset(true);
-      await publicApi.post('/auth/forgot-password', { email: forgotEmail });
+      await apiForgotPassword(forgotEmail);
       setView('forgot-sent');
     } catch {
       setLocalError('No se pudo procesar la solicitud. Intentá de nuevo.');

@@ -732,11 +732,7 @@ if (tipo === 'imagen') return (
         img.parentNode?.appendChild(msg);
       }}
     />
-    {url && (
-      <p className="text-[10px] text-[#B8B4AA]/40 mt-2 text-center font-mono">
-        Para que la imagen cargue, el archivo debe estar compartido como "Cualquier persona con el enlace"
-      </p>
-    )}
+    {url}
   </div>
 );
   return <p className="text-[#B8B4AA]">Contenido no disponible.</p>;

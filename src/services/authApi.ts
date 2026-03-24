@@ -59,3 +59,11 @@ export const refreshToken = async (token: string): Promise<{ accessToken: string
     throw new Error(handleApiError(error));
   }
 };
+
+export const forgotPassword = async (email: string): Promise<void> => {
+  try {
+    await api.post('/auth/forgot-password', { email });
+  } catch (error) {
+    throw new Error(handleApiError(error));
+  }
+};

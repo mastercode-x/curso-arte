@@ -351,7 +351,8 @@ export const getStudentDetail = asyncHandler(async (req: Request, res: Response)
   }
 
   // Crear mapa de progreso real del estudiante
-  const progresoMap = new Map(
+  type ProgresoItem = typeof estudiante.progreso[number];
+  const progresoMap = new Map<string, ProgresoItem>(
     estudiante.progreso.map(p => [p.moduloId, p])
   );
 
@@ -362,9 +363,9 @@ export const getStudentDetail = asyncHandler(async (req: Request, res: Response)
       moduloId: modulo.id,
       titulo: modulo.titulo,
       orden: index + 1,
-      completudPorcentaje: progreso?.completudPorcentaje ?? 0,
-      fechaCompletado: progreso?.fechaCompletado ?? null,
-      ultimaActividad: progreso?.ultimaActividad ?? null
+      completudPorcentaje: progreso ? progreso.completudPorcentaje : 0,
+      fechaCompletado: progreso ? progreso.fechaCompletado : null,
+      ultimaActividad: progreso ? progreso.ultimaActividad : null
     };
   });
 

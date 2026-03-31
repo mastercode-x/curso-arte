@@ -2,8 +2,9 @@ import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { asyncHandler } from '../middleware/errorHandler';
 import { logger } from '../utils/logger';
-import { sendPaymentApprovedEmail, sendApplicationRejectedEmail, sendNewApplicationNotification } from '../services/emailService';
-import { createCheckoutPreference } from '../services/paymentService';
+import { sendPaymentApprovedWithOptionsEmail, sendApplicationRejectedEmail, sendNewApplicationNotification } from '../services/emailService';
+import { createPaymentLinks } from '../services/paymentService';
+
 
 const prisma = new PrismaClient();
 
@@ -197,46 +198,49 @@ export const approveApplication = asyncHandler(async (req: Request, res: Respons
     }
   });
 
-  // Crear preferencia de pago con Mercado Pago
-let paymentUrl = '';
+// Crear links de pago (completo + cuotas)
+let pagoCompleto = { initPoint: '', monto: precioCurso };
+let pagoEnCuotas = { initPoint: '', montoCuota: Math.ceil(precioCurso / 2) };
+
 if (user.estudiante) {
   try {
-    const preference = await createCheckoutPreference(
+    const links = await createPaymentLinks(
       user.estudiante.id,
       user.email,
-      user.nombre,
-      precioCurso,
-      moneda
+      user.nombre
     );
-    paymentUrl = preference?.initPoint || '';
-    logger.info(`Preferencia MP creada para ${user.email}: ${paymentUrl}`);
+    if (links) {
+      pagoCompleto = { initPoint: links.pagoCompleto.initPoint, monto: links.pagoCompleto.monto };
+      pagoEnCuotas = { initPoint: links.pagoEnCuotas.initPoint, montoCuota: links.pagoEnCuotas.montoCuota };
+    }
+    logger.info(`Links de pago creados para ${user.email}`);
   } catch (mpErr) {
-    logger.warn(`No se pudo crear preferencia de Mercado Pago para ${user.email}: ${mpErr}`);
-    // El email se envía igual aunque MP falle
+    logger.warn(`No se pudo crear links de pago para ${user.email}: ${mpErr}`);
   }
 }
 
-  // Enviar email de aprobación con link de pago
-  logger.info(`Enviando email de aprobación a ${solicitud.email}...`);
-const emailEnviado = await sendPaymentApprovedEmail(
+// Enviar email con las dos opciones
+const config = await prisma.configuracionProfesor.findFirst();
+const emailEnviado = await sendPaymentApprovedWithOptionsEmail(
   solicitud.nombre,
   solicitud.email,
-  paymentUrl,
-  precioCurso,
-  moneda
+  pagoCompleto,
+  pagoEnCuotas,
+  config?.nombreCurso || 'Poética de la Mirada'
 );
 
 if (emailEnviado) {
-  logger.info(`Email de aprobación enviado exitosamente a ${solicitud.email}`);
+  logger.info(`Email de aprobación enviado a ${solicitud.email}`);
 } else {
-  logger.error(`FALLO al enviar email de aprobación a ${solicitud.email} — revisar configuración SMTP`);
+  logger.error(`FALLO al enviar email a ${solicitud.email}`);
 }
 
 res.json({
   message: 'Solicitud aprobada exitosamente',
   solicitud: solicitudActualizada,
-  paymentUrl,
-  emailEnviado   // el frontend puede usar esto para mostrar un aviso
+  pagoCompleto: pagoCompleto.initPoint,
+  pagoEnCuotas: pagoEnCuotas.initPoint,
+  emailEnviado,
 });
 
 

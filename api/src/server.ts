@@ -21,6 +21,8 @@ import calendarRoutes from './routes/calendar';
 
 import { startScheduler } from './utils/scheduler';
 
+import { checkOverdueCuotas } from './services/paymentService';
+
 
 dotenv.config();
 
@@ -114,5 +116,17 @@ app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`📚 Health check: http://localhost:${PORT}/health`);
   console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
+
+
+// Scheduler: verificar cuotas vencidas cada día a las 9am
+setInterval(async () => {
+  const ahora = new Date();
+  if (ahora.getHours() === 9 && ahora.getMinutes() === 0) {
+    logger.info('Ejecutando verificación de cuotas vencidas...');
+    await checkOverdueCuotas();
+  }
+}, 60 * 1000); // corre cada minuto, ejecuta lógica solo a las 9:00
+
+logger.info('Scheduler de cuotas activado');
 
 export default app;

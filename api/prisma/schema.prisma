@@ -40,7 +40,14 @@ model Estudiante {
   experiencia          String?             @db.Text
   interes              String?             @db.Text
   fechaInscripcion     DateTime?           @map("fecha_inscripcion")
-  
+
+  // ── Cuotas ──────────────────────────────────────────────────
+  tipoPago             String?             @map("tipo_pago") // 'completo' | 'cuotas'
+  cuota2Pagada         Boolean             @default(false) @map("cuota2_pagada")
+  fechaVencimientoCuota2 DateTime?         @map("fecha_vencimiento_cuota2")
+  cuota2PreferenceId   String?             @map("cuota2_preference_id")
+  cuota2InitPoint      String?             @map("cuota2_init_point")
+
   // Relaciones
   user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   progreso             ProgresoEstudiante[]

@@ -369,7 +369,114 @@ export const emailTemplates = {
         </div>
       </div>
     `
-  })
+  }),
+
+
+  // ── Agregar estos dos templates al objeto emailTemplates ──────────
+
+// Dentro de emailTemplates, agregar:
+paymentApprovedWithOptions: (
+  nombre: string,
+  pagoCompleto: { initPoint: string; monto: number },
+  pagoEnCuotas: { initPoint: string; montoCuota: number },
+  nombreCurso: string
+) => ({
+  subject: `¡Tu solicitud fue aprobada! — ${nombreCurso}`,
+  html: `
+    <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; background: #0B0B0D; color: #F4F2EC; padding: 40px;">
+      <div style="border-bottom: 1px solid rgba(199,163,109,0.3); padding-bottom: 24px; margin-bottom: 32px;">
+        <p style="font-family: monospace; font-size: 11px; letter-spacing: 0.2em; color: #C7A36D; text-transform: uppercase; margin: 0 0 8px 0;">${nombreCurso}</p>
+        <h1 style="font-size: 28px; color: #F4F2EC; margin: 0; font-weight: normal;">¡Tu solicitud fue aprobada!</h1>
+      </div>
+      <p style="color: #B8B4AA; line-height: 1.7; margin-bottom: 28px;">
+        Hola <strong style="color: #F4F2EC;">${nombre}</strong>, tu lugar en el curso está reservado. 
+        Elegí la opción de pago que mejor se adapte a vos:
+      </p>
+
+      <!-- Opción 1: Pago completo -->
+      <div style="border: 1px solid rgba(199,163,109,0.5); background: rgba(199,163,109,0.08); padding: 24px; margin-bottom: 16px;">
+        <p style="font-family: monospace; font-size: 10px; letter-spacing: 0.2em; color: #C7A36D; text-transform: uppercase; margin: 0 0 6px 0;">Opción 1</p>
+        <p style="font-size: 20px; color: #F4F2EC; margin: 0 0 6px 0; font-weight: bold;">Pago completo</p>
+        <p style="color: #B8B4AA; margin: 0 0 20px 0; font-size: 14px;">
+          Un solo pago de <strong style="color: #C7A36D;">$${pagoCompleto.monto.toLocaleString('es-AR')} ARS</strong> — acceso inmediato.
+        </p>
+        <a href="${pagoCompleto.initPoint}" style="display:inline-block;background:#C7A36D;color:#0B0B0D;padding:13px 28px;font-family:monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;text-decoration:none;font-weight:bold;">
+          Pagar completo →
+        </a>
+      </div>
+
+      <!-- Opción 2: Cuotas -->
+      <div style="border: 1px solid rgba(244,242,236,0.12); background: rgba(244,242,236,0.03); padding: 24px; margin-bottom: 32px;">
+        <p style="font-family: monospace; font-size: 10px; letter-spacing: 0.2em; color: #B8B4AA; text-transform: uppercase; margin: 0 0 6px 0;">Opción 2</p>
+        <p style="font-size: 20px; color: #F4F2EC; margin: 0 0 6px 0; font-weight: bold;">Pago en 2 cuotas</p>
+        <p style="color: #B8B4AA; margin: 0 0 4px 0; font-size: 14px;">
+          Hoy: <strong style="color: #F4F2EC;">$${pagoEnCuotas.montoCuota.toLocaleString('es-AR')} ARS</strong> — acceso inmediato.
+        </p>
+        <p style="color: #B8B4AA; margin: 0 0 20px 0; font-size: 13px;">
+          Segunda cuota: <strong style="color: #F4F2EC;">$${pagoEnCuotas.montoCuota.toLocaleString('es-AR')} ARS</strong> en 30 días (te llegará un email con el link).
+        </p>
+        <a href="${pagoEnCuotas.initPoint}" style="display:inline-block;background:transparent;color:#C7A36D;padding:12px 28px;font-family:monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;text-decoration:none;border:1px solid rgba(199,163,109,0.4);">
+          Pagar primera cuota →
+        </a>
+      </div>
+
+      <p style="color: #B8B4AA; font-size: 13px; line-height: 1.6;">
+        Una vez confirmado el pago recibirás un email con tus credenciales de acceso. 
+        Ante cualquier duda, respondé este correo.
+      </p>
+      <div style="border-top: 1px solid rgba(244,242,236,0.08); margin-top: 32px; padding-top: 20px;">
+        <p style="font-family: monospace; font-size: 10px; color: #B8B4AA; text-transform: uppercase; letter-spacing: 0.14em; margin: 0;">${nombreCurso}</p>
+      </div>
+    </div>
+  `
+}),
+
+cuota2Reminder: (nombre: string, paymentUrl: string, monto: number, moneda: string, fechaVencimiento: Date) => ({
+  subject: 'Recordatorio: Segunda cuota del curso',
+  html: `
+    <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; background: #0B0B0D; color: #F4F2EC; padding: 40px;">
+      <div style="border-bottom: 1px solid rgba(199,163,109,0.3); padding-bottom: 24px; margin-bottom: 32px;">
+        <p style="font-family: monospace; font-size: 11px; letter-spacing: 0.2em; color: #C7A36D; text-transform: uppercase; margin: 0 0 8px 0;">Poética de la Mirada</p>
+        <h1 style="font-size: 24px; color: #F4F2EC; margin: 0; font-weight: normal;">Segunda cuota pendiente</h1>
+      </div>
+      <p style="color: #B8B4AA; line-height: 1.7; margin-bottom: 24px;">
+        Hola <strong style="color: #F4F2EC;">${nombre}</strong>, te recordamos que tu segunda cuota vence el 
+        <strong style="color: #C7A36D;">${fechaVencimiento.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>.
+      </p>
+      <div style="border: 1px solid rgba(199,163,109,0.4); background: rgba(199,163,109,0.06); padding: 20px; margin-bottom: 28px; text-align: center;">
+        <p style="color: #B8B4AA; margin: 0 0 4px 0; font-size: 14px;">Monto a pagar</p>
+        <p style="font-size: 32px; font-weight: bold; color: #C7A36D; margin: 0 0 20px 0;">$${monto.toLocaleString('es-AR')} ${moneda}</p>
+        <a href="${paymentUrl}" style="display:inline-block;background:#C7A36D;color:#0B0B0D;padding:13px 28px;font-family:monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;text-decoration:none;font-weight:bold;">
+          Pagar segunda cuota →
+        </a>
+      </div>
+      <p style="color: #B8B4AA; font-size: 13px;">Si ya realizaste el pago, ignorá este mensaje.</p>
+    </div>
+  `
+}),
+
+accountDisabled: (nombre: string, paymentUrl: string) => ({
+  subject: 'Tu acceso al curso fue suspendido',
+  html: `
+    <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; background: #0B0B0D; color: #F4F2EC; padding: 40px;">
+      <div style="border-bottom: 1px solid rgba(199,163,109,0.3); padding-bottom: 24px; margin-bottom: 32px;">
+        <p style="font-family: monospace; font-size: 11px; letter-spacing: 0.2em; color: #C7A36D; text-transform: uppercase; margin: 0 0 8px 0;">Poética de la Mirada</p>
+        <h1 style="font-size: 24px; color: #F4F2EC; margin: 0; font-weight: normal;">Acceso suspendido</h1>
+      </div>
+      <p style="color: #B8B4AA; line-height: 1.7; margin-bottom: 24px;">
+        Hola <strong style="color: #F4F2EC;">${nombre}</strong>, tu acceso al curso fue suspendido temporalmente 
+        porque la segunda cuota no fue abonada en el plazo acordado.
+      </p>
+      <p style="color: #B8B4AA; margin-bottom: 24px;">Para reactivar tu cuenta, realizá el pago:</p>
+      <div style="text-align: center; margin-bottom: 32px;">
+        <a href="${paymentUrl}" style="display:inline-block;background:#C7A36D;color:#0B0B0D;padding:13px 28px;font-family:monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;text-decoration:none;font-weight:bold;">
+          Pagar y reactivar acceso →
+        </a>
+      </div>
+      <p style="color: #B8B4AA; font-size: 13px;">Si creés que hay un error, respondé este email.</p>
+    </div>
+  `
+}),
 };
 
 // Funciones de envío de emails específicos
@@ -416,5 +523,42 @@ export const sendPasswordResetEmail = async (nombre: string, email: string, rese
 
 export const sendPaymentReminderEmail = async (nombre: string, email: string, paymentUrl: string, monto: number, moneda: string, diasRestantes: number) => {
   const template = emailTemplates.paymentReminder(nombre, paymentUrl, monto, moneda, diasRestantes);
+  return sendEmail(email, template.subject, template.html);
+};
+
+
+
+
+
+
+export const sendPaymentApprovedWithOptionsEmail = async (
+  nombre: string,
+  email: string,
+  pagoCompleto: { initPoint: string; monto: number },
+  pagoEnCuotas: { initPoint: string; montoCuota: number },
+  nombreCurso: string
+) => {
+  const template = emailTemplates.paymentApprovedWithOptions(nombre, pagoCompleto, pagoEnCuotas, nombreCurso);
+  return sendEmail(email, template.subject, template.html);
+};
+
+export const sendCuota2ReminderEmail = async (
+  nombre: string,
+  email: string,
+  paymentUrl: string,
+  monto: number,
+  moneda: string,
+  fechaVencimiento: Date
+) => {
+  const template = emailTemplates.cuota2Reminder(nombre, paymentUrl, monto, moneda, fechaVencimiento);
+  return sendEmail(email, template.subject, template.html);
+};
+
+export const sendAccountDisabledEmail = async (
+  nombre: string,
+  email: string,
+  paymentUrl: string
+) => {
+  const template = emailTemplates.accountDisabled(nombre, paymentUrl);
   return sendEmail(email, template.subject, template.html);
 };

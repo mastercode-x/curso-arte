@@ -34,7 +34,8 @@ const PORT = process.env.PORT || 3001;
 // ✅ CORS - Configuración permisiva para desarrollo
 const allowedOrigins = [
   process.env.FRONTEND_URL,
-  'https://curso2-nine.vercel.app/',
+  // 'https://curso2-nine.vercel.app/',
+  'http://ernestoengelcurso.site/',
   'http://localhost:5173',
   'http://localhost:3000',
 ].filter(Boolean);

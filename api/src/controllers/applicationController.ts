@@ -220,13 +220,13 @@ if (user.estudiante) {
 }
 
 // Enviar email con las dos opciones
-const config = await prisma.configuracionProfesor.findFirst();
+
 const emailEnviado = await sendPaymentApprovedWithOptionsEmail(
   solicitud.nombre,
   solicitud.email,
   pagoCompleto,
   pagoEnCuotas,
-  config?.nombreCurso || 'Poética de la Mirada'
+  config?.nombreCurso || 'Poética de la Mirada'  // config ya existe
 );
 
 if (emailEnviado) {

@@ -122,11 +122,11 @@ app.listen(Number(PORT), '0.0.0.0', () => {
 setInterval(async () => {
   const ahora = new Date();
   if (ahora.getHours() === 9 && ahora.getMinutes() === 0) {
-    logger.info('Ejecutando verificación de cuotas vencidas...');
+    console.log('Ejecutando verificación de cuotas vencidas...');
     await checkOverdueCuotas();
   }
 }, 60 * 1000); // corre cada minuto, ejecuta lógica solo a las 9:00
 
-logger.info('Scheduler de cuotas activado');
+console.log('Scheduler de cuotas activado');
 
 export default app;

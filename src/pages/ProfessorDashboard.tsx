@@ -665,9 +665,10 @@ function SolicitudesSection() {
 // ── ESTUDIANTES ──────────────────────────────────────────────────
 function EstudiantesSection() {
   const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState<null | any>(null);
   const [estudiantes, setEstudiantes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; nombre: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadEstudiantes();
@@ -692,6 +693,21 @@ function EstudiantesSection() {
       toast.success('Estado actualizado');
     } catch (error) {
       toast.error('Error actualizando estado');
+    }
+  };
+
+  const handleDeleteConfirmed = async () => {
+    if (!confirmDelete) return;
+    try {
+      setIsDeleting(true);
+      await studentApi.deleteStudent(confirmDelete.id);
+      toast.success('Estudiante eliminado');
+      setConfirmDelete(null);
+      loadEstudiantes();
+    } catch (error) {
+      toast.error('Error eliminando estudiante');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -748,16 +764,24 @@ function EstudiantesSection() {
                       <div className="w-20 h-1.5 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
                         <div className="h-full bg-[#C7A36D] rounded-full" style={{ width: `${e.progresoPromedio || 0}%` }} />
                       </div>
-                     <span className="text-xs text-[#B8B4AA]">{e.progresoPromedio || 0}%</span>
+                      <span className="text-xs text-[#B8B4AA]">{e.progresoPromedio || 0}%</span>
                     </div>
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1">
-                      <button onClick={() => window.location.href = createPageUrl(`#/estudiantedetalle?id=${e.id}`)} className="p-1.5 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors" title="Ver detalle">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => toggleActivo(e.id)} className={`p-1.5 transition-colors ${e.activo !== false ? 'text-[#B8B4AA] hover:text-yellow-400' : 'text-yellow-400 hover:text-[#B8B4AA]'}`} title={e.activo !== false ? 'Desactivar' : 'Activar'}>
+                      <button
+                        onClick={() => toggleActivo(e.id)}
+                        className={`p-1.5 transition-colors ${e.activo !== false ? 'text-[#B8B4AA] hover:text-yellow-400' : 'text-yellow-400 hover:text-[#B8B4AA]'}`}
+                        title={e.activo !== false ? 'Desactivar' : 'Activar'}
+                      >
                         <XCircle className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete({ id: e.id, nombre: e.nombre })}
+                        className="p-1.5 text-[#B8B4AA] hover:text-red-400 transition-colors"
+                        title="Eliminar estudiante"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
@@ -772,6 +796,43 @@ function EstudiantesSection() {
           </table>
         </div>
       </div>
+
+      {/* Modal de confirmación */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] w-full max-w-md p-6">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5 text-red-400" />
+              </div>
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-red-400 mb-1">Eliminar estudiante</p>
+                <h3 className="font-serif text-lg text-[#F4F2EC]">{confirmDelete.nombre}</h3>
+              </div>
+            </div>
+            <p className="text-sm text-[#B8B4AA] mb-6 leading-relaxed">
+              Esta acción es <strong className="text-[#F4F2EC]">irreversible</strong>. Se eliminarán el usuario, 
+              su progreso y todos sus registros de pago.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                disabled={isDeleting}
+                className="flex-1 font-mono text-xs uppercase tracking-[0.14em] px-5 py-3 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteConfirmed}
+                disabled={isDeleting}
+                className="flex-1 font-mono text-xs uppercase tracking-[0.14em] px-5 py-3 bg-red-500/20 border border-red-500/40 text-red-400 hover:bg-red-500/30 transition-colors disabled:opacity-50"
+              >
+                {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

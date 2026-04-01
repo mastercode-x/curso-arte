@@ -7,7 +7,8 @@ import {
   getDashboard,
   getStudents,
   getStudentDetail,
-  updateStudentByProfessor  // ← agregar
+  updateStudentByProfessor,  // ← agregar
+  deleteStudent
 } from '../controllers/studentController';
 import { authenticate, requireProfessor, requireStudent } from '../middleware/auth';
 
@@ -30,6 +31,10 @@ router.post(
   [param('moduloId').notEmpty()],
   markModuleComplete
 );
+
+
+router.delete('/:id', authenticate, requireProfessor, deleteStudent);
+
 
 // Rutas del profesor (gestión de estudiantes)
 router.get('/', authenticate, requireProfessor, getStudents);

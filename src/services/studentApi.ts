@@ -109,3 +109,5 @@ export const deleteStudent = async (id: string) => {
   const response = await api.delete(`/students/${id}`);
   return response.data;
 };
+
+

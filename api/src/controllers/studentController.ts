@@ -436,3 +436,30 @@ export const updateStudentByProfessor = asyncHandler(async (req: Request, res: R
 
   res.json(updated);
 });
+
+
+
+
+
+
+
+
+export const deleteStudent = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const estudiante = await prisma.estudiante.findUnique({
+    where: { id },
+    include: { user: true }
+  });
+
+  if (!estudiante) {
+    res.status(404).json({ error: 'Estudiante no encontrado' });
+    return;
+  }
+
+  // Borrar el User en cascada elimina Estudiante, ProgresoEstudiante y Pagos
+  await prisma.user.delete({ where: { id: estudiante.userId } });
+
+  logger.info(`Estudiante eliminado: ${estudiante.user.email}`);
+  res.json({ message: 'Estudiante eliminado correctamente' });
+});

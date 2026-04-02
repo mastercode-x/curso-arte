@@ -224,14 +224,25 @@ const processPaymentNotification = async (paymentId: string) => {
     }
 
     // Actualizar registro de pago
-    await prisma.pago.updateMany({
-      where: { estudianteId: estudiante.id, estado: 'pendiente' },
-      data: {
-        referenciaExterna: paymentId,
-        estado: mapMPStatus(paymentData.status),
-        fechaPago: paymentData.status === 'approved' ? new Date() : null,
-      }
-    });
+// Buscar el pago pendiente que corresponde a esta preferencia
+// El external_reference viene como "estudianteId|tipoPago"
+// Actualizamos solo el pago que tiene el monto correcto
+const montoEsperado = tipoPago === 'completo'
+  ? paymentData.transaction_amount
+  : Math.ceil((await prisma.configuracionProfesor.findFirst())?.precioCurso?.toNumber() || 50000) / 2;
+
+await prisma.pago.updateMany({
+  where: { 
+    estudianteId: estudiante.id, 
+    estado: 'pendiente',
+    monto: montoEsperado
+  },
+  data: {
+    referenciaExterna: paymentId,
+    estado: mapMPStatus(paymentData.status),
+    fechaPago: paymentData.status === 'approved' ? new Date() : null,
+  }
+});
 
     if (paymentData.status === 'approved') {
       await handlePaymentSuccess(estudiante, paymentData, tipoPago);

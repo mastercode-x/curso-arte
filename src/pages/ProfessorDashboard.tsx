@@ -662,49 +662,56 @@ function SolicitudesSection() {
   );
 }
 
-// ── ESTUDIANTES ──────────────────────────────────────────────────
+
+
+
+
 function EstudiantesSection() {
   const [query, setQuery] = useState('');
   const [estudiantes, setEstudiantes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [confirmDelete, setConfirmDelete] = useState<{ id: string; nombre: string } | null>(null);
+  const [selected, setSelected] = useState<any | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isToggling, setIsToggling] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadEstudiantes();
-  }, []);
+  useEffect(() => { loadEstudiantes(); }, []);
 
   const loadEstudiantes = async () => {
     try {
       setIsLoading(true);
       const data = await studentApi.getStudents({ limit: 100 });
       setEstudiantes(data.estudiantes || []);
-    } catch (error) {
+    } catch {
       toast.error('Error cargando estudiantes');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const toggleActivo = async (id: string) => {
+  const toggleActivo = async (e: any) => {
     try {
-      await studentApi.toggleStudentActive(id);
+      setIsToggling(e.id);
+      await studentApi.toggleStudentActive(e.id);
+      toast.success(e.estado === 'activo' ? 'Cuenta desactivada' : 'Cuenta activada');
       loadEstudiantes();
-      toast.success('Estado actualizado');
-    } catch (error) {
+    } catch {
       toast.error('Error actualizando estado');
+    } finally {
+      setIsToggling(null);
     }
   };
 
   const handleDeleteConfirmed = async () => {
-    if (!confirmDelete) return;
+    if (!selected) return;
     try {
       setIsDeleting(true);
-      await studentApi.deleteStudent(confirmDelete.id);
+      await studentApi.deleteStudent(selected.id);
       toast.success('Estudiante eliminado');
-      setConfirmDelete(null);
+      setSelected(null);
+      setConfirmDelete(false);
       loadEstudiantes();
-    } catch (error) {
+    } catch {
       toast.error('Error eliminando estudiante');
     } finally {
       setIsDeleting(false);
@@ -716,13 +723,11 @@ function EstudiantesSection() {
     e.email?.toLowerCase().includes(query.toLowerCase())
   );
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
-      </div>
-    );
-  }
+  if (isLoading) return (
+    <div className="flex items-center justify-center py-12">
+      <Loader2 className="w-8 h-8 text-[#C7A36D] animate-spin" />
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -749,16 +754,16 @@ function EstudiantesSection() {
             </thead>
             <tbody>
               {filtered.map((e: any) => (
-                <tr key={e.id} className={`border-b border-[rgba(244,242,236,0.04)] transition-colors ${e.activo !== false ? 'hover:bg-[rgba(244,242,236,0.02)]' : 'opacity-50'}`}>
+                <tr key={e.id} className={`border-b border-[rgba(244,242,236,0.04)] transition-colors ${e.estado === 'inactivo' ? 'opacity-50' : 'hover:bg-[rgba(244,242,236,0.02)]'}`}>
                   <td className="px-5 py-4">
-                    <div>
-                      <p className="text-[#F4F2EC]">{e.nombre}</p>
-                      <p className="text-xs text-[#B8B4AA]">{e.email}</p>
-                    </div>
+                    <p className="text-[#F4F2EC]">{e.nombre}</p>
+                    <p className="text-xs text-[#B8B4AA]">{e.email}</p>
                   </td>
                   <td className="px-5 py-4 text-[#B8B4AA]">{e.pais || '—'}</td>
                   <td className="px-5 py-4"><StatusBadge estado={e.estadoPago} /></td>
-                  <td className="px-5 py-4 text-xs text-[#B8B4AA]">{e.fechaInscripcion ? new Date(e.fechaInscripcion).toLocaleDateString('es-AR') : '—'}</td>
+                  <td className="px-5 py-4 text-xs text-[#B8B4AA]">
+                    {e.fechaInscripcion ? new Date(e.fechaInscripcion).toLocaleDateString('es-AR') : '—'}
+                  </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-20 h-1.5 bg-[rgba(244,242,236,0.06)] rounded-full overflow-hidden">
@@ -769,19 +774,29 @@ function EstudiantesSection() {
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1">
+                      {/* Ver perfil */}
                       <button
-                        onClick={() => toggleActivo(e.id)}
-                        className={`p-1.5 transition-colors ${e.activo !== false ? 'text-[#B8B4AA] hover:text-yellow-400' : 'text-yellow-400 hover:text-[#B8B4AA]'}`}
-                        title={e.activo !== false ? 'Desactivar' : 'Activar'}
+                        onClick={() => setSelected(e)}
+                        className="p-1.5 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors"
+                        title="Ver perfil"
                       >
-                        <XCircle className="w-4 h-4" />
+                        <Eye className="w-4 h-4" />
                       </button>
+                      {/* Activar / Desactivar */}
                       <button
-                        onClick={() => setConfirmDelete({ id: e.id, nombre: e.nombre })}
-                        className="p-1.5 text-[#B8B4AA] hover:text-red-400 transition-colors"
-                        title="Eliminar estudiante"
+                        onClick={() => toggleActivo(e)}
+                        disabled={isToggling === e.id}
+                        className={`p-1.5 transition-colors disabled:opacity-40 ${
+                          e.estado === 'inactivo'
+                            ? 'text-yellow-400 hover:text-[#B8B4AA]'
+                            : 'text-[#B8B4AA] hover:text-yellow-400'
+                        }`}
+                        title={e.estado === 'inactivo' ? 'Activar cuenta' : 'Desactivar cuenta'}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        {isToggling === e.id
+                          ? <Loader2 className="w-4 h-4 animate-spin" />
+                          : <XCircle className="w-4 h-4" />
+                        }
                       </button>
                     </div>
                   </td>
@@ -797,26 +812,85 @@ function EstudiantesSection() {
         </div>
       </div>
 
-      {/* Modal de confirmación */}
-      {confirmDelete && (
+      {/* ── Modal de perfil ── */}
+      {selected && !confirmDelete && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            
+            {/* Header */}
+            <div className="flex items-start justify-between p-6 border-b border-[rgba(244,242,236,0.08)]">
+              <div className="flex items-center gap-4">
+                <div className="w-11 h-11 rounded-full bg-[rgba(199,163,109,0.15)] flex items-center justify-center font-serif text-lg text-[#C7A36D]">
+                  {selected.nombre?.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#C7A36D] mb-0.5">Perfil del estudiante</p>
+                  <h3 className="font-serif text-xl text-[#F4F2EC]">{selected.nombre}</h3>
+                </div>
+              </div>
+              <button onClick={() => setSelected(null)} className="text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors p-1">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Info */}
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-px bg-[rgba(244,242,236,0.04)]">
+                {[
+                  { label: 'Email', value: selected.email },
+                  { label: 'País', value: selected.pais || '—' },
+                  { label: 'Estado de cuenta', value: selected.estado === 'activo' ? 'Activa' : 'Inactiva' },
+                  { label: 'Estado de pago', value: selected.estadoPago },
+                  { label: 'Inscripción', value: selected.fechaInscripcion ? new Date(selected.fechaInscripcion).toLocaleDateString('es-AR') : '—' },
+                  { label: 'Progreso', value: `${selected.progresoPromedio || 0}%` },
+                ].map(({ label, value }) => (
+                  <div key={label} className="bg-[#141419] px-4 py-3">
+                    <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-[#B8B4AA] mb-1">{label}</p>
+                    <p className="text-sm text-[#F4F2EC]">{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Acciones del perfil */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => toggleActivo(selected)}
+                  disabled={isToggling === selected.id}
+                  className="flex-1 font-mono text-xs uppercase tracking-[0.14em] px-4 py-3 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#F4F2EC] hover:border-[rgba(244,242,236,0.25)] transition-colors disabled:opacity-50"
+                >
+                  {selected.estado === 'inactivo' ? 'Activar cuenta' : 'Desactivar cuenta'}
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] px-4 py-3 border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" /> Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal de confirmación de eliminación ── */}
+      {confirmDelete && selected && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] w-full max-w-md p-6">
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-4 mb-5">
               <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
                 <Trash2 className="w-5 h-5 text-red-400" />
               </div>
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-red-400 mb-1">Eliminar estudiante</p>
-                <h3 className="font-serif text-lg text-[#F4F2EC]">{confirmDelete.nombre}</h3>
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-red-400 mb-0.5">Confirmar eliminación</p>
+                <h3 className="font-serif text-lg text-[#F4F2EC]">{selected.nombre}</h3>
               </div>
             </div>
             <p className="text-sm text-[#B8B4AA] mb-6 leading-relaxed">
-              Esta acción es <strong className="text-[#F4F2EC]">irreversible</strong>. Se eliminarán el usuario, 
-              su progreso y todos sus registros de pago.
+              Esta acción es <strong className="text-[#F4F2EC]">irreversible</strong>. Se eliminarán el usuario, su progreso y todos sus registros asociados.
             </p>
             <div className="flex gap-3">
               <button
-                onClick={() => setConfirmDelete(null)}
+                onClick={() => setConfirmDelete(false)}
                 disabled={isDeleting}
                 className="flex-1 font-mono text-xs uppercase tracking-[0.14em] px-5 py-3 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors disabled:opacity-50"
               >
@@ -836,6 +910,9 @@ function EstudiantesSection() {
     </div>
   );
 }
+
+
+
 
 // ── MÓDULOS ──────────────────────────────────────────────────────
 function ModulosSection() {

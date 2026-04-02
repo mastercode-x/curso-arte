@@ -238,7 +238,7 @@ try {
   const { Resend } = await import('resend');
   const resend = new Resend(process.env.RESEND_API_KEY);
   
-  const frontendUrl = process.env.FRONTEND_URL || 'https://curso-arte.vercel.app';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://ernestoengelcurso.site';
 
   await resend.emails.send({
     from: 'Poética de la Mirada <curso@ernestoengelcurso.site>',

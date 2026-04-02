@@ -775,11 +775,7 @@ function EstudiantesSection() {
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1">
                       {/* Ver perfil */}
-                      <button
-                        onClick={() => setSelected(e)}
-                        className="p-1.5 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors"
-                        title="Ver perfil"
-                      >
+                     <button onClick={() => window.location.href = createPageUrl(`#/estudiantedetalle?id=${e.id}`)} className="p-1.5 text-[#B8B4AA] hover:text-[#C7A36D] transition-colors" title="Ver detalle">
                         <Eye className="w-4 h-4" />
                       </button>
                       {/* Activar / Desactivar */}
@@ -811,6 +807,16 @@ function EstudiantesSection() {
           </table>
         </div>
       </div>
+
+
+
+
+
+
+
+
+
+
 
       {/* ── Modal de perfil ── */}
       {selected && !confirmDelete && (

@@ -1,5 +1,4 @@
 import { XCircle, RefreshCw, HelpCircle } from 'lucide-react';
-import { createPageUrl } from '../utils';
 
 export default function PaymentFailed() {
   return (
@@ -20,7 +19,7 @@ export default function PaymentFailed() {
         </ul>
         <div className="space-y-3">
           <a
-            href={createPageUrl('login')}
+            href="/#/login"
             className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] px-6 py-3 bg-[#C7A36D] text-[#0B0B0D] hover:bg-[#d4b07a] transition-colors w-full justify-center"
           >
             <RefreshCw className="w-4 h-4" /> Intentar nuevamente

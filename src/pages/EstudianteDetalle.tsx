@@ -42,6 +42,24 @@ export default function EstudianteDetalle() {
   const [estudiante, setEstudiante] = useState(null);
   const [loading, setLoading] = useState(true);
 
+
+  const handleDeleteConfirmed = async () => {
+    if (!selected) return;
+    try {
+      setIsDeleting(true);
+      await studentApi.deleteStudent(selected.id);
+      toast.success('Estudiante eliminado');
+      setSelected(null);
+      setConfirmDelete(false);
+      loadEstudiantes();
+    } catch {
+      toast.error('Error eliminando estudiante');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+
   useEffect(() => {
     const fetchEstudiante = async () => {
       try {

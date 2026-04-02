@@ -779,21 +779,23 @@ function EstudiantesSection() {
                         <Eye className="w-4 h-4" />
                       </button>
                       {/* Activar / Desactivar */}
-                      <button
-                        onClick={() => toggleActivo(e)}
-                        disabled={isToggling === e.id}
-                        className={`p-1.5 transition-colors disabled:opacity-40 ${
-                          e.estado === 'inactivo'
-                            ? 'text-yellow-400 hover:text-[#B8B4AA]'
-                            : 'text-[#B8B4AA] hover:text-yellow-400'
-                        }`}
-                        title={e.estado === 'inactivo' ? 'Activar cuenta' : 'Desactivar cuenta'}
-                      >
-                        {isToggling === e.id
-                          ? <Loader2 className="w-4 h-4 animate-spin" />
-                          : <XCircle className="w-4 h-4" />
-                        }
-                      </button>
+                     <button
+  onClick={() => toggleActivo(e)}
+  disabled={isToggling === e.id}
+  className={`p-1.5 transition-colors disabled:opacity-40 ${
+    e.estado === 'inactivo'
+      ? 'text-yellow-400 hover:text-[#B8B4AA]'
+      : 'text-[#B8B4AA] hover:text-yellow-400'
+  }`}
+  title={e.estado === 'inactivo' ? 'Activar cuenta' : 'Desactivar cuenta'}
+>
+  {isToggling === e.id
+    ? <Loader2 className="w-4 h-4 animate-spin" />
+    : e.estado === 'inactivo'
+      ? <CheckCircle className="w-4 h-4" />
+      : <XCircle className="w-4 h-4" />
+  }
+</button>
                     </div>
                   </td>
                 </tr>

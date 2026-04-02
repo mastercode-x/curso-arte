@@ -185,9 +185,58 @@ export default function EstudianteDetalle() {
                   : <><ShieldCheck className="w-3.5 h-3.5" /> Activar</>
                 }
               </button>
+
+                  <button onClick={() => setConfirmDelete({ id: e.id, nombre: e.nombre })}
+                   className="flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.12em] px-4 py-2.5 border transition-colors border-red-400/30 text-red-400 hover:bg-red-400/08"
+                   title="Eliminar estudiante" >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
             </div>
           </div>
         </div>
+
+
+
+        {/* Modal de confirmación */}
+              {confirmDelete && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                  <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] w-full max-w-md p-6">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
+                        <Trash2 className="w-5 h-5 text-red-400" />
+                      </div>
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-red-400 mb-1">Eliminar estudiante</p>
+                        <h3 className="font-serif text-lg text-[#F4F2EC]">{confirmDelete.nombre}</h3>
+                      </div>
+                    </div>
+                    <p className="text-sm text-[#B8B4AA] mb-6 leading-relaxed">
+                      Esta acción es <strong className="text-[#F4F2EC]">irreversible</strong>. Se eliminarán el usuario, 
+                      su progreso y todos sus registros de pago.
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setConfirmDelete(null)}
+                        disabled={isDeleting}
+                        className="flex-1 font-mono text-xs uppercase tracking-[0.14em] px-5 py-3 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors disabled:opacity-50"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={handleDeleteConfirmed}
+                        disabled={isDeleting}
+                        className="flex-1 font-mono text-xs uppercase tracking-[0.14em] px-5 py-3 bg-red-500/20 border border-red-500/40 text-red-400 hover:bg-red-500/30 transition-colors disabled:opacity-50"
+                      >
+                        {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+
+
+
 
         {/* ── KPIs ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

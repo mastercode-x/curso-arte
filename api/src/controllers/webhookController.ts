@@ -37,7 +37,7 @@ export const googleFormsWebhook = async (req: Request, res: Response) => {
   try {
     logger.info(`Webhook Google Forms recibido: ${JSON.stringify(req.body)}`);
 
-    const { nombre, email, telefono, pais, experiencia, interes, disposicion, compromiso } = req.body;
+    const { nombre, email, telefono, pais, experiencia, interes, disposicion, relacion, compromiso } = req.body;
 
     // Validar datos requeridos
     if (!nombre || !email) {
@@ -88,6 +88,7 @@ export const googleFormsWebhook = async (req: Request, res: Response) => {
         experiencia: experiencia || null,
         interes: interes || null,
         disposicion: disposicion || null,
+        relacion: relacion || null,
         compromiso: compromiso || null,
         estado: 'pendiente'
       } as any

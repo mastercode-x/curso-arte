@@ -621,6 +621,7 @@ function SolicitudesSection() {
           { label: 'Vínculo con el arte', value: selected.experiencia },
           { label: 'Motivación e interés', value: selected.interes },
           { label: 'Frente al trabajo lento y sin resultados inmediatos', value: selected.disposicion },
+          { label: 'Relación con la mirada y el proceso creativo', value: selected.relacion },
           { label: 'Disposición a comprometerse (4 meses, encuentros grupales)', value: selected.compromiso },
         ].filter(q => q.value).map(({ label, value }) => (
           <div key={label}>
@@ -633,7 +634,7 @@ function SolicitudesSection() {
             </p>
           </div>
         ))}
-        {!selected.experiencia && !selected.interes && !selected.disposicion && !selected.compromiso && (
+        {!selected.experiencia && !selected.interes && !selected.disposicion && !selected.relacion && !selected.compromiso && (
           <p className="text-sm text-[#B8B4AA] text-center py-4">Sin respuestas registradas.</p>
         )}
       </div>

@@ -131,7 +131,7 @@ const Calendar = () => {
   const stats = [
     { icon: Clock, value: String(schedule.length), label: 'Semanas' },
     { icon: CalendarDays, value: String(schedule.filter(s => s.activity.includes('Encuentro')).length), label: 'Encuentros' },
-    { icon: Users, value: 'x', label: 'Cupos' },
+    { icon: Users, value: 'Limitados', label: 'Cupos' },
     { icon: Sparkles, value: String(new Set(schedule.map(s => s.module)).size), label: 'Módulos' },
   ];
 

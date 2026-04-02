@@ -113,7 +113,7 @@ const CourseOverview = ({ config }: { config?: any }) => {
   }, []);
 
   const features = [
-    { icon: Video, text: 'Video de apertura (umbral)' },
+    { icon: Video, text: 'Video de apertura (umbral) y encuentros online' },
     { icon: BookOpen, text: 'Consignas y material pedagógico' },
     { icon: Clock, text: 'Experiencia individual / tiempo de proceso' },
     { icon: Library, text: 'Encuentro virtual de cierre' },

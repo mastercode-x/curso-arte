@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import {
   ArrowLeft, Mail, Phone, MapPin, Calendar, Award,
   CheckCircle, BookOpen, DollarSign, TrendingUp,
-  ShieldOff, ShieldCheck, Clock, BarChart2
+  ShieldOff, ShieldCheck, Clock, BarChart2, Trash2
 } from 'lucide-react';
 import * as studentApi from '@/services/studentApi';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
@@ -39,8 +39,11 @@ export default function EstudianteDetalle() {
   const id = paramId || searchParams.get('id');
   const navigate = useNavigate();
   const { toast } = useToast();
+
   const [estudiante, setEstudiante] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchEstudiante = async () => {
@@ -64,6 +67,19 @@ export default function EstudianteDetalle() {
       toast({ title: nuevoEstado === 'activo' ? 'Acceso activado' : 'Acceso desactivado' });
     } catch {
       toast({ title: 'Error', description: 'No se pudo actualizar el estado.', variant: 'destructive' });
+    }
+  };
+
+  const handleDeleteConfirmed = async () => {
+    try {
+      setIsDeleting(true);
+      await studentApi.deleteStudent(id);
+      toast({ title: 'Estudiante eliminado' });
+      navigate('/profesor');
+    } catch {
+      toast({ title: 'Error', description: 'No se pudo eliminar el estudiante.', variant: 'destructive' });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -122,9 +138,7 @@ export default function EstudianteDetalle() {
 
         {/* ── Hero card ── */}
         <div className="relative overflow-hidden bg-[#141419] border border-[rgba(244,242,236,0.08)]">
-          {/* top accent line */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C7A36D]/50 to-transparent" />
-
           <div className="p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-6">
             {/* Avatar */}
             <div className="relative shrink-0">
@@ -140,19 +154,16 @@ export default function EstudianteDetalle() {
               <h1 className="font-serif text-2xl sm:text-3xl text-[#F4F2EC] mb-3">{estudiante.nombre}</h1>
               <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-[#B8B4AA]">
                 <span className="flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-[#C7A36D]/60" />
-                  {estudiante.email}
+                  <Mail className="w-3.5 h-3.5 text-[#C7A36D]/60" />{estudiante.email}
                 </span>
                 {estudiante.telefono && (
                   <span className="flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-[#C7A36D]/60" />
-                    {estudiante.telefono}
+                    <Phone className="w-3.5 h-3.5 text-[#C7A36D]/60" />{estudiante.telefono}
                   </span>
                 )}
                 {estudiante.pais && (
                   <span className="flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-[#C7A36D]/60" />
-                    {estudiante.pais}
+                    <MapPin className="w-3.5 h-3.5 text-[#C7A36D]/60" />{estudiante.pais}
                   </span>
                 )}
                 {estudiante.fechaRegistro && (
@@ -166,8 +177,7 @@ export default function EstudianteDetalle() {
 
             {/* Actions */}
             <div className="flex sm:flex-col gap-2 shrink-0">
-              <a
-                href={`mailto:${estudiante.email}`}
+          <a href={`mailto:${estudiante.email}`}
                 className="flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.12em] px-4 py-2.5 border border-[rgba(199,163,109,0.3)] text-[#C7A36D] hover:bg-[rgba(199,163,109,0.08)] transition-colors"
               >
                 <Mail className="w-3.5 h-3.5" /> Enviar email
@@ -176,8 +186,8 @@ export default function EstudianteDetalle() {
                 onClick={toggleActivo}
                 className={`flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.12em] px-4 py-2.5 border transition-colors ${
                   activo
-                    ? 'border-red-400/30 text-red-400 hover:bg-red-400/08'
-                    : 'border-green-400/30 text-green-400 hover:bg-green-400/08'
+                    ? 'border-red-400/30 text-red-400 hover:bg-red-400/5'
+                    : 'border-green-400/30 text-green-400 hover:bg-green-400/5'
                 }`}
               >
                 {activo
@@ -185,101 +195,25 @@ export default function EstudianteDetalle() {
                   : <><ShieldCheck className="w-3.5 h-3.5" /> Activar</>
                 }
               </button>
-
-                  <button onClick={() => setConfirmDelete({ id: e.id, nombre: e.nombre })}
-                   className="flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.12em] px-4 py-2.5 border transition-colors border-red-400/30 text-red-400 hover:bg-red-400/08"
-                   title="Eliminar estudiante" >
-                                      <Trash2 className="w-4 h-4" />
-                                    </button>
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.12em] px-4 py-2.5 border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Eliminar
+              </button>
             </div>
           </div>
         </div>
 
-
-
-        {/* Modal de confirmación */}
-              {confirmDelete && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                  <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] w-full max-w-md p-6">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
-                        <Trash2 className="w-5 h-5 text-red-400" />
-                      </div>
-                      <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-red-400 mb-1">Eliminar estudiante</p>
-                        <h3 className="font-serif text-lg text-[#F4F2EC]">{confirmDelete.nombre}</h3>
-                      </div>
-                    </div>
-                    <p className="text-sm text-[#B8B4AA] mb-6 leading-relaxed">
-                      Esta acción es <strong className="text-[#F4F2EC]">irreversible</strong>. Se eliminarán el usuario, 
-                      su progreso y todos sus registros de pago.
-                    </p>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setConfirmDelete(null)}
-                        disabled={isDeleting}
-                        className="flex-1 font-mono text-xs uppercase tracking-[0.14em] px-5 py-3 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors disabled:opacity-50"
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        onClick={handleDeleteConfirmed}
-                        disabled={isDeleting}
-                        className="flex-1 font-mono text-xs uppercase tracking-[0.14em] px-5 py-3 bg-red-500/20 border border-red-500/40 text-red-400 hover:bg-red-500/30 transition-colors disabled:opacity-50"
-                      >
-                        {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-
-
-
-
         {/* ── KPIs ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            {
-              label: 'Progreso general',
-              value: `${totalPct}%`,
-              sub: `${modulosCompletados} de ${progresoEst.length} módulos`,
-              icon: TrendingUp,
-              accent: '#C7A36D',
-              bar: totalPct,
-            },
-            {
-              label: 'Módulos completos',
-              value: `${modulosCompletados}`,
-              sub: `de ${progresoEst.length} publicados`,
-              icon: CheckCircle,
-              accent: '#4ade80',
-              bar: progresoEst.length > 0 ? (modulosCompletados / progresoEst.length) * 100 : 0,
-            },
-            {
-              label: 'Total pagado',
-              value: totalPagado ? `$${Number(totalPagado).toLocaleString('es-AR')}` : '—',
-              sub: moneda,
-              icon: DollarSign,
-              accent: '#60a5fa',
-              bar: null,
-            },
-            {
-              label: 'Estado de pago',
-              value: estudiante.estadoPago === 'pagado' ? 'Pagado' : 'Sin pago',
-              sub: estudiante.fechaPago
-                ? new Date(estudiante.fechaPago).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
-                : '—',
-              icon: BarChart2,
-              accent: estudiante.estadoPago === 'pagado' ? '#4ade80' : '#facc15',
-              bar: null,
-            },
+            { label: 'Progreso general', value: `${totalPct}%`, sub: `${modulosCompletados} de ${progresoEst.length} módulos`, icon: TrendingUp, accent: '#C7A36D', bar: totalPct },
+            { label: 'Módulos completos', value: `${modulosCompletados}`, sub: `de ${progresoEst.length} publicados`, icon: CheckCircle, accent: '#4ade80', bar: progresoEst.length > 0 ? (modulosCompletados / progresoEst.length) * 100 : 0 },
+            { label: 'Total pagado', value: totalPagado ? `$${Number(totalPagado).toLocaleString('es-AR')}` : '—', sub: moneda, icon: DollarSign, accent: '#60a5fa', bar: null },
+            { label: 'Estado de pago', value: estudiante.estadoPago === 'pagado' ? 'Pagado' : 'Sin pago', sub: estudiante.fechaPago ? new Date(estudiante.fechaPago).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' }) : '—', icon: BarChart2, accent: estudiante.estadoPago === 'pagado' ? '#4ade80' : '#facc15', bar: null },
           ].map(({ label, value, sub, icon: Icon, accent, bar }) => (
-            <div
-              key={label}
-              className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-4 sm:p-5 flex flex-col gap-3 hover:border-[rgba(244,242,236,0.14)] transition-colors"
-            >
+            <div key={label} className="bg-[#141419] border border-[rgba(244,242,236,0.08)] p-4 sm:p-5 flex flex-col gap-3 hover:border-[rgba(244,242,236,0.14)] transition-colors">
               <div className="flex items-start justify-between">
                 <div className="w-8 h-8 rounded flex items-center justify-center" style={{ background: `${accent}18` }}>
                   <Icon className="w-4 h-4" style={{ color: accent }} />
@@ -304,12 +238,8 @@ export default function EstudianteDetalle() {
           <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(244,242,236,0.06)]">
             <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#B8B4AA]">Progreso por módulo</p>
             <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1.5 font-mono text-[9px] text-[#B8B4AA]/40">
-                <span className="w-2 h-2 rounded-full bg-[#C7A36D]" /> En progreso
-              </span>
-              <span className="flex items-center gap-1.5 font-mono text-[9px] text-[#B8B4AA]/40">
-                <span className="w-2 h-2 rounded-full bg-[#4ade80]" /> Completado
-              </span>
+              <span className="flex items-center gap-1.5 font-mono text-[9px] text-[#B8B4AA]/40"><span className="w-2 h-2 rounded-full bg-[#C7A36D]" /> En progreso</span>
+              <span className="flex items-center gap-1.5 font-mono text-[9px] text-[#B8B4AA]/40"><span className="w-2 h-2 rounded-full bg-[#4ade80]" /> Completado</span>
             </div>
           </div>
           <div className="p-6">
@@ -324,15 +254,9 @@ export default function EstudianteDetalle() {
                   const pct = p.completudPorcentaje || 0;
                   const done = pct === 100;
                   return (
-                    <div key={p.moduloId} className="group">
+                    <div key={p.moduloId}>
                       <div className="flex items-center gap-3 mb-1.5">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[9px] font-mono border transition-colors ${
-                          done
-                            ? 'bg-[rgba(74,222,128,0.15)] border-[rgba(74,222,128,0.3)] text-green-400'
-                            : pct > 0
-                            ? 'bg-[rgba(199,163,109,0.1)] border-[rgba(199,163,109,0.25)] text-[#C7A36D]'
-                            : 'border-[rgba(244,242,236,0.08)] text-[#B8B4AA]/40'
-                        }`}>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[9px] font-mono border transition-colors ${done ? 'bg-[rgba(74,222,128,0.15)] border-[rgba(74,222,128,0.3)] text-green-400' : pct > 0 ? 'bg-[rgba(199,163,109,0.1)] border-[rgba(199,163,109,0.25)] text-[#C7A36D]' : 'border-[rgba(244,242,236,0.08)] text-[#B8B4AA]/40'}`}>
                           {done ? '✓' : String(i + 1).padStart(2, '0')}
                         </div>
                         <span className="text-xs text-[#F4F2EC] flex-1 truncate">{p.titulo}</span>
@@ -342,21 +266,13 @@ export default function EstudianteDetalle() {
                               {new Date(p.ultimaActividad).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })}
                             </span>
                           )}
-                          <span className={`font-mono text-[10px] w-7 text-right ${done ? 'text-green-400' : pct > 0 ? 'text-[#C7A36D]' : 'text-[#B8B4AA]/30'}`}>
-                            {pct}%
-                          </span>
+                          <span className={`font-mono text-[10px] w-7 text-right ${done ? 'text-green-400' : pct > 0 ? 'text-[#C7A36D]' : 'text-[#B8B4AA]/30'}`}>{pct}%</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="w-6 shrink-0" />
                         <div className="flex-1 h-1 bg-[rgba(244,242,236,0.04)] rounded-full overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${pct}%`,
-                              background: done ? '#4ade80' : pct > 0 ? '#C7A36D' : 'transparent'
-                            }}
-                          />
+                          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: done ? '#4ade80' : pct > 0 ? '#C7A36D' : 'transparent' }} />
                         </div>
                       </div>
                     </div>
@@ -390,9 +306,7 @@ export default function EstudianteDetalle() {
                       <td className="px-5 py-3.5 text-xs text-[#B8B4AA] capitalize">{p.proveedor}</td>
                       <td className="px-5 py-3.5 font-mono text-[10px] text-[#B8B4AA]/50 max-w-[140px] truncate">{p.referenciaExterna}</td>
                       <td className="px-5 py-3.5"><StatusBadge estado={p.estado === 'completado' ? 'pagado' : p.estado} /></td>
-                      <td className="px-5 py-3.5 font-mono text-[10px] text-[#B8B4AA]/60">
-                        {p.fechaPago ? new Date(p.fechaPago).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
-                      </td>
+                      <td className="px-5 py-3.5 font-mono text-[10px] text-[#B8B4AA]/60">{p.fechaPago ? new Date(p.fechaPago).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -402,6 +316,46 @@ export default function EstudianteDetalle() {
         )}
 
       </main>
+
+      {/* ── Modal de confirmación de eliminación ── */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#141419] border border-[rgba(244,242,236,0.08)] w-full max-w-md p-6">
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5 text-red-400" />
+              </div>
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-red-400 mb-0.5">Confirmar eliminación</p>
+                <h3 className="font-serif text-lg text-[#F4F2EC]">{estudiante.nombre}</h3>
+              </div>
+            </div>
+            <p className="text-sm text-[#B8B4AA] mb-6 leading-relaxed">
+              Esta acción es <strong className="text-[#F4F2EC]">irreversible</strong>. Se eliminarán el usuario, su progreso y todos sus registros asociados.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                disabled={isDeleting}
+                className="flex-1 font-mono text-xs uppercase tracking-[0.14em] px-5 py-3 border border-[rgba(244,242,236,0.1)] text-[#B8B4AA] hover:text-[#F4F2EC] transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteConfirmed}
+                disabled={isDeleting}
+                className="flex-1 font-mono text-xs uppercase tracking-[0.14em] px-5 py-3 bg-red-500/20 border border-red-500/40 text-red-400 hover:bg-red-500/30 transition-colors disabled:opacity-50"
+              >
+                {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+
+
+

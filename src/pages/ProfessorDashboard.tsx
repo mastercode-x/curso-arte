@@ -1539,7 +1539,8 @@ const loadConfig = async () => {
           fields: [
             { key: "nombreCurso", label: "Nombre del curso", type: "text" },
             { key: "descripcionCurso", label: "Descripción", type: "textarea" },
-            { key: "precioCurso", label: "Precio", type: "number" },
+            { key: "precioCurso", label: "Precio pago completo (ARS)", type: "number" },
+            { key: "recargoCuotas", label: "Recargo por pagar en 2 cuotas (ARS)", type: "number" },
             { key: "moneda", label: "Moneda (USD, ARS, etc.)", type: "text" },
             { key: "pais", label: "País", type: "text" },
           ]

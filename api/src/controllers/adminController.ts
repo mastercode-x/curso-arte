@@ -133,7 +133,8 @@ const {
     instagramUrl,
     facebookUrl,
     notificarEmail,
-    notificarWhatsApp
+    notificarWhatsApp,
+    recargoCuotas
   } = req.body;
 
   const profesor = await prisma.profesor.findFirst({
@@ -161,7 +162,8 @@ const {
   instagramUrl,   // ← agregar
   facebookUrl,    // ← agregar
   notificarEmail,
-  notificarWhatsApp
+  notificarWhatsApp,
+  recargoCuotas: recargoCuotas !== undefined ? recargoCuotas : undefined
 },
 create: {
   profesorId: profesor.id,
@@ -178,7 +180,8 @@ create: {
   instagramUrl,   // ← agregar
   facebookUrl,    // ← agregar
   notificarEmail: notificarEmail ?? true,
-  notificarWhatsApp: notificarWhatsApp ?? false
+  notificarWhatsApp: notificarWhatsApp ?? false,
+  recargoCuotas: recargoCuotas || null
 }
   });
 

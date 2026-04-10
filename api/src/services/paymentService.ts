@@ -41,7 +41,13 @@ export const createPaymentLinks = async (
     const precioTotal = config?.precioCurso?.toNumber() || 50000;
     const moneda = config?.moneda || 'ARS';
     const nombreCurso = config?.nombreCurso || 'Poética de la Mirada';
-    const montoCuota = Math.ceil(precioTotal / 2);
+    // precioEnCuotas: si hay recargoCuotas, es precioCurso + recargoCuotas.
+    // Si hay precioEnCuotas configurado directamente, lo usa. Si no, igual al precio completo.
+    const recargoCuotas = config?.recargoCuotas?.toNumber() || 0;
+    const precioEnCuotas = recargoCuotas > 0
+      ? precioTotal + recargoCuotas
+      : (config?.precioEnCuotas?.toNumber() || precioTotal);
+    const montoCuota = Math.ceil(precioEnCuotas / 2);
     const backendUrl = process.env.BACKEND_URL!;
     const frontendUrl = process.env.FRONTEND_URL!;
 
@@ -229,7 +235,7 @@ const processPaymentNotification = async (paymentId: string) => {
 // Actualizamos solo el pago que tiene el monto correcto
 const montoEsperado = tipoPago === 'completo'
   ? paymentData.transaction_amount
-  : Math.ceil((await prisma.configuracionProfesor.findFirst())?.precioCurso?.toNumber() || 50000) / 2;
+  : Math.ceil(((await prisma.configuracionProfesor.findFirst())?.precioEnCuotas?.toNumber() || (await prisma.configuracionProfesor.findFirst())?.precioCurso?.toNumber() || 50000) / 2);
 
 await prisma.pago.updateMany({
   where: { 
@@ -268,7 +274,8 @@ const mapMPStatus = (mpStatus: string | undefined): 'pendiente' | 'completado' |
 const handlePaymentSuccess = async (estudiante: any, paymentData: any, tipoPago: string) => {
   try {
     const config = await prisma.configuracionProfesor.findFirst();
-    const montoCuota = Math.ceil((config?.precioCurso?.toNumber() || 50000) / 2);
+    const precioEnCuotas3 = config?.precioEnCuotas?.toNumber() || config?.precioCurso?.toNumber() || 50000;
+    const montoCuota = Math.ceil(precioEnCuotas3 / 2);
 
     if (tipoPago === 'completo') {
       // ── Pago completo — acceso inmediato, no hay segunda cuota ──
@@ -436,7 +443,8 @@ export const checkOverdueCuotas = async () => {
         // 3 días antes del vencimiento → recordatorio
         const { sendCuota2ReminderEmail } = await import('./emailService');
         const config = await prisma.configuracionProfesor.findFirst();
-        const montoCuota = Math.ceil((config?.precioCurso?.toNumber() || 50000) / 2);
+        const precioEnCuotas3 = config?.precioEnCuotas?.toNumber() || config?.precioCurso?.toNumber() || 50000;
+    const montoCuota = Math.ceil(precioEnCuotas3 / 2);
 
         await sendCuota2ReminderEmail(
           est.user.nombre,

@@ -159,6 +159,8 @@ model ConfiguracionProfesor {
   nombreCurso       String    @map("nombre_curso")
   descripcionCurso  String?   @map("descripcion_curso") @db.Text
   precioCurso       Decimal   @map("precio_curso") @db.Decimal(10, 2)
+  precioEnCuotas    Decimal?  @map("precio_en_cuotas") @db.Decimal(10, 2)
+  recargoCuotas     Decimal?  @map("recargo_cuotas") @db.Decimal(10, 2)
   moneda            String    @default("ARS")
   bioProfesor       String?   @map("bio_profesor") @db.Text
   fotoProfesorUrl   String?   @map("foto_profesor_url")
